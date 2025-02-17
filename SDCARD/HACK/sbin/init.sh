@@ -153,7 +153,7 @@ if [ ! -f "$sd_overlay/fs.img" ]; then
 	loop_device="/dev/loop$($losetup -a | $wc -l)"
 	$dd if=/dev/zero of=$sd_overlay/fs.img bs=1k count=32768 && \
 	$losetup $loop_device $sd_overlay/fs.img && \
-	$mkfsvfat $loop_device && \
+	$mkfs_vfat $loop_device && \
 	$mount $loop_device $sd_mnt || exit 1
 	echo -n "Setting up overlay filesystem..."
 	for i in $overlay_dirs; do
