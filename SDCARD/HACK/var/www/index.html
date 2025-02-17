@@ -93,7 +93,7 @@
             background-color: #555;
         }
         #controls {
-            display: flex;
+            display: none;
             flex-direction: column;
             align-items: center;
             margin-top: 20px;
@@ -147,7 +147,7 @@
         <div id="error-message"></div>
         <video id="video" controls autoplay muted></video>
     </div>
-    
+
     <div id="controls">
         <iframe name="hiddenFrame" class="hide" style="display:none;"></iframe>
         <div class="control-row">
@@ -183,7 +183,7 @@
             <button onclick="reboot()">Kamera neu starten</button>
         </div>
     </div>
-    
+
     <div id="links">
         <a href="https://github.com/Bunkerschild/LSCamoflash" target="_blank">Projekt auf GitHub</a>
         <a href="/cgi-bin/streamurl.cgi?type=RTSP" target="_blank">RTSP Stream</a>
@@ -193,12 +193,12 @@
 
     <script>
         var settings = [];
-        
+
         function toggleSettings() {
             let content = document.getElementById("settings-content");
             content.style.display = content.style.display === "none" ? "block" : "none";
         }
-        
+
         async function fetchSettings() {
             let response = await fetch('/cgi-bin/settings.cgi');
             let data = await response.json();
@@ -260,13 +260,13 @@
                     input.dataset.key = key;
                     settingItem.appendChild(input);
                 }
-                
+
                 settings[key] = value;
 
                 settingsContainer.appendChild(settingItem);
             }
         }
-        
+
         async function reboot() {
             if (confirm('Die Kamera jetzt neu starten?')) {
                 let response = await fetch('/cgi-bin/reboot.cgi');
@@ -279,9 +279,9 @@
             inputs.forEach(input => {
                 let key = input.dataset.key;
                 let value = input.type === 'checkbox' ? (input.checked ? '1' : '0') : input.value;
-                
+
                 if (settings[key] != value) {
-                    if (payloads == "") { 
+                    if (payloads == "") {
                         payloads = key + "=" + value;
                     } else {
                         payloads = payloads + ";" + key + "=" + value;
@@ -294,6 +294,14 @@
             } else {
                 fetch(`/cgi-bin/settings.cgi?save=${encodeURIComponent(payloads)}`);
                 alert('Einstellungen gespeichert. Um die Einstellungen zu uebernehmen, muss die Kamera neu gestartet werden.');
+            }
+        }
+
+        async function checkMotor() {
+            let result = await fetch('/cgi-bin/motor.cgi');
+            let answer = await result.text();
+            if (answer.trim() == 'yes') {
+                document.getElementById('controls').style.display = 'flex';
             }
         }
 
@@ -325,7 +333,7 @@
             };
             return translations[key] || key;
         }
-        
+
         async function fetchStreamUrl() {
             try {
                 let response = await fetch('/cgi-bin/streamurl.cgi?type=hls');
@@ -359,7 +367,7 @@
             const video = document.getElementById('video');
             const loading = document.getElementById('loading');
             const errorMessage = document.getElementById('error-message');
-            
+
             if (Hls.isSupported()) {
                 const hls = new Hls();
                 hls.loadSource(streamUrl);
@@ -376,6 +384,7 @@
         }
 
         fetchHostname();
+        checkMotor();
         fetchStreamUrl();
         fetchSettings();
     </script>
