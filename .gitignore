@@ -1,0 +1,36 @@
+# Exclude closed source Anyka binaries and libs in HACK/var/patch
+SDCARD/HACK/usr/patch
+
+# Exclude firmware log path
+SDCARD/HACK/var/log
+
+# Exclude firmware upload path
+SDCARD/HACK/var/upload
+
+# Exclude closed source Anyka binaries in HACK/bin 
+SDCARD/HACK/bin/anyka_ipc
+SDCARD/HACK/bin/anyka_ipc_patched
+
+# Exclude firmware related files in SD cards root, which might have an unwanted impact to the devices behaviour
+SDCARD/_ak39_config.ini
+SDCARD/_ht_av_tuning.conf
+SDCARD/_ht_sw_settings.conf
+SDCARD/_ht_hw_settings.conf
+SDCARD/_ht_uuid.conf
+
+# Exclude firmware and device related files, which are autosaved by LSCamoflash
+SDCARD/HACK/etc/config/anyka_cfg.ini
+SDCARD/HACK/etc/config/_ht_sw_settings.conf
+SDCARD/HACK/etc/config/_ht_hw_settings.conf
+SDCARD/HACK/etc/config/tuya_user.db
+SDCARD/HACK/etc/config/tuya_user.db_bak
+SDCARD/HACK/etc/config/tuya_enckey.db
+
+# Exclude firmware backup path
+SDCARD/HACK/backup
+
+# Exclude closed source Anyka related libraries in HACK/lib
+SDCARD/lib/libavssdkbeta.so
+
+# Exclude hack_custom.conf
+SDCARD/etc/hack_custom.conf

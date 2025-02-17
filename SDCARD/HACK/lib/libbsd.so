@@ -1,0 +1,4 @@
+/* GNU ld script
+ * The MD5 functions are provided by the libmd library. */
+OUTPUT_FORMAT(elf32-littlearm)
+GROUP(/home/olli/libbsd-armv5/lib/ AS_NEEDED(-lmd))

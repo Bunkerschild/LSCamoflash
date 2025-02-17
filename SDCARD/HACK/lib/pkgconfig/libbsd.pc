@@ -1,0 +1,12 @@
+prefix=/home/olli/libbsd-armv5
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libbsd
+Description: Utility functions from BSD systems
+Version: 0.11.7
+URL: https://libbsd.freedesktop.org/
+Libs: -L${libdir} -lbsd
+Libs.private:   -lmd
+Cflags: -I${includedir}

@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LSCamoflash Stream</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        #video-container {
+            width: 100%;
+            max-width: 800px;
+            background-color: #000;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+        video {
+            width: 100%;
+            border-radius: 10px;
+            display: none;
+        }
+        #loading, #error-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.2rem;
+            color: #ffffff;
+        }
+        #error-message {
+            display: none;
+            color: red;
+        }
+        .settings-container {
+            margin-top: 20px;
+            background: #1c1c1c;
+            padding: 15px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+        }
+        .settings-toggle {
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .settings-content {
+            display: none;
+        }
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+        label {
+            font-size: 1rem;
+        }
+        input[type="checkbox"], input[type="text"] {
+            font-size: 1rem;
+        }
+        button {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #555;
+        }
+        #controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .control-row {
+            display: flex;
+            justify-content: center;
+        }
+        .control-button {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            width: 60px;
+            height: 60px;
+        }
+        .control-button:hover {
+            background-color: #555;
+        }
+        #links {
+            margin-top: 30px;
+            text-align: center;
+        }
+        #links a {
+            display: block;
+            color: #1e90ff;
+            text-decoration: none;
+            margin: 5px 0;
+        }
+        #links a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            #video-container {
+                padding: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 id="hostname">LSCamoflash Stream</h1>
+    <div id="video-container">
+        <div id="loading">Bitte warten...</div>
+        <div id="error-message"></div>
+        <video id="video" controls autoplay muted></video>
+    </div>
+    
+    <div id="controls">
+        <iframe name="hiddenFrame" class="hide" style="display:none;"></iframe>
+        <div class="control-row">
+            <form action="/cgi-bin/motor.cgi" method="get" target="hiddenFrame">
+                <input type="hidden" name="dist" value="10">
+                <button class="control-button" type="submit" value="up" name="dir">&uarr;</button>
+            </form>
+        </div>
+        <div class="control-row">
+            <form action="/cgi-bin/motor.cgi" method="get" target="hiddenFrame">
+                <input type="hidden" name="dist" value="10">
+                <button class="control-button" type="submit" value="left" name="dir">&larr;</button>
+            </form>
+            <form action="/cgi-bin/motor.cgi" method="get" target="hiddenFrame">
+                <input type="hidden" name="dist" value="10">
+                <button class="control-button" type="submit" value="right" name="dir">&rarr;</button>
+            </form>
+        </div>
+        <div class="control-row">
+            <form action="/cgi-bin/motor.cgi" method="get" target="hiddenFrame">
+                <input type="hidden" name="dist" value="10">
+                <button class="control-button" type="submit" value="down" name="dir">&darr;</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="settings-container">
+        <div class="settings-toggle" onclick="toggleSettings()">&#9660; Einstellungen anzeigen</div>
+        <div class="settings-content" id="settings-content">
+            <h2>Einstellungen</h2>
+            <div id="settings"></div>
+            <button onclick="saveSettings()">Speichern</button>
+            <button onclick="reboot()">Kamera neu starten</button>
+        </div>
+    </div>
+    
+    <div id="links">
+        <a href="https://github.com/Bunkerschild/LSCamoflash" target="_blank">Projekt auf GitHub</a>
+        <a href="/cgi-bin/streamurl.cgi?type=RTSP" target="_blank">RTSP Stream</a>
+        <a href="/cgi-bin/streamurl.cgi?type=HLS" target="_blank">HLS Stream</a>
+        <a href="/cgi-bin/streamurl.cgi?type=FLV" target="_blank">FLV Stream</a>
+    </div>
+
+    <script>
+        var settings = [];
+        
+        function toggleSettings() {
+            let content = document.getElementById("settings-content");
+            content.style.display = content.style.display === "none" ? "block" : "none";
+        }
+        
+        async function fetchSettings() {
+            let response = await fetch('/cgi-bin/settings.cgi');
+            let data = await response.json();
+            let settingsContainer = document.getElementById('settings');
+            settingsContainer.innerHTML = '';
+
+            for (const [key, value] of Object.entries(data)) {
+                let settingItem = document.createElement('div');
+                settingItem.classList.add('setting-item');
+                let label = document.createElement('label');
+                label.innerText = translateKey(key);
+                settingItem.appendChild(label);
+
+                if ((key.includes('str_')) || (key.includes('string_'))) {
+                    let input = document.createElement('input');
+                    input.type = 'text';
+                    input.value = value;
+                    input.dataset.key = key;
+                    settingItem.appendChild(input);
+                } else if (key.includes('enum_')) {
+                    // Dropdown f??r enum-Felder
+                    let select = document.createElement('select');
+                    select.dataset.key = key;
+
+                    // Definierte Optionen f??r die bekannten enum-Werte (Index 0, 1, 2, ...)
+                    const enumOptions = {
+                        'enum_basic_anti_flicker': ['Aus', '50Hz', '60Hz'],
+                        'enum_night_mode': ['Auto', 'Immer aus', 'Immer an'],
+                        'enum_night_vision_mode': ['Farb-Modus', 'IR-Modus'],
+                        'enum_alarm_sensitivity': ['Niedrig', 'Mittel', 'Hoch'],
+                        'enum_sound_sensitivity': ['Niedrig', 'Hoch'],
+                        'enum_pir_switch': ['Aus', 'Nur nachts', 'Immer'],
+                        'enum_sd_record_mode': ['Ereignisbasiert', 'Dauerhaft']
+                    };
+
+                    let options = enumOptions[key] || ['Option 0', 'Option 1', 'Option 2'];
+
+                    options.forEach((opt, index) => {
+                        let optionElement = document.createElement('option');
+                        optionElement.value = index.toString(); // Speichert den Index als Wert
+                        optionElement.innerText = opt;
+                        if (parseInt(value) === index) {
+                            optionElement.selected = true;
+                        }
+                        select.appendChild(optionElement);
+                    });
+
+                    settingItem.appendChild(select);
+                } else if (key.includes('bool_')) {
+                    let checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = value === '1';
+                    checkbox.dataset.key = key;
+                    settingItem.appendChild(checkbox);
+                } else {
+                    let input = document.createElement('input');
+                    input.type = 'text';
+                    input.value = value;
+                    input.dataset.key = key;
+                    settingItem.appendChild(input);
+                }
+                
+                settings[key] = value;
+
+                settingsContainer.appendChild(settingItem);
+            }
+        }
+        
+        async function reboot() {
+            if (confirm('Die Kamera jetzt neu starten?')) {
+                let response = await fetch('/cgi-bin/reboot.cgi');
+            }
+        }
+
+        function saveSettings() {
+            let payloads = "";
+            let inputs = document.querySelectorAll('[data-key]');
+            inputs.forEach(input => {
+                let key = input.dataset.key;
+                let value = input.type === 'checkbox' ? (input.checked ? '1' : '0') : input.value;
+                
+                if (settings[key] != value) {
+                    if (payloads == "") { 
+                        payloads = key + "=" + value;
+                    } else {
+                        payloads = payloads + ";" + key + "=" + value;
+                    }
+                    settings[key] = value;
+                }
+            });
+            if (payloads == "") {
+                alert('Keine Einstellungen veraendert');
+            } else {
+                fetch(`/cgi-bin/settings.cgi?save=${encodeURIComponent(payloads)}`);
+                alert('Einstellungen gespeichert. Um die Einstellungen zu uebernehmen, muss die Kamera neu gestartet werden.');
+            }
+        }
+
+        function translateKey(key) {
+            const translations = {
+                'bool_led_enable': 'LED aktivieren',
+                'bool_rotate180': 'Bild drehen',
+                'enum_basic_anti_flicker': 'Anti-Flimmer Modus',
+                'bool_osd_time': 'OSD-Zeit anzeigen',
+                'enum_night_mode': 'Nachtmodus',
+                'enum_night_vision_mode': 'Nachtsichtmodus',
+                'bool_bulb_enable': 'Gluehlampe aktivieren',
+                'bool_alarm_enable': 'Alarm aktivieren',
+                'bool_human_filter_enable': 'Menschenfilter aktivieren',
+                'enum_alarm_sensitivity': 'Alarmempfindlichkeit',
+                'bool_alarm_siren_enable': 'Sirene aktivieren',
+                'bool_md_area_enable': 'Bewegungserkennung aktivieren',
+                'str_md_area_rect': 'Bewegungserkennungsbereich',
+                'bool_sound_detect_enable': 'Geraeuscherkennung aktivieren',
+                'enum_sound_sensitivity': 'Geraeuschempfindlichkeit',
+                'enum_pir_switch': 'PIR-Sensor',
+                'bool_sd_record_enable': 'SD-Kartenaufnahme aktivieren',
+                'enum_sd_record_mode': 'Aufnahmemodus',
+                'bool_patrol_switch': 'Patrouillenmodus',
+                'bool_track_enable': 'Tracking aktivieren',
+                'bool_cry_detect_enable': 'Wein-Erkennung',
+                'bool_sleep_mode': 'Schlafmodus',
+                'string_ptz_save_point': 'PTZ-Speicherpunkt'
+            };
+            return translations[key] || key;
+        }
+        
+        async function fetchStreamUrl() {
+            try {
+                let response = await fetch('/cgi-bin/streamurl.cgi?type=hls');
+                let data = await response.json();
+                if (data.error) {
+                    showError(data.error);
+                } else if (data.url) {
+                    loadHlsStream(data.url);
+                } else {
+                    showError("Fehler: Keine Stream-URL erhalten");
+                }
+            } catch (error) {
+                showError("Fehler beim Abrufen der Stream-URL: " + error);
+            }
+        }
+        async function fetchHostname() {
+           try {
+                let response = await fetch('/cgi-bin/hostname.cgi');
+                let data = await response.json();
+                if (data.error) {
+                    showError(data.error);
+                } else if (data.hostname) {
+                    document.getElementById('hostname').innerHTML = data.hostname;
+                }
+            } catch (error) {
+                ;
+            }
+        }
+
+        function loadHlsStream(streamUrl) {
+            const video = document.getElementById('video');
+            const loading = document.getElementById('loading');
+            const errorMessage = document.getElementById('error-message');
+            
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(streamUrl);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    video.style.display = "block";
+                    loading.style.display = "none";
+                    errorMessage.style.display = "none";
+                    video.play();
+                });
+            } else {
+                showError("HLS wird von diesem Browser nicht unterst??tzt.");
+            }
+        }
+
+        fetchHostname();
+        fetchStreamUrl();
+        fetchSettings();
+    </script>
+</body>
+</html>
