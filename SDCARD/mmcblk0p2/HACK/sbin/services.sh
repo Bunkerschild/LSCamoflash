@@ -32,7 +32,7 @@ if [ -e $sd_config/_ht_sw_settings.ini ]; then
 fi
 
 # FTP Service
-if [ "$port_ftp" != "" ]; then
+if [ "$port_ftp" != "" -a "$ftp_enabled" = "1" ]; then
 	has_ftp=`pgrep -f "tcpsvd 0 $port_ftp ftpd"`
 	if [ "$has_ftp" = "" ]; then
 		$sys_bin/tcpsvd 0 $port_ftp ftpd -w $sd_path -t 1800 &
@@ -40,7 +40,7 @@ if [ "$port_ftp" != "" ]; then
 fi
 
 # Telnet Service
-if [ "$port_telnet" != "" ]; then
+if [ "$port_telnet" != "" -a "$telnet_enabled" = "1" ]; then
 	has_telnet=`pgrep -f "busybox telnetd"`
 	if [ "$has_telnet" = "" ]; then
 		$sd_bin/busybox telnetd -p $port_telnet
@@ -48,7 +48,7 @@ if [ "$port_telnet" != "" ]; then
 fi
 
 # HTTP Service
-if [ "$port_http" != "" ]; then
+if [ "$port_http" != "" -a "$http_enabled" = "1" ]; then
 	has_http=`pgrep -f "busybox httpd"`
 	if [ "$has_http" = "" ]; then
 	$sd_bin/busybox httpd -c $sd_etc/httpd.conf -h $sd_www -p $port_http
@@ -69,11 +69,38 @@ if [ "$use_offline_mode" != "" ]; then
 fi
 
 # ONVIF Service
-if [ "$port_onvif" != "" ]; then
+if [ "$port_onvif" != "" -a "$onvif_enabled" = "1" ]; then
 	has_onvif=`pgrep -f "onvif"`
 	if [ "$has_onvif" = "" ]; then
 	$sd_sbin/onvif.sh &
 	fi
+fi
+
+# Make sure hostapd and _ht_ap_mode.conf is on partition 1
+if [ -x "/tmp/hostapd" ]; then
+	mkfsrunning=`ps awx | grep "mkfs.vfat" | grep -v "grep" | awk '{print $1}'`
+
+ 	if [ "$mkfsrunning" = "" ]; then
+		mountedon=`mount | grep "^/dev/mmcblk0p1" | awk '{print $3}' | grep "/mnt"`
+	 	forcedmount=""
+
+ 		if [ "$mountedon" = "" ]; then
+			mount /dev/mmcblk0p1 /mnt && forcedmount="1"
+			mountedon=`mount | grep "^/dev/mmcblk0p1" | awk '{print $3}' | grep "/mnt"`
+	  	fi
+
+ 		if [ "$mountedon" != "" ]; then
+			if [ ! -f "$mountedon/hostapd" ]; then
+				cp /tmp/hostapd $mountedon/hostapd
+  			fi
+			if [ ! -f "$mountedon/_ht_ap_mode.conf" ]; then
+				touch $mountedon/_ht_ap_mode.conf
+  			fi
+    			if [ "$forcedmount" = "1" ]; then
+				umount /mnt && forcedmount=""
+      			fi
+  		fi
+    	fi
 fi
 
 # Daily cleanup of DCIM
