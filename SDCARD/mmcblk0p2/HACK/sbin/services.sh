@@ -2,6 +2,10 @@
 
 [ -n "$hack" ] || exit 1
 
+# We have to reload the hack and hack_custom config
+[ -f "$hack_conf" ] && . $hack_conf
+[ -f "$hack_custom_conf" ] && . $hack_custom_conf
+
 # Custom scripts run before services
 [ -n "$custom_pre_services_async" -a -x "$custom_pre_services_async" ] && $custom_pre_services_async &
 [ -n "$custom_pre_services" -a -x "$custom_pre_services" ] && $custom_pre_services
