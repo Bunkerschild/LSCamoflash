@@ -5,11 +5,6 @@ echo -n "Hack, written by Bunkerschild, is starting up at " && date
 [ -n "$hack" -a -n "$hack_conf" -a -f "$hack_conf" ] && . $hack_conf && echo "Configuration loaded from: $hack_conf" || exit 1
 [ -n "$hack_custom_conf" ] && . $hack_custom_conf && echo "Custom configuration override loaded from: $hack_custom_conf"
 
-# Mmount SD on location that won't be umounted by device
-echo -n "Mount SD card on seperate location $sd_path..."
-mkdir -p $sd_path >/dev/null 2>&1
-mount $sd_dev $sd_path && echo "done" || echo "failed"
-
 # Redefine variables for next scripts (in case of /mnt is unmounted)
 export hack="$sd_path/HACK"
 export hack_conf="$hack/etc/hack.conf"
