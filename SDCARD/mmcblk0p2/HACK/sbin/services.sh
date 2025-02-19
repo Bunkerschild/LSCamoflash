@@ -32,27 +32,45 @@ if [ -e $sd_config/_ht_sw_settings.ini ]; then
 fi
 
 # FTP Service
-if [ "$port_ftp" != "" -a "$ftp_enabled" = "1" ]; then
+if [ "$port_ftp" != "" ]; then
 	has_ftp=`pgrep -f "tcpsvd 0 $port_ftp ftpd"`
-	if [ "$has_ftp" = "" ]; then
-		$sys_bin/tcpsvd 0 $port_ftp ftpd -w $sd_path -t 1800 &
+ 	if [ "$ftp_enabled" = "1" ]; then
+		if [ "$has_ftp" = "" ]; then
+			$sys_bin/tcpsvd 0 $port_ftp ftpd -w $sd_path -t 1800 &
+		fi
+	else
+ 		if [ "$has_ftp" != "" ]; then
+			kill -KILL $has_ftp
+   		fi
 	fi
 fi
 
 # Telnet Service
-if [ "$port_telnet" != "" -a "$telnet_enabled" = "1" ]; then
+if [ "$port_telnet" != "" ]; then
 	has_telnet=`pgrep -f "busybox telnetd"`
-	if [ "$has_telnet" = "" ]; then
-		$sd_bin/busybox telnetd -p $port_telnet
-	fi
+ 	if [ "$telnet_enabled" = "1" ]; then
+		if [ "$has_telnet" = "" ]; then
+			$sd_bin/busybox telnetd -p $port_telnet
+		fi
+	else
+ 		if [ "$has_telnet" != "" ]; then
+			kill -KILL $has_telnet
+   		fi
+ 	fi
 fi
 
 # HTTP Service
-if [ "$port_http" != "" -a "$http_enabled" = "1" ]; then
+if [ "$port_http" != "" ]; then
 	has_http=`pgrep -f "busybox httpd"`
-	if [ "$has_http" = "" ]; then
-	$sd_bin/busybox httpd -c $sd_etc/httpd.conf -h $sd_www -p $port_http
-	fi
+ 	if [ "$http_enabled" = "1" ]; then
+		if [ "$has_http" = "" ]; then
+			$sd_bin/busybox httpd -c $sd_etc/httpd.conf -h $sd_www -p $port_http
+		fi
+  	else
+   		if [ "$has_http" != "" ]; then
+			kill -KILL $has_http
+       		fi
+   	fi
 fi
 
 # Offline mode
@@ -69,11 +87,17 @@ if [ "$use_offline_mode" != "" ]; then
 fi
 
 # ONVIF Service
-if [ "$port_onvif" != "" -a "$onvif_enabled" = "1" ]; then
+if [ "$port_onvif" != "" ]; then
 	has_onvif=`pgrep -f "onvif"`
-	if [ "$has_onvif" = "" ]; then
-	$sd_sbin/onvif.sh &
-	fi
+ 	if [ "$onvif_enabled" = "1" ]; then
+		if [ "$has_onvif" = "" ]; then
+			$sd_sbin/onvif.sh &
+		fi
+  	else
+   		if [ "$has_onvif" != "" ]; then
+			kill -KILL $has_onvif
+     		fi
+   	fi
 fi
 
 # Make sure hostapd and _ht_ap_mode.conf is on partition 1
