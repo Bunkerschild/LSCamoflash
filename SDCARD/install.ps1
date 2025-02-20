@@ -1,6 +1,6 @@
 # PowerShell Skript zur SD-Karten-Partitionierung und Datei-Kopie
 Write-Host "LSCamoflash SD-Karten Partitionierungsskript" -ForegroundColor Cyan
-Write-Host "ACHTUNG: ALLE DATEN AUF DER SD-KARTE WERDEN GELÖSCHT!" -ForegroundColor Red
+Write-Host "ACHTUNG: ALLE DATEN AUF DER SD-KARTE WERDEN GELOESCHT!" -ForegroundColor Red
 Write-Host "ABBRUCH MIT STRG+C"
 Pause
 
