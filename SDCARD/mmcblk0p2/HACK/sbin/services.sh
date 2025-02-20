@@ -90,6 +90,15 @@ if [ "$use_offline_mode" != "" ]; then
 	fi		
 fi
 
+# Cron daemon
+if [ "$crond_enabled" = "1" ]; then
+	has_crond=`pgrep -f "crond"`
+ 	if [ "$has_crond" = "" ]; then
+  		[ -f "$sd_crontabs/root"] || touch $sd_crontabs/root
+    		crond -L $crond_log -c $sd_crontabsn -b
+  	fi
+fi
+
 # ONVIF Service
 if [ "$port_onvif" != "" ]; then
 	has_onvif=`pgrep -f "onvif"`
