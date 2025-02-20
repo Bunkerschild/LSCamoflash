@@ -165,4 +165,4 @@ if (Test-Path $localCrontab) {
 }
 
 Write-Host "Alle Vorgaenge abgeschlossen!" -ForegroundColor Green
-Pause
+
