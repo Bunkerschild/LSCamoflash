@@ -1,5 +1,5 @@
 #!/bin/sh
-echo -n "Hack, written by Bunkerschild, is starting up at " && date
+echo -n "LSCamoflash init script is starting up at " && date
 
 # Check, whether we were called from hostapd script and load configs
 [ -n "$hack" -a -n "$hack_conf" -a -f "$hack_conf" ] && . $hack_conf && echo "Configuration loaded from: $hack_conf" || exit 1
