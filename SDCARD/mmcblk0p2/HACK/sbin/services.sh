@@ -91,11 +91,15 @@ if [ "$use_offline_mode" != "" ]; then
 fi
 
 # Cron daemon
+has_crond=`pgrep -f "crond"`
 if [ "$crond_enabled" = "1" ]; then
-	has_crond=`pgrep -f "crond"`
  	if [ "$has_crond" = "" ]; then
     		$sd_bin/busybox crond -L $crond_log -c $sys_crontabs -b
   	fi
+else
+	if [ "$has_crond" != "" ]; then
+		kill -KILL $has_crond
+ 	fi
 fi
 
 # ONVIF Service
