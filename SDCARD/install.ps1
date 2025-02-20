@@ -117,10 +117,15 @@ if (Test-Path $etcPasswd) {
     Write-Host "passwd nicht gefunden, kein Kopiervorgang notwendig." -ForegroundColor Yellow
 }
 
+$localShadow = ".\shadow"
 $etcShadow = ".\mmcblk0p2\HACK\etc\config\shadow"
 $etcShadowDest = "$drive1`:\shadow"
 
-if (Test-Path $etcPasswd) {
+if (Test-Path $localShadow) {
+    Write-Host "Kopiere lokale ./shadow Version nach / auf $drive1..." -ForegroundColor Cyan
+    Copy-Item -Path $localShadow -Destination $etcShadowDest -Force
+    Write-Host "lokale shadow Version erfolgreich kopiert!" -ForegroundColor Green
+} elseif (Test-Path $etcShadow) {
     Write-Host "Kopiere HACK/etc/config/shadow nach / auf $drive1..." -ForegroundColor Cyan
     Copy-Item -Path $etcShadow -Destination $etcShadowDest -Force
     Write-Host "shadow erfolgreich kopiert!" -ForegroundColor Green
