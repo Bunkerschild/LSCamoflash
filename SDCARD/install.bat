@@ -10,11 +10,13 @@ wmic diskdrive where "MediaType like 'Removable Media'" get Index, Model, Size
 :: Prüfen, ob überhaupt ein Wechselmedium gefunden wurde
 setlocal enabledelayedexpansion
 set hasSDCard=false
+
 for /f "skip=1 tokens=1" %%A in ('wmic diskdrive where "MediaType like 'Removable Media'" get Index ^| findstr /r "^[0-9]"') do (
     set hasSDCard=true
 )
 
-if not defined hasSDCard (
+:: Falls keine SD-Karte erkannt wurde, abbrechen
+if "%hasSDCard%"=="false" (
     echo Keine SD-Karte oder Wechselmedium gefunden! Skript wird beendet.
     pause
     exit
@@ -24,7 +26,7 @@ if not defined hasSDCard (
 set /p disknum="Gib die Datenträgernummer deiner SD-Karte ein: "
 
 :: Sicherheit prüfen: Ist es wirklich ein Wechselmedium?
-wmic diskdrive where "Index=%disknum%" get MediaType | find "Removable Media" > nul
+wmic diskdrive where "Index=%disknum%" get MediaType | findstr /i "Removable" > nul
 if %errorlevel% neq 0 (
     echo Fehler: Der gewählte Datenträger ist KEIN Wechselmedium! Abbruch.
     pause
@@ -32,21 +34,27 @@ if %errorlevel% neq 0 (
 )
 
 :: Automatische Ermittlung freier Laufwerksbuchstaben für Partition 1 und 2
+set DRIVE1=
+set DRIVE2=
+
 for %%A in (E F G H I J K L M N O P Q R S T U V W X Y Z) do (
     fsutil fsinfo drivetype %%A: 2>nul | findstr "Nicht bereit" >nul
     if not errorlevel 1 (
-        if not defined DRIVE1 set DRIVE1=%%A
-        if defined DRIVE1 if not defined DRIVE2 set DRIVE2=%%A
+        if not defined DRIVE1 (
+            set DRIVE1=%%A
+        ) else if not defined DRIVE2 (
+            set DRIVE2=%%A
+        )
     )
 )
 
-:: Prüfen, ob zwei freie Buchstaben gefunden wurden
-if not defined DRIVE1 (
+:: Verzögerte Variablenerweiterung für die Prüfung
+if "!DRIVE1!"=="" (
     echo Fehler: Kein freier Laufwerksbuchstabe für die erste Partition gefunden!
     pause
     exit
 )
-if not defined DRIVE2 (
+if "!DRIVE2!"=="" (
     echo Fehler: Kein freier Laufwerksbuchstabe für die zweite Partition gefunden!
     pause
     exit
