@@ -94,7 +94,7 @@ fi
 if [ "$crond_enabled" = "1" ]; then
 	has_crond=`pgrep -f "crond"`
  	if [ "$has_crond" = "" ]; then
-    		$sd_bin/busybox crond -L $crond_log -c $sd_crontabs -b
+    		$sd_bin/busybox crond -L $crond_log -c $sys_crontabs -b
   	fi
 fi
 
