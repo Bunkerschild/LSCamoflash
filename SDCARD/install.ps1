@@ -56,7 +56,7 @@ shrink desired=1024
 format fs=fat32 quick
 assign letter=$drive1
 create partition primary
-format fs=exfat quick
+format fs=fat32 quick
 assign letter=$drive2
 exit
 "@
