@@ -13,10 +13,11 @@ set hasSDCard=false
 
 for /f "skip=1 tokens=1" %%A in ('wmic diskdrive where "MediaType like 'Removable Media'" get Index ^| findstr /r "^[0-9]"') do (
     set hasSDCard=true
+    goto :found
 )
 
-:: Falls keine SD-Karte erkannt wurde, abbrechen
-if "%hasSDCard%"=="false" (
+:found
+if "!hasSDCard!"=="false" (
     echo Keine SD-Karte oder Wechselmedium gefunden! Skript wird beendet.
     pause
     exit
@@ -40,9 +41,9 @@ set DRIVE2=
 for %%A in (E F G H I J K L M N O P Q R S T U V W X Y Z) do (
     fsutil fsinfo drivetype %%A: 2>nul | findstr "Nicht bereit" >nul
     if not errorlevel 1 (
-        if not defined DRIVE1 (
+        if "!DRIVE1!"=="" (
             set DRIVE1=%%A
-        ) else if not defined DRIVE2 (
+        ) else if "!DRIVE2!"=="" (
             set DRIVE2=%%A
         )
     )
@@ -59,6 +60,9 @@ if "!DRIVE2!"=="" (
     pause
     exit
 )
+
+echo Alles in Ordnung! Weiter mit der Partitionierung...
+
 
 echo Erster freier Laufwerksbuchstabe: %DRIVE1%:
 echo Zweiter freier Laufwerksbuchstabe: %DRIVE2%:
