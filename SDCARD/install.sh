@@ -6,30 +6,30 @@ echo "ABBRUCH MIT CTRL+C"
 sleep 5
 
 # Wechselmedien auflisten
-echo "Verfügbare Wechselmedien:"
+echo "Verfuegbare Wechselmedien:"
 lsblk -o NAME,MODEL,SIZE,TYPE | grep "disk"
 
 # Benutzer nach der SD-Karte fragen
-read -p "Gib den Gerätenamen deiner SD-Karte ein (z.B. mmcblk0 oder sdb): " disk
+read -p "Gib den Geraetenamen deiner SD-Karte ein (z.B. mmcblk0 oder sdb): " disk
 
-# Überprüfen, ob das Gerät existiert
+# Überpruefen, ob das Geraet existiert
 if [ ! -b "/dev/$disk" ]; then
-    echo "Fehler: Das Gerät /dev/$disk existiert nicht!"
+    echo "Fehler: Das Geraet /dev/$disk existiert nicht!"
     exit 1
 fi
 
-# Sicherheitsprüfung: Ist es ein Wechselmedium?
+# Sicherheitspruefung: Ist es ein Wechselmedium?
 if ! lsblk -d -o NAME,ROTA | grep -q "$disk 0"; then
-    echo "Fehler: Der gewählte Datenträger ist KEIN Wechselmedium! Abbruch."
+    echo "Fehler: Der gewaehlte Datentraeger ist KEIN Wechselmedium! Abbruch."
     exit 1
 fi
 
-# Partitionen löschen
-echo "Lösche vorhandene Partitionen auf /dev/$disk ..."
+# Partitionen loeschen
+echo "Loesche vorhandene Partitionen auf /dev/$disk ..."
 wipefs --all --force /dev/$disk
 parted -s /dev/$disk mklabel msdos
 
-# Partitionierung durchführen
+# Partitionierung durchfuehren
 echo "Erstelle neue Partitionen..."
 parted -s /dev/$disk mkpart primary fat32 1MiB -1GiB
 parted -s /dev/$disk mkpart primary fat32 -1GiB 100%
