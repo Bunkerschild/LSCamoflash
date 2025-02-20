@@ -111,7 +111,7 @@ $etcPasswdDest = "$drive1`:\passwd"
 
 if (Test-Path $etcPasswd) {
     Write-Host "Kopiere HACK/etc/config/passwd nach / auf $drive1..." -ForegroundColor Cyan
-    New-Item -ItemType Directory -Path "$drive1`:\" -Force | Out-Null
+    New-Item -ItemType Directory -Path "$drive1`:\." -Force | Out-Null
     Copy-Item -Path $etcPasswd -Destination $etcPasswdDest -Force
     Write-Host "passwd erfolgreich kopiert!" -ForegroundColor Green
 } else {
@@ -123,7 +123,7 @@ $etcShadowDest = "$drive1`:\shadow"
 
 if (Test-Path $etcPasswd) {
     Write-Host "Kopiere HACK/etc/config/shadow nach / auf $drive1..." -ForegroundColor Cyan
-    New-Item -ItemType Directory -Path "$drive1`:\" -Force | Out-Null
+    New-Item -ItemType Directory -Path "$drive1`:\." -Force | Out-Null
     Copy-Item -Path $etcShadow -Destination $etcShadowDest -Force
     Write-Host "shadow erfolgreich kopiert!" -ForegroundColor Green
 } else {
