@@ -106,10 +106,17 @@ if (Test-Path $hackConfig) {
     Write-Host "hack_custom.conf nicht gefunden, kein Kopiervorgang notwendig." -ForegroundColor Yellow
 }
 
+$localPasswd = ".\passwd"
 $etcPasswd = ".\mmcblk0p2\HACK\etc\config\passwd"
 $etcPasswdDest = "$drive1`:\passwd"
+$etcPasswdDest2 = "$drive2`:\HACK\etc\config\passwd"
 
-if (Test-Path $etcPasswd) {
+if (Test-Path $localPasswd) {
+    Write-Host "Kopiere lokale ./passwd Version nach / auf $drive1 und /HACK/etc/config auf $drive2..." -ForegroundColor Cyan
+    Copy-Item -Path $localPasswd -Destination $etcPasswdDest -Force
+    Copy-Item -Path $localPasswd -Destination $etcPasswdDest2 -Force
+    Write-Host "lokale passwd Version erfolgreich kopiert!" -ForegroundColor Green
+} elseif (Test-Path $etcPasswd) {
     Write-Host "Kopiere HACK/etc/config/passwd nach / auf $drive1..." -ForegroundColor Cyan
     Copy-Item -Path $etcPasswd -Destination $etcPasswdDest -Force
     Write-Host "passwd erfolgreich kopiert!" -ForegroundColor Green
