@@ -40,6 +40,8 @@ SDCARD/hack_custom.conf
 SDCARD/shadow
 SDCARD/passwd
 SDCARD/httpd.conf
+SDCARD/crontab
+
 
 
 
