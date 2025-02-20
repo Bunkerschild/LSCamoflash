@@ -33,8 +33,13 @@ defaultpw='$1$YjgTo5mH$ADPfZ0ejO6cxknnlP3F/K.'
 shadowpw=`cat /etc/config/shadow | grep "^root" | cut -d : -f2`
 if [ "$defaultpw" = "$shadowpw" ]; then
   echo "  IMPORTANT:"
-  echo "  DEFAULT PASSWORD IS SET"
-  echo "  To change default password for telnet, ftp and httpd type: chpasswd"
-  echo "  Do not use 'passwd' as it does not survive a reboot"
+  echo "  DEFAULT PASSWORD IS SET."
+  echo "  FOR YOUR OWN SECURITY CHANGE IT NOW."
 fi
+echo "  --------------------------------------------------------"
+echo "  To change password for the device and services like
+echo "  telnet, ftp and httpd type: 'chpasswd' (without quotes)."
+echo "  Do not use 'passwd' as it does not survive a reboot."
+echo "  --------------------------------------------------------"
+echo "  LSCamoflash version: $(cat /tmp/sd/HACK/etc/version.txt)"
 echo "/tmp/core_%e_%p_%t" > /proc/sys/kernel/core_pattern
