@@ -65,6 +65,7 @@ echo "Kopiere Konfigurationsdateien, sofern vorhanden..."
 [ -f "./passwd" ] && cp -f ./passwd "$mount1/" && cp -f ./passwd "$mount2/HACK/etc/config"
 [ -f "./shadow" ] && cp -f ./shadow "$mount1/" && cp -f ./shadow "$mount2/HACK/etc/config"
 [ -f "./httpd.conf" ] && cp -f ./httpd.conf "$mount2/HACK/etc"
+[ -f "./crontab" ] && cp -f ./crontab "$mount2/HACK/var/spool/cron/crontabs/root"
 
 # Unmounten
 umount "$mount1"
