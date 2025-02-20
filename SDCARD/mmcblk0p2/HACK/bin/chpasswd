@@ -1,6 +1,7 @@
 #!/bin/sh
 
 root="/tmp/sd/HACK/"
+mnt="/mnt"
 
 busybox_firmware="/bin/busybox"
 busybox_hack="$root/bin/busybox"
@@ -25,6 +26,12 @@ if [ "$NEWROOT" = "$OLDROOT" ]; then
 	echo "Password not changed on SD cards shadow and httpd.conf"
 else
 	$cp -f /etc/config/shadow $root/etc/config/shadow
+	mounted=`mount | grep "^/dev/mmcblk0p1" | grep "$mnt" | awk '{print $3}'`
+	if [ "$mounted" = "$mnt" ]; then
+		cp -f /etc/config/shadow $mnt/shadow
+	else
+		mount /dev/mmcblk0p1 $mnt && cp -f /etc/config/shadow $mnt/shadow && umount $mnt
+	fi
 	$cat $root/etc/httpd.conf | grep -v "^/:root" > /tmp/httpd.conf
 	echo "Writing new root password line to httpd.conf"
 	echo "/:root:$NEWROOT" >> /tmp/httpd.conf
