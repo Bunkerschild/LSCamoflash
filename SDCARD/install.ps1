@@ -142,5 +142,16 @@ if (Test-Path $localShadow) {
     Write-Host "shadow nicht gefunden, kein Kopiervorgang notwendig." -ForegroundColor Yellow
 }
 
+$localHttpdConf = ".\httpd.conf"
+$localHttpdConfDest = "$drive2`:\HACK\etc\httpd.conf"
+
+if (Test-Path $localHttpdConf) {
+    Write-Host "Kopiere lokale ./httpd.conf Version nach /HACK/etc auf $drive2..." -ForegroundColor Cyan
+    Copy-Item -Path $localHttpdConf -Destination $localHttpdConfDest -Force
+    Write-Host "lokale httpd.conf Version erfolgreich kopiert!" -ForegroundColor Green
+} else {
+    Write-Host "httpd.conf nicht gefunden, kein Kopiervorgang notwendig." -ForegroundColor Yellow
+}
+
 Write-Host "Alle Vorgaenge abgeschlossen!" -ForegroundColor Green
 Pause
