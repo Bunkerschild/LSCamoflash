@@ -200,9 +200,9 @@ for i in shadow passwd; do
 done
 
 # Copy crontabs
-echo -n "Copying crontabs..."
-mkdir -p $sys_crontabs >/dev/null 2>&1
-cp -a $sd_crontabs/* $sys_crontabs && echo "done" || echo "failed"
+echo -n "Copying crontabs from $sd_crontabs to $sys_crontabs..."
+$mkdir -p $sys_crontabs >/dev/null 2>&1
+$cp $sd_crontabs/* $sys_crontabs && echo "done" || echo "failed"
 
 # Make a backup of the origin firmware files
 if [ ! -e $sd_backup/root.tar ]; then
