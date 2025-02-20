@@ -36,10 +36,10 @@ if [ "$defaultpw" = "$shadowpw" ]; then
   echo "  DEFAULT PASSWORD IS SET."
   echo "  FOR YOUR OWN SECURITY CHANGE IT NOW."
 fi
-echo "  --------------------------------------------------------"
-echo "  To change password for the device and services like
-echo "  telnet, ftp and httpd type: 'chpasswd' (without quotes)."
+echo "  ------------------------------------------------------"
+echo "  To change password for the device and services like"
+echo "  telnet, ftp and httpd type: 'chpasswd' without quotes."
 echo "  Do not use 'passwd' as it does not survive a reboot."
-echo "  --------------------------------------------------------"
+echo "  ------------------------------------------------------"
 echo "  LSCamoflash version: $(cat /tmp/sd/HACK/etc/version.txt)"
 echo "/tmp/core_%e_%p_%t" > /proc/sys/kernel/core_pattern
