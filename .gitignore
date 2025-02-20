@@ -35,3 +35,7 @@ SDCARD/lib/libavssdkbeta.so
 # Exclude hack_custom.conf
 SDCARD/etc/hack_custom.conf
 SDCARD/hack_custom.conf
+
+# Exclude local shadow version
+SDCARD/shadow
+
