@@ -14,16 +14,16 @@ if (-not $removableDisks) {
 }
 
 Write-Host "`nGefundene Wechselmedien:"
-$removableDisks | ForEach-Object { Write-Host "$($_.Index): $($_.Model) - Größe: $($_.Size) Bytes" }
+$removableDisks | ForEach-Object { Write-Host "$($_.Index): $($_.Model) - Groesse: $($_.Size) Bytes" }
 
 # Benutzer nach der SD-Karten-Nummer fragen
-$disknum = Read-Host "Gib die Datenträgernummer deiner SD-Karte ein"
+$disknum = Read-Host "Gib die Datentraegernummer deiner SD-Karte ein"
 
-# Prüfen, ob die eingegebene Nummer zu einem Wechselmedium gehört
+# Pruefen, ob die eingegebene Nummer zu einem Wechselmedium gehoert
 $selectedDisk = $removableDisks | Where-Object { $_.Index -eq $disknum }
 
 if (-not $selectedDisk) {
-    Write-Host "Fehler: Der gewählte Datenträger ist KEIN Wechselmedium! Abbruch." -ForegroundColor Red
+    Write-Host "Fehler: Der gewaehlte Datentraeger ist KEIN Wechselmedium! Abbruch." -ForegroundColor Red
     Pause
     Exit
 }
@@ -36,7 +36,7 @@ $usedLetters = (Get-Volume).DriveLetter
 $freeLetters = $allLetters | Where-Object { $_ -notin $usedLetters }
 
 if ($freeLetters.Count -lt 2) {
-    Write-Host "Fehler: Nicht genügend freie Laufwerksbuchstaben gefunden!" -ForegroundColor Red
+    Write-Host "Fehler: Nicht genuegend freie Laufwerksbuchstaben gefunden!" -ForegroundColor Red
     Pause
     Exit
 }
@@ -46,7 +46,7 @@ $drive2 = $freeLetters[1]
 
 Write-Host "Laufwerksbuchstaben zugewiesen: Partition 1 -> $drive1, Partition 2 -> $drive2"
 
-# Diskpart-Skript für Partitionierung erstellen
+# Diskpart-Skript fuer Partitionierung erstellen
 $diskpartScript = @"
 select disk $disknum
 clean
@@ -61,7 +61,7 @@ assign letter=$drive2
 exit
 "@
 
-# Diskpart-Befehl ausführen
+# Diskpart-Befehl ausfuehren
 Write-Host "Starte Partitionierung mit DiskPart..." -ForegroundColor Cyan
 $diskpartScript | Out-File -FilePath "$env:TEMP\diskpart.txt" -Encoding ascii
 Start-Process -FilePath "diskpart.exe" -ArgumentList "/s $env:TEMP\diskpart.txt" -NoNewWindow -Wait
@@ -135,5 +135,5 @@ if (Test-Path $localShadow) {
     Write-Host "shadow nicht gefunden, kein Kopiervorgang notwendig." -ForegroundColor Yellow
 }
 
-Write-Host "Alle Vorgänge abgeschlossen!" -ForegroundColor Green
+Write-Host "Alle Vorgaenge abgeschlossen!" -ForegroundColor Green
 Pause
