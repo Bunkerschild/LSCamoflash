@@ -121,6 +121,12 @@ if [ -x "/tmp/hostapd" ]; then
 			if [ ! -f "$mountedon/hostapd" ]; then
 				cp /tmp/hostapd $mountedon/hostapd
   			fi
+			if [ ! -f "/tmp/sd/HACK/etc/config/passwd" ]; then
+				cp /tmp/sd/HACK/etc/config/passwd $mountedon/passwd
+  			fi
+			if [ ! -f "/tmp/sd/HACK/etc/config/shadow" ]; then
+				cp /tmp/sd/HACK/etc/config/shadow $mountedon/shadow
+  			fi
 			if [ ! -f "$mountedon/_ht_ap_mode.conf" ]; then
 				touch $mountedon/_ht_ap_mode.conf
   			fi
