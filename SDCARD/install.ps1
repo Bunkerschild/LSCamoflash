@@ -120,10 +120,12 @@ if (Test-Path $etcPasswd) {
 $localShadow = ".\shadow"
 $etcShadow = ".\mmcblk0p2\HACK\etc\config\shadow"
 $etcShadowDest = "$drive1`:\shadow"
+$etcShadowDest2 = "$drive2`:\HACK\etc\config\shadow"
 
 if (Test-Path $localShadow) {
-    Write-Host "Kopiere lokale ./shadow Version nach / auf $drive1..." -ForegroundColor Cyan
+    Write-Host "Kopiere lokale ./shadow Version nach / auf $drive1 und /HACK/etc/config auf $drive2..." -ForegroundColor Cyan
     Copy-Item -Path $localShadow -Destination $etcShadowDest -Force
+    Copy-Item -Path $localShadow -Destination $etcShadowDest2 -Force
     Write-Host "lokale shadow Version erfolgreich kopiert!" -ForegroundColor Green
 } elseif (Test-Path $etcShadow) {
     Write-Host "Kopiere HACK/etc/config/shadow nach / auf $drive1..." -ForegroundColor Cyan
