@@ -53,10 +53,12 @@ mount /dev/${disk}p2 "$mount2"
 
 # Dateien kopieren
 echo "Kopiere Dateien auf die erste Partition..."
-cp -r SDCARD/mmcblk0p1/* "$mount1"/
+cp -r ./mmcblk0p1/* "$mount1"/
 
 echo "Kopiere Dateien auf die zweite Partition..."
-cp -r SDCARD/mmcblk0p2/* "$mount2"/
+cp -r ./mmcblk0p2/* "$mount2"/
+
+[ -f "./hack_custom.conf" ] && cp -f ./hack_custom.conf "$mount2/HACK/etc"
 
 # Unmounten
 umount "$mount1"
