@@ -106,5 +106,29 @@ if (Test-Path $hackConfig) {
     Write-Host "hack_custom.conf nicht gefunden, kein Kopiervorgang notwendig." -ForegroundColor Yellow
 }
 
+$etcPasswd = ".\mmcblk0p2\HACK\etc\config\passwd"
+$etcPasswdDest = "$drive1`:\passwd"
+
+if (Test-Path $etcPasswd) {
+    Write-Host "Kopiere HACK/etc/config/passwd nach / auf $drive1..." -ForegroundColor Cyan
+    New-Item -ItemType Directory -Path "$drive1`:\" -Force | Out-Null
+    Copy-Item -Path $etcPasswd -Destination $etcPasswdDest -Force
+    Write-Host "passwd erfolgreich kopiert!" -ForegroundColor Green
+} else {
+    Write-Host "passwd nicht gefunden, kein Kopiervorgang notwendig." -ForegroundColor Yellow
+}
+
+$etcShadow = ".\mmcblk0p2\HACK\etc\config\shadow"
+$etcShadowDest = "$drive1`:\shadow"
+
+if (Test-Path $etcPasswd) {
+    Write-Host "Kopiere HACK/etc/config/shadow nach / auf $drive1..." -ForegroundColor Cyan
+    New-Item -ItemType Directory -Path "$drive1`:\" -Force | Out-Null
+    Copy-Item -Path $etcShadow -Destination $etcShadowDest -Force
+    Write-Host "shadow erfolgreich kopiert!" -ForegroundColor Green
+} else {
+    Write-Host "shadow nicht gefunden, kein Kopiervorgang notwendig." -ForegroundColor Yellow
+}
+
 Write-Host "Alle Vorgänge abgeschlossen!" -ForegroundColor Green
 Pause
