@@ -188,6 +188,9 @@ if [ -f "$sd_overlay/fs.img" ]; then
 	$find $sd_lib -maxdepth 1 -type f -exec $ln -sf {} $sd_mnt/lib \;
 	$find $sd_lib -maxdepth 1 -type l -exec $ln -sf {} $sd_mnt/lib \;
 	$find $sd_lib/pkgconfig -maxdepth 1 -type f -exec $ln -sf {} $sd_mnt/lib/pkgconfig \;
+	for i in jmacs jpico jstar rjoe; do
+		$ln -sf $sd_bin/joe $sd_mnt/bin/$i
+	done
 	$ln -sf $sd_share/joe $sd_mnt/usr/share
 	$ln -sf $sd_share/aclocal $sd_mnt/usr/share
 	echo "done"
