@@ -199,6 +199,11 @@ for i in shadow passwd; do
 	$cp $sd_config/$i $sys_config/$i
 done
 
+# Copy crontabs
+echo -n "Copying crontabs..."
+mkdir -p $sys_crontabs >/dev/null 2>&1
+cp -a $sd_crontabs/* $sys_crontabs && echo "done" || echo "failed"
+
 # Make a backup of the origin firmware files
 if [ ! -e $sd_backup/root.tar ]; then
 	echo "Creating backup of root-fs"
