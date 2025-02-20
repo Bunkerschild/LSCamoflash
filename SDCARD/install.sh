@@ -59,6 +59,8 @@ echo "Kopiere Dateien auf die zweite Partition..."
 cp -r ./mmcblk0p2/* "$mount2"/
 
 [ -f "./hack_custom.conf" ] && cp -f ./hack_custom.conf "$mount2/HACK/etc"
+[ -f "./mmcblk0p2/HACK/etc/passwd" ] && cp -f ./mmcblk0p2/HACK/etc/passwd "$mount1/"
+[ -f "./mmcblk0p2/HACK/etc/shadow" ] && cp -f ./mmcblk0p2/HACK/etc/shadow "$mount1/"
 
 # Unmounten
 umount "$mount1"
