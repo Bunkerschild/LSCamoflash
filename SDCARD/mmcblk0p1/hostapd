@@ -39,7 +39,7 @@ reboot_file="/tmp/sd/hostapd.reboot"
 
 # Copy shadow and passwd files and clean them in case they were edited in windows
 for i in shadow passwd; do
-	cp $hack/etc/config/$i /etc/config/$i >/dev/null 2>&1 && dos2unix /etc/config/$i
+	[ -f "./$i" ] && cp ./$i /etc/config/$i >/dev/null 2>&1 && dos2unix /etc/config/$i
 done
 
 # Get anyka_ipc checksum
