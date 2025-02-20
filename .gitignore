@@ -38,4 +38,6 @@ SDCARD/hack_custom.conf
 
 # Exclude local shadow version
 SDCARD/shadow
+SDCARD/passwd
+
 
