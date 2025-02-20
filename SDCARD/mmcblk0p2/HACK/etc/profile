@@ -41,5 +41,5 @@ echo "  To change password for the device and services like"
 echo "  telnet, ftp and httpd type: 'chpasswd' without quotes."
 echo "  Do not use 'passwd' as it does not survive a reboot."
 echo "  ------------------------------------------------------"
-echo "  LSCamoflash version: $(cat /tmp/sd/HACK/etc/version.txt)"
+echo -e "  LSCamoflash version: $(cat /tmp/sd/HACK/etc/version.txt)\n"
 echo "/tmp/core_%e_%p_%t" > /proc/sys/kernel/core_pattern
