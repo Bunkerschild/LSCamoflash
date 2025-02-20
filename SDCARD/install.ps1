@@ -153,5 +153,16 @@ if (Test-Path $localHttpdConf) {
     Write-Host "httpd.conf nicht gefunden, kein Kopiervorgang notwendig." -ForegroundColor Yellow
 }
 
+$localCrontab = ".\crontab"
+$localCrontabDest = "$drive2`:\HACK\var\spool\cron\crontabs\root"
+
+if (Test-Path $localCrontab) {
+    Write-Host "Kopiere lokale ./crontab Version nach /HACK/var/spool/cron/crontabs/root auf $drive2..." -ForegroundColor Cyan
+    Copy-Item -Path $localCrontab -Destination $localCrontabDest -Force
+    Write-Host "lokale crontab Version erfolgreich kopiert!" -ForegroundColor Green
+} else {
+    Write-Host "crontab nicht gefunden, kein Kopiervorgang notwendig." -ForegroundColor Yellow
+}
+
 Write-Host "Alle Vorgaenge abgeschlossen!" -ForegroundColor Green
 Pause
