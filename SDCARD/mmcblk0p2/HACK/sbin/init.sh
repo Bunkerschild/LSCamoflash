@@ -120,7 +120,7 @@ compare() {
 
 # Create paths on sd, if not exist
 echo "Creating directory structure"
-for i in $sd_etc $sd_bin $sd_lib $sd_sbin $sd_backup $sd_www $sd_log $sd_patch $sd_overlay $sd_mnt; do
+for i in $sd_etc $sd_bin $sd_lib $sd_sbin $sd_backup $sd_www $sd_log $sd_patch $sd_overlay $sd_mnt $sd_crontabs; do
 	$mkdir -p $i >/dev/null 2>&1 && echo " - $i"
 done
 
