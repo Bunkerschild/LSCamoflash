@@ -17,7 +17,12 @@ The `SDCARD` folder in this repository contains:
 ## Automatic Installation (Recommended)
 To simplify partitioning and file copying, installation scripts are provided for Windows and Linux:
 
-- **Windows**: Run `install.bat` as Administrator.
+- **Windows**: Run `install.ps1` in powershell as Administrator.
+  ```powershell
+  Set-ExecutionPolicy Bypass -Scope Process -Force
+  .\install.ps1
+  Set-ExecutionPolicy Default -Scope Process -Force
+  ```
 - **Linux**: Run `install.sh` with root privileges:
   ```bash
   sudo ./install.sh
@@ -143,7 +148,12 @@ Im `SDCARD`-Ordner dieses Repos befinden sich:
 ## Automatische Installation (Empfohlen)
 Um die Partitionierung und das Kopieren der Dateien zu vereinfachen, gibt es für Windows und Linux jeweils ein Installationsskript:
 
-- **Windows**: Führe `install.bat` als Administrator aus.
+- **Windows**: Führe `install.ps1` in der Powershell als Administrator aus.
+  ```powershell
+  Set-ExecutionPolicy Bypass -Scope Process -Force
+  .\install.ps1
+  Set-ExecutionPolicy Default -Scope Process -Force
+  ```
 - **Linux**: Führe `install.sh` mit Root-Rechten aus:
   ```bash
   sudo ./install.sh
