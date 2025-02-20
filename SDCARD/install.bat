@@ -8,7 +8,8 @@ pause
 wmic diskdrive where "MediaType like 'Removable Media'" get Index, Model, Size
 
 :: Prüfen, ob überhaupt ein Wechselmedium gefunden wurde
-set hasSDCard=
+setlocal enabledelayedexpansion
+set hasSDCard=false
 for /f "skip=1 tokens=1" %%A in ('wmic diskdrive where "MediaType like 'Removable Media'" get Index ^| findstr /r "^[0-9]"') do (
     set hasSDCard=true
 )
