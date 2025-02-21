@@ -1,0 +1,92 @@
+#!/bin/sh
+
+# Export variables for init script
+export hack="/tmp/sd/HACK"
+export hack_conf="$hack/etc/hack.conf"
+export hack_custom_conf="$hack/etc/hack_custom.conf"
+export commands_conf="$hack/etc/commands.conf"
+
+# Custom scripts
+custom_pre_init="/tmp/sd/CUSTOM/pre_init.sh"
+custom_pre_init_async="/tmp/sd/CUSTOM/pre_init_custom.sh"
+export custom_pre_services="/tmp/sd/CUSTOM/pre_services.sh"
+export custom_pre_services_async="/tmp/sd/CUSTOM/pre_services_async.sh"
+export custom_pre_services_once="/tmp/sd/CUSTOM/pre_services_once.sh"
+export custom_pre_services_once_async="/tmp/sd/CUSTOM/pre_services_once_async.sh"
+
+# SD device and path
+sd_dev="/dev/mmcblk0p2"
+sd_path="/tmp/sd"
+
+# Logging
+hack_log="/tmp/hostapd.log"
+hack_err="/tmp/hostapd.err"
+
+# Hostapd and config 
+hostapd="/mnt/hostapd.real"
+hostapd_real="/tmp/hostapd.real"
+hostapd_conf="/mnt/_ht_ap_mode.conf"
+
+# Init script path
+init="$hack/sbin/init.sh"
+
+# Update script path
+update="$hack/sbin/update.sh"
+
+# Reboot flag
+reboot_flag="/tmp/hostapd.reboot"
+reboot_file="/tmp/sd/hostapd.reboot"
+
+# Copy shadow and passwd files and clean them in case they were edited in windows
+for i in shadow passwd; do
+	[ -f "./$i" ] && cp ./$i /etc/config/$i >/dev/null 2>&1 && dos2unix /etc/config/$i
+done
+
+# Get anyka_ipc checksum
+export anyka_md5=`md5sum /usr/bin/anyka_ipc | grep "anyka_ipc" | awk '{print \$1}'`
+
+# Get device mac
+export device_mac=`ifconfig wlan0 | grep HWaddr | awk '{print $5}'`
+
+# Set device uid
+export device_uid=`echo $device_mac | sha256sum | cut -d " " -f1`
+
+if [ -x "$hostapd" -a -f "$hostapd_conf" -a "$1" != "" -a "$2" = "-B" ]; then
+	# Start real hostapd, when config has ssid
+	hostapd_ssid=`cat $hostapd_conf | grep "^ssid"`
+	
+	if [ "$hostapd_ssid" = "" ]; then
+		cp $hostapd $hostapd_real
+		$hostapd_real "$1" "$2"
+	fi
+else
+	# Remove AP mode file and reset wifi to client mode
+	rm -f /tmp/_ht_ap_mode.conf 
+	killall udhcpd
+	ifconfig wlan0 0.0.0.0
+	
+	# Mmount SD on location that won't be umounted by device
+	echo -n "Mount SD card on seperate location $sd_path..."
+	mkdir -p $sd_path >/dev/null 2>&1
+	mount $sd_dev $sd_path && echo "done" || echo "failed"
+	
+	# Check for updates
+	[ -x $update ] && $update
+
+	# Execute pre_init_async.sh
+	[ -n "$custom_pre_init_async" -a -x "$custom_pre_init_async" ] && $custom_pre_init_async &
+	[ -n "$custom_pre_init" -a -x "$custom_pre_init" ] && $custom_pre_init
+
+	# Check for reboot file and move it to reboot flag
+	[ -f "$reboot_file" ] && mv $reboot_file $reboot_flag
+	
+	# Check for reboot flag
+	if [ -f $reboot_flag ]; then 
+		# Reboot
+		rm -f $reboot_flag
+		reboot
+	else
+		# Run init script
+		[ -x $init ] && $init >$hack_log 2>$hack_err || echo "Unable to start $init" >$hack_err
+	fi
+fi
