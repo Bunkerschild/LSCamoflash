@@ -37,6 +37,7 @@ MINIUPNPC := miniupnpc_2_3_0
 CURL := curl-8.7.1
 BUSYBOX := busybox-1.36.1
 MOSQUITTO := mosquitto-2.0.20
+CJSON := cJSON-1.7.18
 
 # Exportiere die Variablen für alle Ziele
 export TOOLCHAIN_PATH PKG_CONFIG_PATH PATH CC CXX AR RANLIB CROSS_PREFIX
@@ -56,6 +57,7 @@ URLS := \
     https://curl.se/download/$(CURL).tar.gz \
     https://curl.se/ca/cacert.pem \
     https://marlam.de/msmtp/releases/$(MSMTP).tar.xz \
+    https://github.com/DaveGamble/cJSON/archive/refs/tags/v1.7.18.tar.gz \
     https://github.com/eclipse-mosquitto/mosquitto/archive/refs/tags/v2.0.20.tar.gz \
     https://github.com/miniupnp/miniupnp/archive/refs/tags/$(MINIUPNPC).tar.gz
 
@@ -270,6 +272,46 @@ busybox: $(STAGING_DIR)/$(SDROOT)/bin/busybox
 busybox-clean:
 	@make -C $(PACKAGES_DIR)/$(BUSYBOX) clean distclean
 
+$(PACKAGES_DIR)/$(CJSON)/cjson-config:
+	@cp cjson-config $(PACKAGES_DIR)/$(CJSON)/CMakeLists.txt
+	@cp cjson-config $(PACKAGES_DIR)/$(CJSON)
+
+$(PACKAGES_DIR)/$(CJSON)/build/Makefile: $(PACKAGES_DIR)/$(CJSON)/cjson-config
+	@mkdir -p $(PACKAGES_DIR)/$(CJSON)/build
+	@cd $(PACKAGES_DIR)/$(CJSON)/build; cmake -DCMAKE_PREFIX_PATH=/ ..
+
+$(PACKAGES_DIR)/$(CJSON)/build/libcjson.a: $(PACKAGES_DIR)/$(CJSON)/build/Makefile
+	@make -C $(PACKAGES_DIR)/$(CJSON)/build -j$(nproc)
+	@touch $@
+
+$(STAGING_DIR)/$(SDROOT)/usr/local/lib/libcjson.a: $(PACKAGES_DIR)/$(CJSON)/build/libcjson.a
+	@make -C $(PACKAGES_DIR)/$(CJSON)/build install DESTDIR=$(STAGING_DIR)/$(SDROOT)
+	@touch $@
+
+cjson: $(STAGING_DIR)/$(SDROOT)/usr/local/lib/libcjson.a
+
+cjson-clean:
+	@rm -rf $(PACKAGES_DIR)/$(CJSON)/build
+
+$(PACKAGES_DIR)/$(MOSQUITTO)/mosquitto-config: $(STAGING_DIR)/$(SDROOT)/bin/openssl $(STAGING_DIR)/$(SDROOT)/lib/libz.a
+	@cp mosquitto-config $(PACKAGES_DIR)/$(MOSQUITTO)/config.mk
+	@cp mosquitto-config $(PACKAGES_DIR)/$(MOSQUITTO)/mosquitto-config
+
+$(PACKAGES_DIR)/$(MOSQUITTO)/build/Makefile: $(PACKAGES_DIR)/$(MOSQUITTO)/mosquitto-config
+	@mkdir -p $(PACKAGES_DIR)/$(MOSQUITTO)/build
+	@cd $(PACKAGES_DIR)/$(MOSQUITTO)/build; cmake .. -DCMAKE_INSTALL_PREFIX=/ -DWITH_STATIC_LIBRARIES=ON -DOPENSSL_ROOT_DIR=$(PACKAGES_DIR)/$(OPENSSL) -DBUILD_SHARED_LIBS=OFF -DWITH_DOCS=no -DWITH_DESTDIR=$(STAGING_DIR)/$(SDROOT)
+
+$(PACKAGES_DIR)/$(MOSQUITTO)/build/mosquitto: $(PACKAGES_DIR)/$(MOSQUITTO)/build/Makefile
+	@make -C $(PACKAGES_DIR)/$(MOSQUITTO)/build -j$(nproc)
+	
+$(STAGING_DIR)/$(SDROOT)/bin/mosquitto: $(PACKAGES_DIR)/$(MOSQUITTO)/build/mosquitto
+	@make -C $(PACKAGES_DIR)/$(MOSQUITTO)/build DESTDIR=$(STAGING_DIR)/$(SDROOT) WITH_DOCS=no install
+	
+mosquitto: $(STAGING_DIR)/$(SDROOT)/bin/mosquitto
+
+mosquitto-clean:
+	@rm -rf $(PACKAGES_DIR)/$(MOSQUITTO)/build
+
 staging-clean:
 	@rm -rf $(STAGING_DIR)
 	
@@ -284,8 +326,8 @@ toolchain-clean:
 	
 mr-proper: staging-clean packages-clean download-clean toolchain-clean
 	
-clean: busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
+clean: mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
 
-compile: libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox
+compile: libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto
 
 .PHONY: all fetch unpack clean
