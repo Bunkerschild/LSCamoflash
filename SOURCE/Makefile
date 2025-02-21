@@ -65,7 +65,7 @@ fetch: $(DOWNLOAD_DIR) $(patsubst %,$(DOWNLOAD_DIR)/%,$(notdir $(URLS)))
 unpack: $(TOOLCHAIN_DIR) $(PACKAGES_DIR) $(STAGING_DIR)
 	@tar -xf $(DOWNLOAD_DIR)/armv5-eabi--uclibc--stable-2020.08-1.tar.bz2 -C $(TOOLCHAIN_DIR) --strip-components=1
 	@for file in $(DOWNLOAD_DIR)/*; do \
-	  if [ "$$file" != "$(DOWNLOAD_DIR)/armv5-eabi--uclibc--stable-2020.08-1.tar.bz2" ]; then \
+	  if [ "$$file" != "$(DOWNLOAD_DIR)/armv5-eabi--uclibc--stable-2020.08-1.tar.bz2" -a "$$file" != "$(DOWNLOAD_DIR)/cacert.pem" ]; then \
 	    tar -xf $$file -C $(PACKAGES_DIR) || echo "Skipping $$file"; \
 	  fi; \
 	done
@@ -124,7 +124,6 @@ $(PACKAGES_DIR)/$(OPENSSL)/apps/openssl: $(PACKAGES_DIR)/$(OPENSSL)/configdata.p
 $(STAGING_DIR)/$(SDROOT)/bin/openssl: $(PACKAGES_DIR)/$(OPENSSL)/apps/openssl
 	@make -C $(PACKAGES_DIR)/$(OPENSSL) install DESTDIR=$(STAGING_DIR)
 	@$(STRIP) $(STAGING_DIR)/$(SDROOT)/bin/openssl
-	@$(STRIP) $(STAGING_DIR)/$(SDROOT)/bin/c_rehash
 	
 openssl: $(STAGING_DIR)/$(SDROOT)/bin/openssl
 
