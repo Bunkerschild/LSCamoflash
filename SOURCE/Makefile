@@ -324,7 +324,8 @@ download-clean:
 toolchain-clean:
 	@rm -rf $(TOOLCHAIN_DIR)
 	
-mr-proper: staging-clean packages-clean download-clean toolchain-clean
+mrproper: staging-clean packages-clean download-clean toolchain-clean
+	@rm .unpack || true
 	
 clean: mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
 
