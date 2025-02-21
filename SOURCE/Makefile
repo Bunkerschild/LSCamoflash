@@ -443,4 +443,7 @@ mrproper: staging-clean packages-clean download-clean toolchain-clean build-clea
 	
 clean: mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
 
-.PHONY: all fetch unpack clean
+install: all
+	@cd $(BUILD_DIR); sh install.sh
+
+.PHONY: all clean
