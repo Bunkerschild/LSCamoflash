@@ -58,17 +58,18 @@ URLS := \
     https://github.com/miniupnp/miniupnp/archive/refs/tags/$(MINIUPNPC).tar.gz
 
 # Ziele definieren
-all: fetch unpack compile
+all: fetch .unpack compile
 
 fetch: $(DOWNLOAD_DIR) $(patsubst %,$(DOWNLOAD_DIR)/%,$(notdir $(URLS)))
 
-unpack: $(TOOLCHAIN_DIR) $(PACKAGES_DIR) $(STAGING_DIR)
+.unpack: $(TOOLCHAIN_DIR) $(PACKAGES_DIR) $(STAGING_DIR)
 	@tar -xf $(DOWNLOAD_DIR)/armv5-eabi--uclibc--stable-2020.08-1.tar.bz2 -C $(TOOLCHAIN_DIR) --strip-components=1
 	@for file in $(DOWNLOAD_DIR)/*; do \
 	  if [ "$$file" != "$(DOWNLOAD_DIR)/armv5-eabi--uclibc--stable-2020.08-1.tar.bz2" -a "$$file" != "$(DOWNLOAD_DIR)/cacert.pem" ]; then \
 	    tar -xf $$file -C $(PACKAGES_DIR) || echo "Skipping $$file"; \
 	  fi; \
 	done
+	@touch .unpack
 
 $(DOWNLOAD_DIR):
 	@mkdir -p $@
