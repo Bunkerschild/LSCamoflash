@@ -42,6 +42,11 @@ SDCARD/passwd
 SDCARD/httpd.conf
 SDCARD/crontab
 
+# Joe's backup files
+*~
 
-
-
+# Generated folders
+SOURCE/download
+SOURCE/packages
+SOURCE/staging
+SOURCE/toolchain

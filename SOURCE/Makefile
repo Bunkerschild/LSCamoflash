@@ -36,6 +36,7 @@ MSMTP := msmtp-1.8.24
 MINIUPNPC := miniupnpc_2_3_0
 CURL := curl-8.7.1
 BUSYBOX := busybox-1.36.1
+MOSQUITTO := mosquitto-2.0.20
 
 # Exportiere die Variablen für alle Ziele
 export TOOLCHAIN_PATH PKG_CONFIG_PATH PATH CC CXX AR RANLIB CROSS_PREFIX
@@ -55,6 +56,7 @@ URLS := \
     https://curl.se/download/$(CURL).tar.gz \
     https://curl.se/ca/cacert.pem \
     https://marlam.de/msmtp/releases/$(MSMTP).tar.xz \
+    https://github.com/eclipse-mosquitto/mosquitto/archive/refs/tags/v2.0.20.tar.gz \
     https://github.com/miniupnp/miniupnp/archive/refs/tags/$(MINIUPNPC).tar.gz
 
 # Ziele definieren
