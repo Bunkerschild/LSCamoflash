@@ -97,10 +97,10 @@ $(PACKAGES_DIR)/$(LIBPCAP)/config.status:
 $(PACKAGES_DIR)/$(LIBPCAP)/libpcap.a: $(PACKAGES_DIR)/$(LIBPCAP)/config.status
 	@make -C $(PACKAGES_DIR)/$(LIBPCAP) -j$(nproc)
 
-$(STAGING_DIR)/$(SDROOT)/lib/libpcap.a: $(PACKAGES_DIR)/$(LIBPCAP)/libpcap.a
+$(STAGING_DIR)/lib/libpcap.a: $(PACKAGES_DIR)/$(LIBPCAP)/libpcap.a
 	@make -C $(PACKAGES_DIR)/$(LIBPCAP) install DESTDIR=$(STAGING_DIR)
 
-libpcap: $(STAGING_DIR)/$(SDROOT)/lib/libpcap.a
+libpcap: $(STAGING_DIR)/lib/libpcap.a
 
 libpcap-clean:
 	@make -C $(PACKAGES_DIR)/$(LIBPCAP) clean distclean
@@ -111,11 +111,11 @@ $(PACKAGES_DIR)/$(TCPDUMP)/config.status: $(PACKAGES_DIR)/$(LIBPCAP)/libpcap.a
 $(PACKAGES_DIR)/$(TCPDUMP)/tcpdump: $(PACKAGES_DIR)/$(TCPDUMP)/config.status
 	@make -C $(PACKAGES_DIR)/$(TCPDUMP) -j$(nproc) LDFLAGS="--static"
 	
-$(STAGING_DIR)/$(SDROOT)/bin/tcpdump: $(PACKAGES_DIR)/$(TCPDUMP)/tcpdump
+$(STAGING_DIR)/bin/tcpdump: $(PACKAGES_DIR)/$(TCPDUMP)/tcpdump
 	@make -C $(PACKAGES_DIR)/$(TCPDUMP) install DESTDIR=$(STAGING_DIR)
-	@$(STRIP) $(STAGING_DIR)/$(SDROOT)/bin/tcpdump
+	@$(STRIP) $(STAGING_DIR)/bin/tcpdump
 
-tcpdump: $(STAGING_DIR)/$(SDROOT)/bin/tcpdump
+tcpdump: $(STAGING_DIR)/bin/tcpdump
 
 tcpdump-clean:
 	@make -C $(PACKAGES_DIR)/$(TCPDUMP) clean distclean
@@ -126,11 +126,11 @@ $(PACKAGES_DIR)/$(OPENSSL)/configdata.pm:
 $(PACKAGES_DIR)/$(OPENSSL)/apps/openssl: $(PACKAGES_DIR)/$(OPENSSL)/configdata.pm
 	@make -C $(PACKAGES_DIR)/$(OPENSSL) -j$(nproc)
 	
-$(STAGING_DIR)/$(SDROOT)/bin/openssl: $(PACKAGES_DIR)/$(OPENSSL)/apps/openssl
+$(STAGING_DIR)/bin/openssl: $(PACKAGES_DIR)/$(OPENSSL)/apps/openssl
 	@make -C $(PACKAGES_DIR)/$(OPENSSL) install DESTDIR=$(STAGING_DIR)
-	@$(STRIP) $(STAGING_DIR)/$(SDROOT)/bin/openssl
+	@$(STRIP) $(STAGING_DIR)/bin/openssl
 	
-openssl: $(STAGING_DIR)/$(SDROOT)/bin/openssl
+openssl: $(STAGING_DIR)/bin/openssl
 
 openssl-clean:
 	@make -C $(PACKAGES_DIR)/$(OPENSSL) clean distclean
@@ -141,10 +141,10 @@ $(PACKAGES_DIR)/$(ZLIB)/configure.log:
 $(PACKAGES_DIR)/$(ZLIB)/libz.a: $(PACKAGES_DIR)/$(ZLIB)/configure.log
 	@make -C $(PACKAGES_DIR)/$(ZLIB) -j$(nproc)
 	
-$(STAGING_DIR)/$(SDROOT)/lib/libz.a: $(PACKAGES_DIR)/$(ZLIB)/libz.a
+$(STAGING_DIR)/lib/libz.a: $(PACKAGES_DIR)/$(ZLIB)/libz.a
 	@make -C $(PACKAGES_DIR)/$(ZLIB) install DESTDIR=$(STAGING_DIR)
 	
-zlib: $(STAGING_DIR)/$(SDROOT)/lib/libz.a
+zlib: $(STAGING_DIR)/lib/libz.a
 
 zlib-clean:
 	@make -C $(PACKAGES_DIR)/$(ZLIB) clean distclean
@@ -155,11 +155,11 @@ $(PACKAGES_DIR)/$(JOE)/config.status:
 $(PACKAGES_DIR)/$(JOE)/joe/joe: $(PACKAGES_DIR)/$(JOE)/config.status
 	@make -C $(PACKAGES_DIR)/$(JOE) -j$(nproc)
 	
-$(STAGING_DIR)/$(SDROOT)/bin/joe: $(PACKAGES_DIR)/$(JOE)/joe/joe
+$(STAGING_DIR)/bin/joe: $(PACKAGES_DIR)/$(JOE)/joe/joe
 	@make -C $(PACKAGES_DIR)/$(JOE) install DESTDIR=$(STAGING_DIR)
-	@$(STRIP) $(STAGING_DIR)/$(SDROOT)/bin/joe
+	@$(STRIP) $(STAGING_DIR)/bin/joe
 	
-joe: $(STAGING_DIR)/$(SDROOT)/bin/joe
+joe: $(STAGING_DIR)/bin/joe
 
 joe-clean:
 	@make -C $(PACKAGES_DIR)/$(JOE) clean distclean
@@ -170,11 +170,11 @@ $(PACKAGES_DIR)/$(STRACE)/config.status:
 $(PACKAGES_DIR)/$(STRACE)/src/strace: $(PACKAGES_DIR)/$(STRACE)/config.status
 	@make -C $(PACKAGES_DIR)/$(STRACE) -j$(nproc)
 	
-$(STAGING_DIR)/$(SDROOT)/bin/strace: $(PACKAGES_DIR)/$(STRACE)/src/strace
+$(STAGING_DIR)/bin/strace: $(PACKAGES_DIR)/$(STRACE)/src/strace
 	@make -C $(PACKAGES_DIR)/$(STRACE) install DESTDIR=$(STAGING_DIR)
-	@$(STRIP) $(STAGING_DIR)/$(SDROOT)/bin/strace
+	@$(STRIP) $(STAGING_DIR)/bin/strace
 	
-strace: $(STAGING_DIR)/$(SDROOT)/bin/strace
+strace: $(STAGING_DIR)/bin/strace
 
 strace-clean:
 	@make -C $(PACKAGES_DIR)/$(STRACE) clean distclean
@@ -185,26 +185,26 @@ $(PACKAGES_DIR)/$(SQLITE3)/config.status:
 $(PACKAGES_DIR)/$(SQLITE3)/sqlite3: $(PACKAGES_DIR)/$(SQLITE3)/config.status
 	@make -C $(PACKAGES_DIR)/$(SQLITE3) -j$(nproc)
 	
-$(STAGING_DIR)/$(SDROOT)/bin/sqlite3: $(PACKAGES_DIR)/$(SQLITE3)/sqlite3
+$(STAGING_DIR)/bin/sqlite3: $(PACKAGES_DIR)/$(SQLITE3)/sqlite3
 	@make -C $(PACKAGES_DIR)/$(SQLITE3) install DESTDIR=$(STAGING_DIR)
-	@$(STRIP) $(STAGING_DIR)/$(SDROOT)/bin/sqlite3
+	@$(STRIP) $(STAGING_DIR)/bin/sqlite3
 	
-sqlite3: $(STAGING_DIR)/$(SDROOT)/bin/sqlite3
+sqlite3: $(STAGING_DIR)/bin/sqlite3
 
 sqlite3-clean:
 	@make -C $(PACKAGES_DIR)/$(SQLITE3) clean distclean
 
 $(PACKAGES_DIR)/$(SQLCIPHER)/config.status:
-	@cd $(PACKAGES_DIR)/$(SQLCIPHER); ./configure --host=$(HOST) --prefix=$(SDROOT) --sysconfdir=$(SDROOT)/etc/config --datarootdir=$(SDROOT)/usr/share --with-sysroot=$(STAGING_DIR)/$(SDROOT) CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL" LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib --static -lssl -lcrypto"
+	@cd $(PACKAGES_DIR)/$(SQLCIPHER); ./configure --host=$(HOST) --prefix=$(SDROOT) --sysconfdir=$(SDROOT)/etc/config --datarootdir=$(SDROOT)/usr/share --with-sysroot=$(STAGING_DIR) CFLAGS="-I$(STAGING_DIR)/include -DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL" LDFLAGS="-L$(STAGING_DIR)/lib --static -lssl -lcrypto"
 
 $(PACKAGES_DIR)/$(SQLCIPHER)/sqlcipher: $(PACKAGES_DIR)/$(SQLCIPHER)/config.status
 	@make -C $(PACKAGES_DIR)/$(SQLCIPHER) -j$(nproc)
 	
-$(STAGING_DIR)/$(SDROOT)/bin/sqlcipher: $(PACKAGES_DIR)/$(SQLCIPHER)/sqlcipher
+$(STAGING_DIR)/bin/sqlcipher: $(PACKAGES_DIR)/$(SQLCIPHER)/sqlcipher
 	@make -C $(PACKAGES_DIR)/$(SQLCIPHER) install DESTDIR=$(STAGING_DIR)
-	@$(STRIP) $(STAGING_DIR)/$(SDROOT)/bin/sqlcipher
+	@$(STRIP) $(STAGING_DIR)/bin/sqlcipher
 	
-sqlcipher: $(STAGING_DIR)/$(SDROOT)/bin/sqlcipher
+sqlcipher: $(STAGING_DIR)/bin/sqlcipher
 
 sqlcipher-clean:
 	@make -C $(PACKAGES_DIR)/$(SQLCIPHER) clean distclean
@@ -215,11 +215,11 @@ $(PACKAGES_DIR)/$(MSMTP)/config.status:
 $(PACKAGES_DIR)/$(MSMTP)/src/msmtp: $(PACKAGES_DIR)/$(MSMTP)/config.status
 	@make -C $(PACKAGES_DIR)/$(MSMTP) -j$(nproc)
 	
-$(STAGING_DIR)/$(SDROOT)/bin/msmtp: $(PACKAGES_DIR)/$(MSMTP)/src/msmtp
+$(STAGING_DIR)/bin/msmtp: $(PACKAGES_DIR)/$(MSMTP)/src/msmtp
 	@make -C $(PACKAGES_DIR)/$(MSMTP) install DESTDIR=$(STAGING_DIR)
-	@$(STRIP) $(STAGING_DIR)/$(SDROOT)/bin/msmtp
+	@$(STRIP) $(STAGING_DIR)/bin/msmtp
 	
-msmtp: $(STAGING_DIR)/$(SDROOT)/bin/msmtp
+msmtp: $(STAGING_DIR)/bin/msmtp
 
 msmtp-clean:
 	@make -C $(PACKAGES_DIR)/$(MSMTP) clean distclean
@@ -227,30 +227,30 @@ msmtp-clean:
 $(PACKAGES_DIR)/miniupnp-$(MINIUPNPC)/miniupnpc/build/upnpc-static:
 	@INSTALLPREFIX=$(SDROOT) make -C $(PACKAGES_DIR)/miniupnp-$(MINIUPNPC)/miniupnpc -j$(nproc) 
 	
-$(STAGING_DIR)/$(SDROOT)/bin/upnpc-static: $(PACKAGES_DIR)/miniupnp-$(MINIUPNPC)/miniupnpc/build/upnpc-static
-	@make -C $(PACKAGES_DIR)/miniupnp-$(MINIUPNPC)/miniupnpc install-static DESTDIR=$(STAGING_DIR)/$(SDROOT) INSTALLDIRINC=$(STAGING_DIR)/$(SDROOT)/include INSTALLDIRLIB=$(STAGING_DIR)/$(SDROOT)/lib INSTALLDIRBIN=$(STAGING_DIR)/$(SDROOT)/bin
-	@cp $(PACKAGES_DIR)/miniupnp-$(MINIUPNPC)/miniupnpc/build/upnpc-static $(STAGING_DIR)/$(SDROOT)/bin
-	@$(STRIP) $(STAGING_DIR)/$(SDROOT)/bin/upnpc-static
+$(STAGING_DIR)/bin/upnpc-static: $(PACKAGES_DIR)/miniupnp-$(MINIUPNPC)/miniupnpc/build/upnpc-static
+	@make -C $(PACKAGES_DIR)/miniupnp-$(MINIUPNPC)/miniupnpc install-static DESTDIR=$(STAGING_DIR) INSTALLDIRINC=$(STAGING_DIR)/include INSTALLDIRLIB=$(STAGING_DIR)/lib INSTALLDIRBIN=$(STAGING_DIR)/bin
+	@cp $(PACKAGES_DIR)/miniupnp-$(MINIUPNPC)/miniupnpc/build/upnpc-static $(STAGING_DIR)/bin
+	@$(STRIP) $(STAGING_DIR)/bin/upnpc-static
 	
-miniupnpc: $(STAGING_DIR)/$(SDROOT)/bin/upnpc-static
+miniupnpc: $(STAGING_DIR)/bin/upnpc-static
 
 miniupnpc-clean:
 	@make -C $(PACKAGES_DIR)/$(MINIUPNPC) clean
 
 $(PACKAGES_DIR)/$(CURL)/config.status:
-	@cd $(PACKAGES_DIR)/$(CURL); ./configure --host=$(HOST) --prefix=$(SDROOT) --sysconfdir=$(SDROOT)/etc/config --datarootdir=$(SDROOT)/usr/share --disable-shared --enable-static --with-ssl=$(STAGING_DIR)/$(SDROOT) --with-zlib --disable-ldap --enable-rtsp --disable-dict --enable-file --enable-telnet --enable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-gopher --enable-ftp --enable-hsts --enable-headers-api --enable-websockets --with-ca-path=$(SDROOT)/etc/config/ssl --with-ca-bundle=$(SDROOT)/etc/config/ssl/ca-bundle --with-nghttp2 --enable-mqtt --enable-unix-sockets --enable-cookies --enable-socketpair --enable-http-auth --enable-bearer-auth --enable-digest-auth --enable-negotiate-auth --enable-verbose --disable-docs --enable-dnsshuffle --enable-doh --enable-mime --enable-bindlocal --enable-form-api --enable-dateparse --enable-netrc --enable-progress-meter --enable-get-easy-options --disable-manual LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib --static -lssl -lcrypto" CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include"
+	@cd $(PACKAGES_DIR)/$(CURL); ./configure --host=$(HOST) --prefix=$(SDROOT) --sysconfdir=$(SDROOT)/etc/config --datarootdir=$(SDROOT)/usr/share --disable-shared --enable-static --with-ssl=$(STAGING_DIR) --with-zlib --disable-ldap --enable-rtsp --disable-dict --enable-file --enable-telnet --enable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-gopher --enable-ftp --enable-hsts --enable-headers-api --enable-websockets --with-ca-path=$(SDROOT)/etc/config/ssl --with-ca-bundle=$(SDROOT)/etc/config/ssl/ca-bundle --with-nghttp2 --enable-mqtt --enable-unix-sockets --enable-cookies --enable-socketpair --enable-http-auth --enable-bearer-auth --enable-digest-auth --enable-negotiate-auth --enable-verbose --disable-docs --enable-dnsshuffle --enable-doh --enable-mime --enable-bindlocal --enable-form-api --enable-dateparse --enable-netrc --enable-progress-meter --enable-get-easy-options --disable-manual LDFLAGS="-L$(STAGING_DIR)/lib --static -lssl -lcrypto" CFLAGS="-I$(STAGING_DIR)/include"
 
 $(PACKAGES_DIR)/$(CURL)/src/curl: $(PACKAGES_DIR)/$(CURL)/config.status
 	@make -C $(PACKAGES_DIR)/$(CURL) -j$(nproc)
 	
-$(STAGING_DIR)/$(SDROOT)/bin/curl: $(PACKAGES_DIR)/$(CURL)/src/curl
+$(STAGING_DIR)/bin/curl: $(PACKAGES_DIR)/$(CURL)/src/curl
 	@make -C $(PACKAGES_DIR)/$(CURL) install DESTDIR=$(STAGING_DIR)
-	@$(STRIP) $(STAGING_DIR)/$(SDROOT)/bin/curl
+	@$(STRIP) $(STAGING_DIR)/bin/curl
 	
-$(STAGING_DIR)/$(SDROOT)/etc/config/ssl/ca-bundle:
-	@cp $(DOWNLOAD_DIR)/cacert.pem $(STAGING_DIR)/$(SDROOT)/etc/config/ssl/ca-bundle
+$(STAGING_DIR)/etc/config/ssl/ca-bundle:
+	@cp $(DOWNLOAD_DIR)/cacert.pem $(STAGING_DIR)/etc/config/ssl/ca-bundle
 	
-curl: $(STAGING_DIR)/$(SDROOT)/bin/curl $(STAGING_DIR)/$(SDROOT)/etc/config/ssl/ca-bundle
+curl: $(STAGING_DIR)/bin/curl $(STAGING_DIR)/etc/config/ssl/ca-bundle
 
 curl-clean:
 	@make -C $(PACKAGES_DIR)/$(CURL) clean distclean
@@ -262,12 +262,12 @@ $(PACKAGES_DIR)/$(BUSYBOX)/.config:
 $(PACKAGES_DIR)/$(BUSYBOX)/busybox: $(PACKAGES_DIR)/$(BUSYBOX)/.config
 	@make -C $(PACKAGES_DIR)/$(BUSYBOX) -j$(nproc)
 	
-$(STAGING_DIR)/$(SDROOT)/bin/busybox: $(PACKAGES_DIR)/$(BUSYBOX)/busybox
+$(STAGING_DIR)/bin/busybox: $(PACKAGES_DIR)/$(BUSYBOX)/busybox
 	@make -C $(PACKAGES_DIR)/$(BUSYBOX) install
-	@cp $(PACKAGES_DIR)/$(BUSYBOX)/_install/bin/busybox $(STAGING_DIR)/$(SDROOT)/bin
-	@$(STRIP) $(STAGING_DIR)/$(SDROOT)/bin/busybox
+	@cp $(PACKAGES_DIR)/$(BUSYBOX)/_install/bin/busybox $(STAGING_DIR)/bin
+	@$(STRIP) $(STAGING_DIR)/bin/busybox
 	
-busybox: $(STAGING_DIR)/$(SDROOT)/bin/busybox
+busybox: $(STAGING_DIR)/bin/busybox
 
 busybox-clean:
 	@make -C $(PACKAGES_DIR)/$(BUSYBOX) clean distclean
@@ -284,17 +284,17 @@ $(PACKAGES_DIR)/$(CJSON)/build/libcjson.a: $(PACKAGES_DIR)/$(CJSON)/build/Makefi
 	@make -C $(PACKAGES_DIR)/$(CJSON)/build -j$(nproc)
 	@touch $@
 
-$(STAGING_DIR)/$(SDROOT)/usr/local/lib/libcjson.a: $(PACKAGES_DIR)/$(CJSON)/build/libcjson.a
-	@make -C $(PACKAGES_DIR)/$(CJSON)/build install DESTDIR=$(STAGING_DIR)/$(SDROOT)
+$(STAGING_DIR)/usr/local/lib/libcjson.a: $(PACKAGES_DIR)/$(CJSON)/build/libcjson.a
+	@make -C $(PACKAGES_DIR)/$(CJSON)/build install DESTDIR=$(STAGING_DIR)
 	@touch $@
 
-cjson: $(STAGING_DIR)/$(SDROOT)/usr/local/lib/libcjson.a
+cjson: $(STAGING_DIR)/usr/local/lib/libcjson.a
 
 cjson-clean:
 	@rm -rf $(PACKAGES_DIR)/$(CJSON)/build
 	@rm $(PACKAGES_DIR)/$(CJSON)/cjson-config
 
-$(PACKAGES_DIR)/$(MOSQUITTO)/mosquitto-config: $(STAGING_DIR)/$(SDROOT)/bin/openssl $(STAGING_DIR)/$(SDROOT)/lib/libz.a
+$(PACKAGES_DIR)/$(MOSQUITTO)/mosquitto-config: $(STAGING_DIR)/bin/openssl $(STAGING_DIR)/lib/libz.a
 	@cp mosquitto-config $(PACKAGES_DIR)/$(MOSQUITTO)/config.mk
 	@cp mosquitto-config $(PACKAGES_DIR)/$(MOSQUITTO)/mosquitto-config
 
@@ -303,17 +303,17 @@ $(PACKAGES_DIR)/$(MOSQUITTO)/build/Makefile: $(PACKAGES_DIR)/$(MOSQUITTO)/mosqui
 	@mv $(PACKAGES_DIR)/$(MOSQUITTO)/man $(PACKAGES_DIR)/$(MOSQUITTO)/man.orig
 	@mkdir $(PACKAGES_DIR)/$(MOSQUITTO)/man
 	@touch $(PACKAGES_DIR)/$(MOSQUITTO)/man/CMakeLists.txt
-	@cd $(PACKAGES_DIR)/$(MOSQUITTO)/build; cmake .. -DCMAKE_INSTALL_PREFIX=/ -DWITH_STATIC_LIBRARIES=ON -DOPENSSL_ROOT_DIR=$(PACKAGES_DIR)/$(OPENSSL) -DBUILD_SHARED_LIBS=OFF -DWITH_DOCS=no -DWITH_DESTDIR=$(STAGING_DIR)/$(SDROOT)
+	@cd $(PACKAGES_DIR)/$(MOSQUITTO)/build; cmake .. -DCMAKE_INSTALL_PREFIX=/ -DWITH_STATIC_LIBRARIES=ON -DOPENSSL_ROOT_DIR=$(PACKAGES_DIR)/$(OPENSSL) -DBUILD_SHARED_LIBS=OFF -DWITH_DOCS=no -DWITH_DESTDIR=$(STAGING_DIR)
 
 $(PACKAGES_DIR)/$(MOSQUITTO)/build/src/mosquitto: $(PACKAGES_DIR)/$(MOSQUITTO)/build/Makefile
 	@make -C $(PACKAGES_DIR)/$(MOSQUITTO)/build -j$(nproc)
 	@touch $@
 	
-$(STAGING_DIR)/$(SDROOT)/usr/sbin/mosquitto: $(PACKAGES_DIR)/$(MOSQUITTO)/build/src/mosquitto
-	@make -C $(PACKAGES_DIR)/$(MOSQUITTO)/build DESTDIR=$(STAGING_DIR)/$(SDROOT) WITH_DOCS=no install
+$(STAGING_DIR)/usr/sbin/mosquitto: $(PACKAGES_DIR)/$(MOSQUITTO)/build/src/mosquitto
+	@make -C $(PACKAGES_DIR)/$(MOSQUITTO)/build DESTDIR=$(STAGING_DIR) WITH_DOCS=no install
 	@touch $@
 	
-mosquitto: $(STAGING_DIR)/$(SDROOT)/usr/sbin/mosquitto
+mosquitto: $(STAGING_DIR)/usr/sbin/mosquitto
 
 mosquitto-clean:
 	@rm -rf $(PACKAGES_DIR)/$(MOSQUITTO)/build
