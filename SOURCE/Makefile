@@ -292,6 +292,7 @@ cjson: $(STAGING_DIR)/$(SDROOT)/usr/local/lib/libcjson.a
 
 cjson-clean:
 	@rm -rf $(PACKAGES_DIR)/$(CJSON)/build
+	@rm $(PACKAGES_DIR)/$(CJSON)/cjson-config
 
 $(PACKAGES_DIR)/$(MOSQUITTO)/mosquitto-config: $(STAGING_DIR)/$(SDROOT)/bin/openssl $(STAGING_DIR)/$(SDROOT)/lib/libz.a
 	@cp mosquitto-config $(PACKAGES_DIR)/$(MOSQUITTO)/config.mk
@@ -299,18 +300,24 @@ $(PACKAGES_DIR)/$(MOSQUITTO)/mosquitto-config: $(STAGING_DIR)/$(SDROOT)/bin/open
 
 $(PACKAGES_DIR)/$(MOSQUITTO)/build/Makefile: $(PACKAGES_DIR)/$(MOSQUITTO)/mosquitto-config
 	@mkdir -p $(PACKAGES_DIR)/$(MOSQUITTO)/build
+	@mv $(PACKAGES_DIR)/$(MOSQUITTO)/man $(PACKAGES_DIR)/$(MOSQUITTO)/man.orig
+	@mkdir $(PACKAGES_DIR)/$(MOSQUITTO)/man
+	@touch $(PACKAGES_DIR)/$(MOSQUITTO)/man/CMakeLists.txt
 	@cd $(PACKAGES_DIR)/$(MOSQUITTO)/build; cmake .. -DCMAKE_INSTALL_PREFIX=/ -DWITH_STATIC_LIBRARIES=ON -DOPENSSL_ROOT_DIR=$(PACKAGES_DIR)/$(OPENSSL) -DBUILD_SHARED_LIBS=OFF -DWITH_DOCS=no -DWITH_DESTDIR=$(STAGING_DIR)/$(SDROOT)
 
-$(PACKAGES_DIR)/$(MOSQUITTO)/build/mosquitto: $(PACKAGES_DIR)/$(MOSQUITTO)/build/Makefile
+$(PACKAGES_DIR)/$(MOSQUITTO)/build/src/mosquitto: $(PACKAGES_DIR)/$(MOSQUITTO)/build/Makefile
 	@make -C $(PACKAGES_DIR)/$(MOSQUITTO)/build -j$(nproc)
+	@touch $@
 	
-$(STAGING_DIR)/$(SDROOT)/bin/mosquitto: $(PACKAGES_DIR)/$(MOSQUITTO)/build/mosquitto
+$(STAGING_DIR)/$(SDROOT)/usr/sbin/mosquitto: $(PACKAGES_DIR)/$(MOSQUITTO)/build/src/mosquitto
 	@make -C $(PACKAGES_DIR)/$(MOSQUITTO)/build DESTDIR=$(STAGING_DIR)/$(SDROOT) WITH_DOCS=no install
+	@touch $@
 	
-mosquitto: $(STAGING_DIR)/$(SDROOT)/bin/mosquitto
+mosquitto: $(STAGING_DIR)/$(SDROOT)/usr/sbin/mosquitto
 
 mosquitto-clean:
 	@rm -rf $(PACKAGES_DIR)/$(MOSQUITTO)/build
+	@rm $(PACKAGES_DIR)/$(MOSQUITTO)/mosquitto-config
 
 staging-clean:
 	@rm -rf $(STAGING_DIR)
