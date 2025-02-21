@@ -7,7 +7,7 @@ SRCS = motor.c
 OBJS = $(SRCS:.c=.o)
 
 # Installationspfad (kann mit "make DESTDIR=/custom/path install" überschrieben werden)
-PREFIX ?= /usr/local
+PREFIX ?= /
 BINDIR ?= $(PREFIX)/bin
 
 # Standardziel

@@ -50,4 +50,9 @@ SOURCE/download
 SOURCE/packages
 SOURCE/staging
 SOURCE/toolchain
+SOURCE/build
 SOURCE/.unpack
+
+# Generated files
+SOURCE/src/contrib/motor/motor
+SOURCE/src/contrib/motor/motor.o

@@ -4,6 +4,12 @@ DOWNLOAD_DIR := $(ROOT_DIR)/download
 TOOLCHAIN_DIR := $(ROOT_DIR)/toolchain
 PACKAGES_DIR := $(ROOT_DIR)/packages
 STAGING_DIR := $(ROOT_DIR)/staging
+BUILD_DIR := $(ROOT_DIR)/build
+SRC_DIR := $(ROOT_DIR)/src
+
+# Hack paths
+BUILD_HACK := $(BUILD_DIR)/mmcblk0p2/HACK
+STAGE_HACK := $(STAGING_DIR)/tmp/sd/HACK
 
 # SD card
 SDCARD := /tmp/sd
@@ -62,18 +68,25 @@ URLS := \
     https://github.com/miniupnp/miniupnp/archive/refs/tags/$(MINIUPNPC).tar.gz
 
 # Ziele definieren
-all: fetch .unpack compile
+all: download toolchain packages staging build
 
-fetch: $(DOWNLOAD_DIR) $(patsubst %,$(DOWNLOAD_DIR)/%,$(notdir $(URLS)))
+download: $(DOWNLOAD_DIR) $(patsubst %,$(DOWNLOAD_DIR)/%,$(notdir $(URLS)))
 
-.unpack: $(TOOLCHAIN_DIR) $(PACKAGES_DIR) $(STAGING_DIR)
+$(TOOLCHAIN_DIR)/buildroot.config: $(TOOLCHAIN_DIR)
 	@tar -xf $(DOWNLOAD_DIR)/armv5-eabi--uclibc--stable-2020.08-1.tar.bz2 -C $(TOOLCHAIN_DIR) --strip-components=1
+	@touch $@
+	
+toolchain: $(TOOLCHAIN_DIR)/buildroot.config
+
+$(PACKAGES_DIR)/cacert.pem: $(PACKAGES_DIR)
 	@for file in $(DOWNLOAD_DIR)/*; do \
 	  if [ "$$file" != "$(DOWNLOAD_DIR)/armv5-eabi--uclibc--stable-2020.08-1.tar.bz2" -a "$$file" != "$(DOWNLOAD_DIR)/cacert.pem" ]; then \
 	    tar -xf $$file -C $(PACKAGES_DIR) || echo "Skipping $$file"; \
 	  fi; \
 	done
-	@touch .unpack
+	@touch $@
+	
+packages: $(PACKAGES_DIR)/cacert.pem
 
 $(DOWNLOAD_DIR):
 	@mkdir -p $@
@@ -85,6 +98,9 @@ $(PACKAGES_DIR):
 	@mkdir -p $@
 
 $(STAGING_DIR):
+	@mkdir -p $@
+
+$(BUILD_DIR):
 	@mkdir -p $@
 
 $(DOWNLOAD_DIR)/%:
@@ -319,6 +335,97 @@ mosquitto-clean:
 	@rm -rf $(PACKAGES_DIR)/$(MOSQUITTO)/build
 	@rm $(PACKAGES_DIR)/$(MOSQUITTO)/mosquitto-config
 
+staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto
+
+$(BUILD_DIR)/install.ps1: $(BUILD_DIR)
+	@cp -a $(SRC_DIR)/sdcard/* $(BUILD_DIR)
+	@make -C $(SRC_DIR)/contrib/motor DESTDIR=$(BUILD_DIR)/mmcblk0p2/HACK install
+	@cp -a $(STAGE_HACK)/lib/* $(BUILD_HACK)/lib
+	@cp -a $(STAGE_HACK)/usr/lib/* $(BUILD_HACK)/lib
+	@cp -a $(STAGE_HACK)/usr/local/lib/* $(BUILD_HACK)/lib
+	@touch $@
+	
+$(BUILD_HACK)/sbin/mosquitto:
+	@cp -a $(STAGE_HACK)/etc/mosquitto $(BUILD_HACK)/etc/config
+	@cp $(STAGE_HACK)/usr/sbin/mosquitto $@
+
+$(BUILD_HACK)/bin/mosquitto_passwd:
+	@cp $(STAGE_HACK)/usr/bin/mosquitto_passwd $@
+
+$(BUILD_HACK)/bin/mosquitto_sub:
+	@cp $(STAGE_HACK)/usr/bin/mosquitto_sub $@
+
+$(BUILD_HACK)/bin/mosquitto_pub:
+	@cp $(STAGE_HACK)/usr/bin/mosquitto_pub $@
+
+$(BUILD_HACK)/bin/mosquitto_rr:
+	@cp $(STAGE_HACK)/usr/bin/mosquitto_rr $@
+
+$(BUILD_HACK)/bin/busybox:
+	@cp $(STAGE_HACK)/bin/busybox $@
+
+$(BUILD_HACK)/bin/c_rehash:
+	@cp $(STAGE_HACK)/bin/c_rehash $@
+
+$(BUILD_HACK)/bin/curl:
+	@cp -a $(STATE_HACK)/usr/share/aclocal $(BUILD_HACK)/usr/share
+	@cp $(STAGE_HACK)/bin/curl $@
+
+$(BUILD_HACK)/bin/curl-config:
+	@cp $(STAGE_HACK)/bin/curl-config $@
+
+$(BUILD_HACK)/bin/joe:
+	@cp -a $(STAGE_HACK)/etc/config/joe $(BUILD_HACK)/etc/config
+	@cp -a $(STATE_HACK)/usr/share/joe $(BUILD_HACK)/usr/share
+	@cp $(STAGE_HACK)/bin/joe $(BUILD_HACK)/bin/rjoe
+	@cp $(STAGE_HACK)/bin/joe $(BUILD_HACK)/bin/jmacs
+	@cp $(STAGE_HACK)/bin/joe $(BUILD_HACK)/bin/jpico
+	@cp $(STAGE_HACK)/bin/joe $(BUILD_HACK)/bin/jstar
+	@cp $(STAGE_HACK)/bin/joe $@
+
+$(BUILD_HACK)/bin/msmtp:
+	@cp -a $(STATE_HACK)/usr/share/locale $(BUILD_HACK)/usr/share
+	@cp $(STAGE_HACK)/bin/msmtp $@
+
+$(BUILD_HACK)/sbin/msmtpd:
+	@cp $(STAGE_HACK)/bin/msmtpd $@
+
+$(BUILD_HACK)/bin/openssl:
+	@cp -a $(STAGE_HACK)/etc/config/ssl $(BUILD_HACK)/etc/config
+	@cp $(STAGE_HACK)/bin/openssl $@
+
+$(BUILD_HACK)/bin/pcap-config:
+	@cp $(STAGE_HACK)/bin/pcap-config $@
+
+$(BUILD_HACK)/bin/sqlcipher:
+	@cp $(STAGE_HACK)/bin/sqlcipher $@
+
+$(BUILD_HACK)/bin/sqlite3:
+	@cp $(STAGE_HACK)/bin/sqlite3 $@
+
+$(BUILD_HACK)/bin/strace:
+	@cp $(STAGE_HACK)/bin/strace $@
+
+$(BUILD_HACK)/bin/strace-log-merge:
+	@cp $(STAGE_HACK)/bin/strace-log-merge $@
+
+$(BUILD_HACK)/bin/tcpdump:
+	@cp $(STAGE_HACK)/bin/tcpdump $@
+
+$(BUILD_HACK)/bin/tcpdump-static:
+	@cp $(STAGE_HACK)/bin/tcpdump.4.99.4 $@
+
+$(BUILD_HACK)/bin/upnpc:
+	@cp $(STAGE_HACK)/bin/upnpc-static $@
+	
+$(BUILD_HACK)/etc/version.txt: 
+	@cp version.txt $@
+
+build: $(BUILD_DIR)/install.ps1 $(BUILD_HACK)/bin/upnpc $(BUILD_HACK)/bin/tcpdump-static $(BUILD_HACK)/bin/tcpdump $(BUILD_HACK)/bin/strace-log-merge $(BUILD_HACK)/bin/strace $(BUILD_HACK)/bin/sqlite3 $(BUILD_HACK)/bin/sqlcipher $(BUILD_HACK)/bin/pcap-config $(BUILD_HACK)/bin/openssl $(BUILD_HACK)/sbin/msmtpd $(BUILD_HACK)/bin/msmtp $(BUILD_HACK)/bin/joe $(BUILD_HACK)/bin/curl-config $(BUILD_HACK)/bin/curl $(BUILD_HACK)/bin/c_rehash $(BUILD_HACK)/bin/busybox $(BUILD_HACK)/bin/mosquitto_rr $(BUILD_HACK)/bin/mosquitto_pub $(BUILD_HACK)/bin/mosquitto_sub $(BUILD_HACK)/bin/mosquitto_passwd $(BUILD_HACK)/sbin/mosquitto $(BUILD_HACK)/etc/version.txt
+	
+build-clean:
+	@rm -rf $(BUILD_DIR)
+
 staging-clean:
 	@rm -rf $(STAGING_DIR)
 	
@@ -330,12 +437,10 @@ download-clean:
 
 toolchain-clean:
 	@rm -rf $(TOOLCHAIN_DIR)
-	
-mrproper: staging-clean packages-clean download-clean toolchain-clean
+
+mrproper: staging-clean packages-clean download-clean toolchain-clean build-clean
 	@rm .unpack || true
 	
 clean: mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
-
-compile: libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto
 
 .PHONY: all fetch unpack clean
