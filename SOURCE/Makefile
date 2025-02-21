@@ -147,10 +147,10 @@ zlib-clean:
 $(PACKAGES_DIR)/$(JOE)/config.status:
 	@cd $(PACKAGES_DIR)/$(JOE); ./configure --host=$(HOST) --prefix=$(SDROOT) --sysconfdir=$(SDROOT)/etc/config --datarootdir=$(SDROOT)/usr/share
 	
-$(PACKAGES_DIR)/$(JOE)/joe: $(PACKAGES_DIR)/$(JOE)/config.status
+$(PACKAGES_DIR)/$(JOE)/joe/joe: $(PACKAGES_DIR)/$(JOE)/config.status
 	@make -C $(PACKAGES_DIR)/$(JOE) -j$(nproc)
 	
-$(STAGING_DIR)/$(SDROOT)/bin/joe: $(PACKAGES_DIR)/$(JOE)/joe
+$(STAGING_DIR)/$(SDROOT)/bin/joe: $(PACKAGES_DIR)/$(JOE)/joe/joe
 	@make -C $(PACKAGES_DIR)/$(JOE) install DESTDIR=$(STAGING_DIR)
 	@$(STRIP) $(STAGING_DIR)/$(SDROOT)/bin/joe
 	
