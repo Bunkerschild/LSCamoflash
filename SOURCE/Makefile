@@ -364,13 +364,13 @@ $(PACKAGES_DIR)/$(ONVIF)/Makefile.new:
 	@cp onvif-makefile $(PACKAGES_DIR)/$(ONVIF)/Makefile
 	@touch $@
 
-$(PACKAGES_DIR)/$(ONVIF)/src/onvif_srvd: $(PACKAGES_DIR)/$(ONVIF)/Makefile.new
+$(PACKAGES_DIR)/$(ONVIF)/onvif_srvd: $(PACKAGES_DIR)/$(ONVIF)/Makefile.new
 	@make -C $(PACKAGES_DIR)/$(ONVIF) -j$(nproc) release
 	@touch $@
 
-$(STAGING_DIR)/$(SDROOT)/sbin/onvif_srvd: $(PACKAGES_DIR)/$(ONVIF)/src/onvif_srvd
+$(STAGING_DIR)/$(SDROOT)/sbin/onvif_srvd: $(PACKAGES_DIR)/$(ONVIF)/onvif_srvd
 	@mkdir -p $(STAGING_DIR)/$(SDROOT)/sbin/ || true
-	@cp $(PACKAGES_DIR)/$(ONVIF)/src/onvif_srvd $@
+	@cp $(PACKAGES_DIR)/$(ONVIF)/onvif_srvd $@
 	@touch $@
 
 onvif: $(STAGING_DIR)/$(SDROOT)/sbin/onvif_srvd
@@ -407,9 +407,6 @@ $(BUILD_HACK)/bin/mosquitto_rr:
 
 $(BUILD_HACK)/bin/busybox:
 	@cp $(STAGE_HACK)/bin/busybox $@
-
-$(BUILD_HACK)/bin/c_rehash:
-	@cp $(STAGE_HACK)/bin/c_rehash $@
 
 $(BUILD_HACK)/bin/curl:
 	@cp -a $(STATE_HACK)/usr/share/aclocal $(BUILD_HACK)/usr/share
@@ -470,7 +467,7 @@ $(BUILD_HACK)/sbin/onvif_srvd:
 $(BUILD_HACK)/etc/version.txt: 
 	@cp version.txt $@
 
-build: $(BUILD_DIR)/install.ps1 $(BUILD_HACK)/sbin/onvif_srvd $(BUILD_HACK)/bin/upnpc $(BUILD_HACK)/bin/tcpdump-static $(BUILD_HACK)/bin/tcpdump $(BUILD_HACK)/bin/strace-log-merge $(BUILD_HACK)/bin/strace $(BUILD_HACK)/bin/sqlite3 $(BUILD_HACK)/bin/sqlcipher $(BUILD_HACK)/bin/pcap-config $(BUILD_HACK)/bin/openssl $(BUILD_HACK)/sbin/msmtpd $(BUILD_HACK)/bin/msmtp $(BUILD_HACK)/bin/joe $(BUILD_HACK)/bin/curl-config $(BUILD_HACK)/bin/curl $(BUILD_HACK)/bin/c_rehash $(BUILD_HACK)/bin/busybox $(BUILD_HACK)/bin/mosquitto_rr $(BUILD_HACK)/bin/mosquitto_pub $(BUILD_HACK)/bin/mosquitto_sub $(BUILD_HACK)/bin/mosquitto_passwd $(BUILD_HACK)/sbin/mosquitto $(BUILD_HACK)/etc/version.txt
+build: $(BUILD_DIR)/install.ps1 $(BUILD_HACK)/sbin/onvif_srvd $(BUILD_HACK)/bin/upnpc $(BUILD_HACK)/bin/tcpdump-static $(BUILD_HACK)/bin/tcpdump $(BUILD_HACK)/bin/strace-log-merge $(BUILD_HACK)/bin/strace $(BUILD_HACK)/bin/sqlite3 $(BUILD_HACK)/bin/sqlcipher $(BUILD_HACK)/bin/pcap-config $(BUILD_HACK)/bin/openssl $(BUILD_HACK)/sbin/msmtpd $(BUILD_HACK)/bin/msmtp $(BUILD_HACK)/bin/joe $(BUILD_HACK)/bin/curl-config $(BUILD_HACK)/bin/curl $(BUILD_HACK)/bin/busybox $(BUILD_HACK)/bin/mosquitto_rr $(BUILD_HACK)/bin/mosquitto_pub $(BUILD_HACK)/bin/mosquitto_sub $(BUILD_HACK)/bin/mosquitto_passwd $(BUILD_HACK)/sbin/mosquitto $(BUILD_HACK)/etc/version.txt
 	
 build-clean:
 	@rm -rf $(BUILD_DIR)
