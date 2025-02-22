@@ -44,6 +44,8 @@ CURL := curl-8.7.1
 BUSYBOX := busybox-1.36.1
 MOSQUITTO := mosquitto-2.0.20
 CJSON := cJSON-1.7.18
+GSOAP := gsoap-2.8
+ONVIF := onvif_srvd-1.1
 
 # Exportiere die Variablen für alle Ziele
 export TOOLCHAIN_PATH PKG_CONFIG_PATH PATH CC CXX AR RANLIB CROSS_PREFIX
@@ -59,12 +61,14 @@ URLS := \
     https://strace.io/files/6.9/$(STRACE).tar.xz \
     http://www.zlib.net/$(ZLIB).tar.gz \
     https://www.sqlite.org/2024/$(SQLITE3).tar.gz \
-    https://github.com/sqlcipher/sqlcipher/archive/refs/tags/v4.5.5.tar.gz \
+    https://github.com/sqlcipher/sqlcipher/archive/refs/tags/v4.5.5.tar.gz\#f=/$(SQLCIPHER).tar.gz \
     https://curl.se/download/$(CURL).tar.gz \
     https://curl.se/ca/cacert.pem \
     https://marlam.de/msmtp/releases/$(MSMTP).tar.xz \
-    https://github.com/DaveGamble/cJSON/archive/refs/tags/v1.7.18.tar.gz \
-    https://github.com/eclipse-mosquitto/mosquitto/archive/refs/tags/v2.0.20.tar.gz \
+    https://github.com/DaveGamble/cJSON/archive/refs/tags/v1.7.18.tar.gz\#f=/$(CJSON).tar.gz \
+    https://github.com/eclipse-mosquitto/mosquitto/archive/refs/tags/v2.0.20.tar.gz\#f=/$(MOSQUITTO).tar.gz \
+    https://sourceforge.net/projects/gsoap2/files/gsoap_2.8.137.zip/download\#f=/$(GSOAP).zip \
+    https://github.com/KoynovStas/onvif_srvd/archive/refs/tags/v1.1.tar.gz\#f=/$(ONVIF).tar.gz \
     https://github.com/miniupnp/miniupnp/archive/refs/tags/$(MINIUPNPC).tar.gz
 
 # Ziele definieren
@@ -81,7 +85,8 @@ toolchain: $(TOOLCHAIN_DIR)/buildroot.config
 $(PACKAGES_DIR)/cacert.pem: $(PACKAGES_DIR)
 	@for file in $(DOWNLOAD_DIR)/*; do \
 	  if [ "$$file" != "$(DOWNLOAD_DIR)/armv5-eabi--uclibc--stable-2020.08-1.tar.bz2" -a "$$file" != "$(DOWNLOAD_DIR)/cacert.pem" ]; then \
-	    tar -xf $$file -C $(PACKAGES_DIR) || echo "Skipping $$file"; \
+	  	cd $(PACKAGES_DIR); \
+	  	unzip -o $$file 2>/dev/null || tar -xvf $$file -C $(PACKAGES_DIR) || echo "Skipping $$file"; \
 	  fi; \
 	done
 	@touch $@
@@ -335,6 +340,34 @@ mosquitto-clean:
 	@rm -rf $(PACKAGES_DIR)/$(MOSQUITTO)/build
 	@rm $(PACKAGES_DIR)/$(MOSQUITTO)/mosquitto-config
 
+$(PACKAGES_DIR)/$(GSOAP)/config.status:
+	@cd $(PACKAGES_DIR)/$(GSOAP); ./configure --host=$(HOST) --prefix=$(SDROOT) --sysconfdir=$(SDROOT)/etc/config --datarootdir=$(SDROOT)/usr/share --disable-shared --enable-static --with-ssl=$(STAGING_DIR)/$(SDROOT) --with-zlib=$(STAGING_DIR)/$(SDROOT) --with-openssl=$(STAGING_DIR)/$(SDROOT) LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib --static -lssl -lcrypto" CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include"
+
+$(PACKAGES_DIR)/$(GSOAP)/libgsoap.a: $(PACKAGES_DIR)/$(GSOAP)/config.status
+	@make -C $(PACKAGES_DIR)/$(GSOAP) -j$(nproc)
+	
+$(STAGING_DIR)/$(SDROOT)/lib/libgsoap.a: $(PACKAGES_DIR)/$(GSOAP)/libgsoap.a
+	@make -C $(PACKAGES_DIR)/$(GSOAP) install DESTDIR=$(STAGING_DIR)
+		
+gsoap: $(STAGING_DIR)/$(SDROOT)/lib/libgsoap.a
+
+gsoap-clean:
+	@make -C $(PACKAGES_DIR)/$(GSOAP) clean distclean
+
+$(PACKAGES_DIR)/$(ONVIF)/src/onvif_srvd:
+	@make -C $(PACKAGES_DIR)/$(ONVIF) -j$(nproc)
+	@touch $@
+
+$(STAGING_DIR)/$(SDROOT)/sbin/onvif_srvd: $(PACKAGES_DIR)/$(ONVIF)/src/onvif_srvd
+	@make -C $(PACKAGES_DIR)/$(ONVIF) DESTDIR=$(STAGING_DIR)/$(SDROOT) install
+	@touch $@
+
+onvif: $(STAGING_DIR)/$(SDROOT)/sbin/onvif_srvd
+
+onvif-clean:
+	@rm -rf $(PACKAGES_DIR)/$(ONVIF)/build
+	@rm $(PACKAGES_DIR)/$(ONVIF)/onvif-config
+
 staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto
 
 $(BUILD_DIR)/install.ps1: $(BUILD_DIR)
@@ -447,3 +480,4 @@ install: all
 	@cd $(BUILD_DIR); sh install.sh
 
 .PHONY: all clean
+
