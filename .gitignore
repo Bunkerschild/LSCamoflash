@@ -46,7 +46,7 @@ SDCARD/crontab
 *~
 
 # Generated folders
-SOURCE/download
+#SOURCE/download
 SOURCE/packages
 SOURCE/staging
 SOURCE/toolchain
@@ -56,3 +56,4 @@ SOURCE/.unpack
 # Generated files
 SOURCE/src/contrib/motor/motor
 SOURCE/src/contrib/motor/motor.o
+SOURCE/LSCamoflash-*.tar.gz
