@@ -341,12 +341,13 @@ mosquitto-clean:
 	@rm $(PACKAGES_DIR)/$(MOSQUITTO)/mosquitto-config
 
 $(PACKAGES_DIR)/$(GSOAP)/config.status:
-	@cd $(PACKAGES_DIR)/$(GSOAP); ./configure --host=$(HOST) --prefix=$(SDROOT) --sysconfdir=$(SDROOT)/etc/config --datarootdir=$(SDROOT)/usr/share --disable-shared --enable-static --with-ssl=$(STAGING_DIR)/$(SDROOT) --with-zlib=$(STAGING_DIR)/$(SDROOT) --with-openssl=$(STAGING_DIR)/$(SDROOT) LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib --static -lssl -lcrypto" CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include"
+	@cd $(PACKAGES_DIR)/$(GSOAP); ac_cv_func_malloc_0_nonnull=yes ./configure --host=$(HOST) --prefix=$(SDROOT) --sysconfdir=$(SDROOT)/etc/config --datarootdir=$(SDROOT)/usr/share --disable-shared --enable-static --with-ssl=$(STAGING_DIR)/$(SDROOT) --with-zlib=$(STAGING_DIR)/$(SDROOT) --with-openssl=$(STAGING_DIR)/$(SDROOT) LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib --static -lssl -lcrypto" CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include"
+	@echo -e "all:\n\ninstall\n" > $(PACKAGES_DIR)/$(GSOAP)/gsoap/wsdl/Makefile
 
-$(PACKAGES_DIR)/$(GSOAP)/libgsoap.a: $(PACKAGES_DIR)/$(GSOAP)/config.status
+$(PACKAGES_DIR)/$(GSOAP)/gsoap/libgsoap.a: $(PACKAGES_DIR)/$(GSOAP)/config.status
 	@make -C $(PACKAGES_DIR)/$(GSOAP) -j$(nproc)
 	
-$(STAGING_DIR)/$(SDROOT)/lib/libgsoap.a: $(PACKAGES_DIR)/$(GSOAP)/libgsoap.a
+$(STAGING_DIR)/$(SDROOT)/lib/libgsoap.a: $(PACKAGES_DIR)/$(GSOAP)/gsoap/libgsoap.a
 	@make -C $(PACKAGES_DIR)/$(GSOAP) install DESTDIR=$(STAGING_DIR)
 		
 gsoap: $(STAGING_DIR)/$(SDROOT)/lib/libgsoap.a
