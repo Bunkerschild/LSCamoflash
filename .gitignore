@@ -46,7 +46,7 @@ SDCARD/crontab
 *~
 
 # Generated folders
-#SOURCE/download
+SOURCE/download
 SOURCE/packages
 SOURCE/staging
 SOURCE/toolchain
