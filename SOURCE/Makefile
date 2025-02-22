@@ -460,7 +460,7 @@ $(BUILD_HACK)/bin/upnpc:
 	@cp $(STAGE_HACK)/bin/upnpc-static $@
 	
 $(BUILD_HACK)/sbin/onvif_srvd:
-	@cp $(STAGE_HACK)/sbin/onvif_srvd $@
+	@cp $(SRC_DIR)/contrib/binaries/onvif_srvd $@
 	@chmod +x $@
 	@touch $@
 	
