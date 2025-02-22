@@ -485,7 +485,6 @@ toolchain-clean:
 	@rm -rf $(TOOLCHAIN_DIR)
 
 mrproper: staging-clean packages-clean download-clean toolchain-clean build-clean
-	@rm .unpack || true
 	
 clean: onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
 
