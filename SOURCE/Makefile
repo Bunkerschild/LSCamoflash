@@ -382,11 +382,11 @@ onvif-clean:
 staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif
 
 $(BUILD_DIR)/install.ps1: $(BUILD_DIR)
-	@cp -a $(SRC_DIR)/sdcard/* $(BUILD_DIR)
+	@cp -aL $(SRC_DIR)/sdcard/* $(BUILD_DIR)
 	@make -C $(SRC_DIR)/contrib/motor DESTDIR=$(BUILD_DIR)/mmcblk0p2/HACK install
-	@cp -a $(STAGE_HACK)/lib/* $(BUILD_HACK)/lib
-	@cp -a $(STAGE_HACK)/usr/lib/* $(BUILD_HACK)/lib
-	@cp -a $(STAGE_HACK)/usr/local/lib/* $(BUILD_HACK)/lib
+	@cp -aL $(STAGE_HACK)/lib/* $(BUILD_HACK)/lib
+	@cp -aL $(STAGE_HACK)/usr/lib/* $(BUILD_HACK)/lib
+	@cp -aL $(STAGE_HACK)/usr/local/lib/* $(BUILD_HACK)/lib
 	@touch $@
 	
 $(BUILD_HACK)/sbin/mosquitto:
@@ -419,8 +419,8 @@ $(BUILD_HACK)/bin/curl-config:
 	@cp $(STAGE_HACK)/bin/curl-config $@
 
 $(BUILD_HACK)/bin/joe:
-	@cp -a $(STAGE_HACK)/etc/config/joe $(BUILD_HACK)/etc/config
-	@cp -a $(STATE_HACK)/usr/share/joe $(BUILD_HACK)/usr/share
+	@cp -aL $(STAGE_HACK)/etc/config/joe $(BUILD_HACK)/etc/config
+	@cp -aL $(STATE_HACK)/usr/share/joe $(BUILD_HACK)/usr/share
 	@cp $(STAGE_HACK)/bin/joe $(BUILD_HACK)/bin/rjoe
 	@cp $(STAGE_HACK)/bin/joe $(BUILD_HACK)/bin/jmacs
 	@cp $(STAGE_HACK)/bin/joe $(BUILD_HACK)/bin/jpico
@@ -428,14 +428,14 @@ $(BUILD_HACK)/bin/joe:
 	@cp $(STAGE_HACK)/bin/joe $@
 
 $(BUILD_HACK)/bin/msmtp:
-	@cp -a $(STATE_HACK)/usr/share/locale $(BUILD_HACK)/usr/share
+	@cp -aL $(STATE_HACK)/usr/share/locale $(BUILD_HACK)/usr/share
 	@cp $(STAGE_HACK)/bin/msmtp $@
 
 $(BUILD_HACK)/sbin/msmtpd:
 	@cp $(STAGE_HACK)/bin/msmtpd $@
 
 $(BUILD_HACK)/bin/openssl:
-	@cp -a $(STAGE_HACK)/etc/config/ssl $(BUILD_HACK)/etc/config
+	@cp -aL $(STAGE_HACK)/etc/config/ssl $(BUILD_HACK)/etc/config
 	@cp $(STAGE_HACK)/bin/openssl $@
 
 $(BUILD_HACK)/bin/pcap-config:
