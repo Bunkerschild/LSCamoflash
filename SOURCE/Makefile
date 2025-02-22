@@ -379,7 +379,7 @@ onvif-clean:
 	@rm -rf $(PACKAGES_DIR)/$(ONVIF)/build
 	@rm $(PACKAGES_DIR)/$(ONVIF)/onvif-config
 
-staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap
+staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif
 
 $(BUILD_DIR)/install.ps1: $(BUILD_DIR)
 	@cp -a $(SRC_DIR)/sdcard/* $(BUILD_DIR)
@@ -462,10 +462,15 @@ $(BUILD_HACK)/bin/tcpdump-static:
 $(BUILD_HACK)/bin/upnpc:
 	@cp $(STAGE_HACK)/bin/upnpc-static $@
 	
+$(BUILD_HACK)/sbin/onvif_srvd:
+	@cp $(STAGE_HACK)/sbin/onvif_srvd $@
+	@chmod +x $@
+	@touch $@
+	
 $(BUILD_HACK)/etc/version.txt: 
 	@cp version.txt $@
 
-build: $(BUILD_DIR)/install.ps1 $(BUILD_HACK)/bin/upnpc $(BUILD_HACK)/bin/tcpdump-static $(BUILD_HACK)/bin/tcpdump $(BUILD_HACK)/bin/strace-log-merge $(BUILD_HACK)/bin/strace $(BUILD_HACK)/bin/sqlite3 $(BUILD_HACK)/bin/sqlcipher $(BUILD_HACK)/bin/pcap-config $(BUILD_HACK)/bin/openssl $(BUILD_HACK)/sbin/msmtpd $(BUILD_HACK)/bin/msmtp $(BUILD_HACK)/bin/joe $(BUILD_HACK)/bin/curl-config $(BUILD_HACK)/bin/curl $(BUILD_HACK)/bin/c_rehash $(BUILD_HACK)/bin/busybox $(BUILD_HACK)/bin/mosquitto_rr $(BUILD_HACK)/bin/mosquitto_pub $(BUILD_HACK)/bin/mosquitto_sub $(BUILD_HACK)/bin/mosquitto_passwd $(BUILD_HACK)/sbin/mosquitto $(BUILD_HACK)/etc/version.txt
+build: $(BUILD_DIR)/install.ps1 $(BUILD_HACK)/sbin/onvif_srvd $(BUILD_HACK)/bin/upnpc $(BUILD_HACK)/bin/tcpdump-static $(BUILD_HACK)/bin/tcpdump $(BUILD_HACK)/bin/strace-log-merge $(BUILD_HACK)/bin/strace $(BUILD_HACK)/bin/sqlite3 $(BUILD_HACK)/bin/sqlcipher $(BUILD_HACK)/bin/pcap-config $(BUILD_HACK)/bin/openssl $(BUILD_HACK)/sbin/msmtpd $(BUILD_HACK)/bin/msmtp $(BUILD_HACK)/bin/joe $(BUILD_HACK)/bin/curl-config $(BUILD_HACK)/bin/curl $(BUILD_HACK)/bin/c_rehash $(BUILD_HACK)/bin/busybox $(BUILD_HACK)/bin/mosquitto_rr $(BUILD_HACK)/bin/mosquitto_pub $(BUILD_HACK)/bin/mosquitto_sub $(BUILD_HACK)/bin/mosquitto_passwd $(BUILD_HACK)/sbin/mosquitto $(BUILD_HACK)/etc/version.txt
 	
 build-clean:
 	@rm -rf $(BUILD_DIR)
@@ -485,7 +490,7 @@ toolchain-clean:
 mrproper: staging-clean packages-clean download-clean toolchain-clean build-clean
 	@rm .unpack || true
 	
-clean: mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean gsoap-clean
+clean: onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
 
 install: all
 	@cd $(BUILD_DIR); sh install.sh
