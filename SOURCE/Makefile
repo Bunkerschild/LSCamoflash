@@ -492,7 +492,7 @@ mrproper: staging-clean packages-clean download-clean toolchain-clean build-clea
 clean: onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
 
 LSCamoflash-$(VERSION).tar.gz: download toolchain packages staging build
-	@tar -C build -cvzf $@ .
+	@tar -C $(BUILD_DIR) -cvzf $@ .
 	@touch $@
 	
 release: LSCamoflash-$(VERSION).tar.gz
