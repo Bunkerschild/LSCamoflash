@@ -15,6 +15,9 @@ STAGE_HACK := $(STAGING_DIR)/tmp/sd/HACK
 SDCARD := /tmp/sd
 SDROOT := $(SDCARD)/HACK
 
+# Version
+VERSION = $(shell cat version.txt)
+
 # Definiere die Toolchain-Pfade
 TOOLCHAIN_PATH := $(TOOLCHAIN_DIR)
 PKG_CONFIG_PATH := $(TOOLCHAIN_PATH)/lib/pkgconfig:$(TOOLCHAIN_PATH)/share/pkgconfig
@@ -487,6 +490,12 @@ toolchain-clean:
 mrproper: staging-clean packages-clean download-clean toolchain-clean build-clean
 	
 clean: onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
+
+LSCamoflash-$(VERSION).tar.gz: download toolchain packages staging build
+	@tar -C build -cvzf $@ .
+	@touch $@
+	
+release: LSCamoflash-$(VERSION).tar.gz
 
 install: all
 	@cd $(BUILD_DIR); sh install.sh
