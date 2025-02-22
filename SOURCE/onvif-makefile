@@ -262,7 +262,7 @@ define build_gsoap
 
     # unzip
     if [ ! -f gsoap-2.8/README.txt ]; then \
-    	unzip ../download/gsoap-2.8.zip; \
+    	unzip ../../download/gsoap-2.8.zip; \
     fi
 
     # build
