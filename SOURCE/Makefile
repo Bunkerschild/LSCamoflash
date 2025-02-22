@@ -22,8 +22,11 @@ PATH := $(TOOLCHAIN_PATH)/bin:$(PATH)
 
 # Definiere die Cross-Compiler Variablen
 HOST := arm-buildroot-linux-uclibcgnueabi
+C := $(TOOLCHAIN_PATH)/bin/$(HOST)-gcc
 CC := $(TOOLCHAIN_PATH)/bin/$(HOST)-gcc
+GCC := $(TOOLCHAIN_PATH)/bin/$(HOST)-g++
 CXX := $(TOOLCHAIN_PATH)/bin/$(HOST)-g++
+CPP := $(TOOLCHAIN_PATH)/bin/$(HOST)-cpp
 AR := $(TOOLCHAIN_PATH)/bin/$(HOST)-ar
 RANLIB := $(TOOLCHAIN_PATH)/bin/$(HOST)-ranlib
 STRIP := $(TOOLCHAIN_PATH)/bin/$(HOST)-strip
@@ -48,7 +51,7 @@ GSOAP := gsoap-2.8
 ONVIF := onvif_srvd-1.1
 
 # Exportiere die Variablen für alle Ziele
-export TOOLCHAIN_PATH PKG_CONFIG_PATH PATH CC CXX AR RANLIB CROSS_PREFIX
+export TOOLCHAIN_PATH PKG_CONFIG_PATH PATH C CC GCC CXX CPP AR RANLIB CROSS_PREFIX
 
 # Liste der zu ladenden Pakete
 URLS := \
@@ -355,12 +358,19 @@ gsoap: $(STAGING_DIR)/$(SDROOT)/lib/libgsoap.a
 gsoap-clean:
 	@make -C $(PACKAGES_DIR)/$(GSOAP) clean distclean
 
-$(PACKAGES_DIR)/$(ONVIF)/src/onvif_srvd:
-	@make -C $(PACKAGES_DIR)/$(ONVIF) -j$(nproc)
+$(PACKAGES_DIR)/$(ONVIF)/Makefile.new:
+	@cp onvif-makefile $(PACKAGES_DIR)/$(ONVIF)/Makefile.new
+	@cp $(PACKAGES_DIR)/$(ONVIF)/Makefile $(PACKAGES_DIR)/$(ONVIF)/Makefile.old
+	@cp onvif-makefile $(PACKAGES_DIR)/$(ONVIF)/Makefile
+	@touch $@
+
+$(PACKAGES_DIR)/$(ONVIF)/src/onvif_srvd: $(PACKAGES_DIR)/$(ONVIF)/Makefile.new
+	@make -C $(PACKAGES_DIR)/$(ONVIF) -j$(nproc) release
 	@touch $@
 
 $(STAGING_DIR)/$(SDROOT)/sbin/onvif_srvd: $(PACKAGES_DIR)/$(ONVIF)/src/onvif_srvd
-	@make -C $(PACKAGES_DIR)/$(ONVIF) DESTDIR=$(STAGING_DIR)/$(SDROOT) install
+	@mkdir -p $(STAGING_DIR)/$(SDROOT)/sbin/ || true
+	@cp $(PACKAGES_DIR)/$(ONVIF)/src/onvif_srvd $@
 	@touch $@
 
 onvif: $(STAGING_DIR)/$(SDROOT)/sbin/onvif_srvd
@@ -369,7 +379,7 @@ onvif-clean:
 	@rm -rf $(PACKAGES_DIR)/$(ONVIF)/build
 	@rm $(PACKAGES_DIR)/$(ONVIF)/onvif-config
 
-staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto
+staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap
 
 $(BUILD_DIR)/install.ps1: $(BUILD_DIR)
 	@cp -a $(SRC_DIR)/sdcard/* $(BUILD_DIR)
@@ -475,7 +485,7 @@ toolchain-clean:
 mrproper: staging-clean packages-clean download-clean toolchain-clean build-clean
 	@rm .unpack || true
 	
-clean: mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
+clean: mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean gsoap-clean
 
 install: all
 	@cd $(BUILD_DIR); sh install.sh
