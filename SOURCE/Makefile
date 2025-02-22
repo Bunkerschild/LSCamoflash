@@ -345,7 +345,7 @@ mosquitto-clean:
 
 $(PACKAGES_DIR)/$(GSOAP)/config.status:
 	@cd $(PACKAGES_DIR)/$(GSOAP); ac_cv_func_malloc_0_nonnull=yes ./configure --host=$(HOST) --prefix=$(SDROOT) --sysconfdir=$(SDROOT)/etc/config --datarootdir=$(SDROOT)/usr/share --disable-shared --enable-static --with-ssl=$(STAGING_DIR)/$(SDROOT) --with-zlib=$(STAGING_DIR)/$(SDROOT) --with-openssl=$(STAGING_DIR)/$(SDROOT) LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib --static -lssl -lcrypto" CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include"
-	@echo -e "all:\n\ninstall\n" > $(PACKAGES_DIR)/$(GSOAP)/gsoap/wsdl/Makefile
+	@echo -e "all:\n\ninstall:\n" > $(PACKAGES_DIR)/$(GSOAP)/gsoap/wsdl/Makefile
 
 $(PACKAGES_DIR)/$(GSOAP)/gsoap/libgsoap.a: $(PACKAGES_DIR)/$(GSOAP)/config.status
 	@make -C $(PACKAGES_DIR)/$(GSOAP) -j$(nproc)
