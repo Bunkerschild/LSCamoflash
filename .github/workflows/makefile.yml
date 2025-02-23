@@ -22,24 +22,4 @@ jobs:
       - name: Starte Build
         run: |
           cd SOURCE
-          make
-
-      - name: Erstelle Release (Optional)
-        if: github.event_name == 'push'
-        run: |
-          tar -czvf LSCamoflash.tar.gz build/
-          mkdir -p release
-          mv LSCamoflash.tar.gz release/
-
-      - name: Lade Build-Artefakte hoch (Optional)
-        uses: actions/upload-artifact@v4
-        with:
-          name: LSCamoflash-Build
-          path: release/
-
-      - name: Erstelle GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: release/LSCamoflash.tar.gz
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          make download toolchain packages staging
