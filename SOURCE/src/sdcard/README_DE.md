@@ -125,4 +125,4 @@ Falls die Skripte nicht genutzt werden können, kann die SD-Karte manuell partit
 
 ---
 
-Die **empfohlene Methode** ist die **automatische Installation mit `install.bat` (Windows) oder `install.sh` (Linux)**, da sie Fehler vermeidet und den Vorgang vereinfacht.
+Die **empfohlene Methode** ist die **automatische Installation mit `install.ps1` (Windows) oder `install.sh` (Linux)**, da sie Fehler vermeidet und den Vorgang vereinfacht.
