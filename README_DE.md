@@ -2,6 +2,8 @@
 
 LSCamoflash ist ein modifiziertes Firmware-Paket für bestimmte IP-Kameras, das zusätzliche Funktionen und Verbesserungen bietet.
 
+![Build Status](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/makefile.yml/badge.svg)
+
 ## Inhaltsverzeichnis
 
 - [Installation](#installation)
