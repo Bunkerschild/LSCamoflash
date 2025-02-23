@@ -125,4 +125,4 @@ If the scripts cannot be used, the SD card can be partitioned manually.
 
 ---
 
-The **recommended method** is the **automatic installation with `install.bat` (Windows) or `install.sh` (Linux)**, as it avoids errors and simplifies the process.
+The **recommended method** is the **automatic installation with `install.ps1` (Windows) or `install.sh` (Linux)**, as it avoids errors and simplifies the process.
