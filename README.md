@@ -1,171 +1,126 @@
-# 🚀 LSCamoflash – Free Your LSC Cam! 🔓
+# LSCamoflash
 
-LSCamoflash allows you to free LSC cameras from the cloud and use **local** RTSP streaming. Special thanks to [guino](https://github.com/guino/LSCOutdoor1080P), whose project served as the foundation for this modification. 🙌
+LSCamoflash is a modified firmware package for specific IP cameras that provides additional features and improvements.
 
-⚠ **Disclaimer:** The use of this hack is **at your own risk**. I accept **no liability** for any damage to devices or persons. ⚠
+## Table of Contents
 
-🔍 **Antivirus Warning:** Some antivirus programs, such as **Bitdefender**, falsely detect **Gen:Variant.Trojan.Linux.Specter.1** as a virus, in tcpdump. This is a **false positive**. More information can be found on [VirusTotal](https://www.virustotal.com/gui/file/2136a323071c9f1ae52b45996b8b4045827bcf666e1494579500c22bdfdda934).  
+- [Installation](#installation)
+- [Setting up the Build Environment](#setting-up-the-build-environment)
+- [Available Tools](#available-tools)
+- [Password Management](#password-management)
+- [Web Server Features](#web-server-features)
+- [Update Mechanism](#update-mechanism)
+- [SD Card Partitioning](#sd-card-partitioning)
+- [Notes on Motor Control](#notes-on-motor-control)
+- [Planned Improvements](#planned-improvements)
 
-## ✨ Features
-✅ **Telnet server on port 24** *(Login: `root` / `LSCamoflash`)*  
-✅ **Web server on port 8080** *(e.g., for PTZ control of rotating cameras)*  
-✅ **FTP access on port 21** *(Access to the SD card)*  
-✅ **ONVIF server for camera integration** *(Support for ONVIF-compatible clients!)*  
-✅ **Firmware remains untouched** *(No permanent modification!)*  
-✅ **Configurable offline mode** *(Completely disconnects the camera from the Tuya cloud)*  
-✅ **Update function** *(Keeps the hack up to date, even for multiple cameras!)*  
-✅ **RTSP streaming** *(Currently available for only two models:)*  
-   - 📌 **PTZ Indoor Camera (1080p)**  
-   - 📌 **Static Outdoor Camera (1080p)**  
-   *(Check `PATCH` to see if your camera model is supported.)*
+## Installation
 
-## ⚙️ Technical Background
-🛠️ The camera is tricked by an **empty file** `_ht_ap_mode.conf` into thinking it needs to start **AP mode**.  
-🛠️ A **modified `hostapd`** then launches the actual hack.  
+1. **Download the source code:**
 
-🚫 **After `hostapd` starts, the following happens:**  
-🔹 **Prevention of automatic firmware updates** to keep the security vulnerability open.  
-🔹 **Offline mode can be activated via a configuration file**, blocking any connection to the Tuya cloud.  
-🔹 **Update function** keeps the hack up to date and allows updates for multiple cameras simultaneously.  
+   ```bash
+   git clone https://github.com/Bunkerschild/LSCamoflash.git
+   cd LSCamoflash/SOURCE
+   ```
 
-## 🔄 Workflow of init.sh and services.sh
-### 🏁 **`init.sh` (Initialization Script)**
-This central startup script runs directly after the camera boots up:  
-1️⃣ **Checks the SD card** *(Is it recognized? Is the filesystem correct?)*  
-2️⃣ **Sets environment variables** *(Important for later scripts)*  
-3️⃣ **Starts `services.sh`** to activate all background services.  
+2. **Start the build process:**
 
-### ⚡ **`services.sh` (Starts services and blocks cloud connections)**
-2️⃣ **Starts the Telnet server (Port 24)** *(Login: `root` / `LSCamoflash`)*  
-3️⃣ **Activates the web server (Port 8080)** *(For PTZ camera control)*  
-4️⃣ **Starts the FTP server (Port 21)** *(Access to the SD card)*  
-5️⃣ **Starts the ONVIF server** to integrate the camera into ONVIF-compatible systems.  
-6️⃣ **Checks if offline mode is active** *(If enabled, all cloud connections are blocked!)*  
-7️⃣ **Enables future updates** *(Even for multiple cameras simultaneously!)*  
+   - To download and compile all components:
 
-## 🔮 Future Plans
-🚧 **Planned:** Automatic **anyka_ipc** patching at camera boot, eliminating the need for a static patch!  
+     ```bash
+     make
+     ```
 
-## 📥 Installation
-1️⃣ Download the repository or clone it using Git.  
-2️⃣ Copy the contents of the `SDCARD` directory onto a **FAT32-formatted** SD card.  
-3️⃣ **Insert the SD card into the camera and restart it.**  
-4️⃣ Wait a few moments – Telnet, FTP, ONVIF, and the web server should now be available.  
+     or
 
-## 🛠️ Troubleshooting
-🔴 **Blue LED blinks continuously?**
-   - Remove the SD card and delete the file `HACK/usr/patch/<MD5-CHECKSUM>/bin/anyka_ipc_patched`.
-   - If the problem persists, also remove `anyka_ipc` from the same directory.
+     ```bash
+     make all
+     ```
 
-🔴 **RTSP or Telnet not working?**
-   - Check if the file `_ht_ap_mode.conf` exists on the SD card.
-   - Ensure the SD card is **formatted as FAT32**.
+   - After a successful build, the content for the SD card will be located in the `build/` directory, including the installation scripts `install.ps1` (for Windows) and `install.sh` (for Unix/Linux).
 
-## 🔍 Version Check
-Verify whether the patch has been applied correctly:
-```sh
-md5sum /usr/bin/anyka_ipc
-```
-Compare the output with `SDCARD/HACK/etc/hack.conf` under `Static patch supported`.
+3. **Create a release:**
 
-## 🛠️ Useful Tools
-LSCamoflash includes the following additional tools:
-✅ **BusyBox (latest version) with all common applets**  
-✅ **Mosquitto_pub (MQTT client)**  
-✅ **OpenSSL for secure connections**  
-✅ **cURL with HTTPS support**  
-✅ **joe (simple text editor)**  
-✅ **SQLite3 and SQLCipher for database management**  
-✅ **strace for process monitoring and debugging**  
-✅ **tcpdump for network analysis**  
+   - To create a compressed tarball of the `build/` directory:
 
-🚀 **LSCamoflash is the best solution to free LSC cameras from the cloud and take full control of your devices!** 🔥
+     ```bash
+     make release
+     ```
 
-*This text was generated by AI.*
+     This generates a gz-compressed tar file for distribution.
 
----
+## Setting up the Build Environment
 
-# 🚀 LSCamoflash – Befreie deine LSC Cam! 🔓
+The following packages are required for the build process:
 
-LSCamoflash ermöglicht es, LSC-Kameras von der Cloud zu befreien und RTSP-Streaming **lokal** zu nutzen. Ein besonderer Dank geht an [guino](https://github.com/guino/LSCOutdoor1080P), dessen Projekt als Grundlage für diese Modifikation diente. 🙌
+- `build-essential`: Basic compiler tools
+- `flex`: Scanner generator
+- `bison`: Parser generator
+- `gsoap`: SOAP code generator (required for `onvif_srvd`)
+- `binutils`: Collection of binary utilities
+- `make`: Build automation tool
+- `automake`: Tool for generating Makefiles
+- `autoconf`: Tool for configuring software packages
 
-⚠ **Hinweis:** Die Verwendung dieses Hacks geschieht auf **eigene Gefahr**. Ich übernehme **keinerlei Haftung** für Schäden an Geräten oder Personen. ⚠
+**Note:** Ensure all dependencies are installed to ensure a smooth build process.
 
-🔍 **Antivirenwarnung:** Einige Virenscanner, wie z. B. **Bitdefender**, erkennen fälschlicherweise den Virus **Gen:Variant.Trojan.Linux.Specter.1** in der Datei tcpdump. Dies ist ein **False-Positive**. Weitere Informationen findest du auf [VirusTotal](https://www.virustotal.com/gui/file/2136a323071c9f1ae52b45996b8b4045827bcf666e1494579500c22bdfdda934).  
+## Available Tools
 
-## ✨ Funktionen
-✅ **Telnet-Server auf Port 24** *(Login: `root` / `LSCamoflash`)*  
-✅ **Webserver auf Port 8080** *(z.B. zur PTZ-Steuerung bei schwenkbaren Kameras)*  
-✅ **FTP-Zugang auf Port 21** *(Zugriff auf die Speicherkarte)*  
-✅ **ONVIF-Server zur Kamera-Integration** *(Unterstützung für ONVIF-kompatible Clients!)*  
-✅ **Firmware bleibt unangetastet** *(keine dauerhafte Modifikation!)*  
-✅ **Offline-Modus konfigurierbar** *(Kamera vollständig von der Tuya-Cloud trennen)*  
-✅ **Update-Funktion** *(Hält den Hack aktuell, auch für mehrere Kameras!)*  
-✅ **RTSP-Streaming** *(Derzeit nur für zwei Modelle verfügbar:)*  
-   - 📌 **PTZ Indoor Kamera (1080p)**  
-   - 📌 **Statische Außenkamera (1080p)**  
-   *(Siehe `PATCH`, um zu prüfen, ob dein Kameramodell unterstützt wird.)*
+After installation, the following tools are available:
 
-## ⚙️ Technischer Hintergrund
-🛠️ Die Kamera wird durch eine **leere Datei** `_ht_ap_mode.conf` getäuscht, dass sie den **AP-Modus** starten muss.  
-🛠️ Eine **manipulierte `hostapd`** startet daraufhin den eigentlichen Hack.  
+- `busybox`: Collection of Unix utilities
+- `chpasswd`: Password change tool
+- `curl`: Data transfer tool
+- `joe` (incl. `jmacs`, `jpico`, `jstar`, `rjoe`): Text editor
+- `mosquitto` (incl. `mosquitto_pub`, `mosquitto_sub`, `mosquitto_passwd`, `mosquitto_rr`): MQTT broker and clients
+- `motor`: Terminal-based file manager
+- `msmtp` and `msmtpd`: SMTP client and server
+- `openssl`: SSL/TLS toolkit
+- `pcap-config`: Tool for querying libpcap configuration details
+- `sqlcipher`: Encrypted SQLite database
+- `sqlite3`: SQLite database client
+- `strace` (incl. `strace-log-merge`): System call monitoring
+- `tcpdump`: Network packet analyzer
+- `upnpc`: UPnP client
+- `onvif_srvd`: ONVIF device server
 
-🚫 **Nach dem Start von `hostapd` passiert folgendes:**  
-🔹 **Verhinderung automatischer Firmware-Updates**, um die Sicherheitslücke offen zu halten.  
-🔹 **Offline-Modus kann per Konfigurationsdatei aktiviert werden**, sodass keine Tuya-Cloud-Verbindung mehr möglich ist.  
-🔹 **Update-Funktion**, um den Hack aktuell zu halten und mehrere Kameras gleichzeitig zu aktualisieren.  
+## Password Management
 
-## 🔄 Ablauf von init.sh und services.sh
-### 🏁 **`init.sh` (Initialisierungsskript)**
-Das zentrale Startskript, das direkt nach dem Booten der Kamera ausgeführt wird:  
-1️⃣ **Überprüfung der SD-Karte** *(wird sie erkannt? Ist das Dateisystem korrekt?)*  
-2️⃣ **Setzen der Umgebungsvariablen** *(wichtig für spätere Skripte)*  
-3️⃣ **Start von `services.sh`**, um alle Hintergrunddienste zu aktivieren.  
+To change the password for various services (e.g., the HTTP server), use `chpasswd`. This ensures that password changes are persistent and remain after a reboot.
 
-### ⚡ **`services.sh` (Startet Dienste und blockiert Cloud-Verbindungen)**
-2️⃣ **Startet den Telnet-Server (Port 24)** *(Login: `root` / `LSCamoflash`)*  
-3️⃣ **Aktiviert den Webserver (Port 8080)** *(Steuerung für PTZ-Kameras)*  
-4️⃣ **Startet den FTP-Server (Port 21)** *(Zugriff auf die SD-Karte)*  
-5️⃣ **Startet den ONVIF-Server**, um die Kamera in ONVIF-kompatible Systeme zu integrieren.  
-6️⃣ **Prüft, ob der Offline-Modus aktiv ist** *(falls ja, wird jede Verbindung zur Cloud blockiert!)*  
-7️⃣ **Ermöglicht zukünftige Updates** *(auch für mehrere Kameras gleichzeitig!)*  
+**Note:** The `passwd` tool from `busybox` only changes the password temporarily and does not work for all services.
 
-## 🔮 Zukunftspläne
-🚧 **Geplant:** Automatische **anyka_ipc**-Patches beim Booten der Kamera, sodass kein statischer Patch mehr nötig ist!  
+## Web Server Features
 
-## 📥 Installation
-1️⃣ Lade das Repository herunter oder klone es mit Git.  
-2️⃣ Kopiere den Inhalt des `SDCARD`-Verzeichnisses auf eine **FAT32-formatierte** SD-Karte.  
-3️⃣ **Setze die SD-Karte in die Kamera ein und starte sie neu.**  
-4️⃣ Warte einige Momente – danach sollten Telnet, FTP, ONVIF und der Webserver verfügbar sein.  
+The integrated web server offers the following features:
 
-## 🛠️ Fehlerbehebung
-🔴 **Blaue LED blinkt dauerhaft?**
-   - SD-Karte entfernen und Datei `HACK/usr/patch/<MD5-CHECKSUM>/bin/anyka_ipc_patched` löschen.
-   - Falls das Problem weiterhin besteht, auch `anyka_ipc` entfernen.
+- **Streaming:** Provides an HLS stream via a TUYA Cloud API key and allows retrieval of RTSP and FLV stream URLs.
+- **Camera Control:** Adjust camera settings and restart the camera via the HTTP service on port 8080 (configurable).
+- **Service Management:** Enable or disable services such as FTP or `crond` via a central configuration file.
 
-🔴 **RTSP oder Telnet funktionieren nicht?**
-   - Prüfen, ob die Datei `_ht_ap_mode.conf` auf der SD-Karte existiert.
-   - Sicherstellen, dass die SD-Karte **FAT32-formatiert** ist.
+## Update Mechanism
 
-## 🔍 Versionsprüfung
-Überprüfen, ob der Patch korrekt angewendet wurde:
-```sh
-md5sum /usr/bin/anyka_ipc
-```
-Vergleiche die Ausgabe mit `SDCARD/HACK/etc/hack.conf` unter `Static patch supported`.
+An integrated update script keeps the camera up to date. Features of the update mechanism:
 
-## 🛠️ Nützliche Tools
-LSCamoflash enthält folgende zusätzliche Werkzeuge:
-✅ **BusyBox (aktuelle Version) mit allen gängigen Applets**  
-✅ **Mosquitto_pub (MQTT Client)**  
-✅ **OpenSSL für sichere Verbindungen**  
-✅ **cURL mit HTTPS-Unterstützung**  
-✅ **joe (einfacher Texteditor)**  
-✅ **SQLite3 und SQLCipher für Datenbankmanagement**  
-✅ **strace zur Prozessüberwachung und Fehlersuche**  
-✅ **tcpdump zur Netzwerkanalyse**  
+- **Configurable update server:** The server can be set in the configuration.
+- **Flexible update strategies:** Updates can be provided globally, by groups, or individually per camera ID.
+- **Version checking:** Before an update, the camera's current version is checked against the server to allow incremental updates.
 
-🚀 **LSCamoflash ist die beste Lösung, um LSC-Kameras von der Cloud zu befreien und volle Kontrolle über deine Geräte zu erhalten!** 🔥
+## SD Card Partitioning
 
-*Dieser Text wurde KI-generiert.*
+The SD card is partitioned so that formatting via the TUYA app does not remove the hack:
+
+- **Multiple partitions:** The first partition (`mmcblk0p1`) is formatted, while the second partition (`mmcblk0p2`) contains the important data.
+- **Automatic recovery:** A script (`services.sh`) checks the state of the partitions every 30 seconds and ensures that necessary files are automatically restored after formatting.
+
+**Note:** Avoid restarting the camera within 1 minute after formatting to ensure automatic recovery. If this happens, the required files can be manually copied to the first partition.
+
+## Notes on Motor Control
+
+Motor control is currently only compatible with older versions of the 1080p Indoor PTZ camera. The control option is only displayed in the web interface if the connected camera supports this function.
+
+## Planned Improvements
+
+- **Implementation of checksums:** Future versions will use checksums for external downloads to ensure file integrity.
+- **Review of `strace-log-merge`:** This tool is currently only used for internal purposes and may be removed in later versions.
+- **Reducing monitoring intervals:** Currently, `services.sh` checks the state of the partitions every 30 seconds. Future versions aim to shorten this interval for faster recovery.
