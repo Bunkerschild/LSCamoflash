@@ -233,16 +233,13 @@ if [ -e $sd_bin/anyka_ipc ]; then
 fi
 
 # Check, whether anyka_ipc_patched exists and if there are patches
-if [ ! -e $sd_bin/anyka_ipc_patched -a -n $PATCHES ]; then
-	echo -n "Creating patch copy of firmwares anyka_ipc..." 
-	$cp $sys_usr_bin/anyka_ipc $sd_bin && echo "done" || echo "failed"
-	echo -n "Patching anyka_ipc_patched..."
-	while read -r offset bytes; do
-		echo -ne "$bytes" | $dd of="$PATCHED_FILE" bs=1 seek=$((offset)) conv=notrunc
-	done <<EOF
-$PATCHES
-EOF
-	echo "done"
+if [ ! -e $sd_bin/anyka_ipc_patched -a -e $sd_bin/anyka_ipc ]; then
+	anyka_checksum=`$md5sum -b $sd_bin/anyka_ipc`
+	patch_file=`$find $sd_patch -type f -name "$anyka_checksum.ips.gz" | $awk '{print $1}'`
+	
+	if [ "$patch_file" != "" -a -f $patch_file ]; then
+		$sd_bin/apply_ips_patch.sh $patch_file $sd_bin/anyka_ipc $sd_bin/anyka_ipc_patched
+	fi
 fi
 
 # Check, whether ssl exists
