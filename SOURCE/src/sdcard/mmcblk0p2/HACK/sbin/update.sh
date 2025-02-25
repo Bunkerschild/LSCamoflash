@@ -2,7 +2,7 @@
 
 [ -n "$hack" -a -n "$update_url" -a -n "$device_uid" ] || exit 1
 
-VERSION=$(cat /mnt/HACK/etc/version.txt)
+VERSION=$(cat /tmp/sd/HACK/etc/version.txt)
 UPDATE_URL=$(echo $update_url | sed -e "s/%device_uid%/$device_uid/g")
 
 echo -n "Updater is starting up at " && date
@@ -16,7 +16,15 @@ V_REVISION=$(echo "$VERSION" | cut -d "." -f3)
 
 if [ -d "$sd_update" ]; then
 	echo "Installing update: $VERSION" >> $sd_log/update.log
-        $cp -av $sd_update/* $sd_path/ >> $sd_log/update.log 2>&1
+	mounted=`cat /proc/mounts | grep /dev/mmcblk0p1 | grep $sys_mnt | awk '{print $2}'`
+		
+	[ "$mounted" = "$sys_mnt" ] || mounted=`mount /dev/mmcblk0p1 $sys_mnt >/dev/null 2>&1 && echo 1`
+	[ -x "$sd_update/update-pre.sh" ] && $sd_update/update-pre.sh $VERSION >> $sd_log/update.log 2>&1
+        [ -d $sd_update/mmcblk0p1 ] && $cp -av $sd_update/mmcblk0p1/* $sys_mnt/ >> $sd_log/update.log 2>&1
+        [ -d $sd_update/mmcblk0p2 ] && $cp -av $sd_update/mmcblk0p2/* $sd_path/ >> $sd_log/update.log 2>&1
+	[ -x "$sd_update/update-post.sh" ] && $sd_update/update-post.sh $VERSION >> $sd_log/update.log 2>&1
+        [ "$mounted" = "1" ] && umount $sys_mnt >/dev/null 2>&1
+ 
         $rm -rf $sd_update
 	echo -n "Update installed: " >> $sd_log/update.log
 	date >> $sd_log/update.log
@@ -24,7 +32,7 @@ if [ -d "$sd_update" ]; then
         exit
 fi
 
-agent="LSCamoflash/$($cat /mnt/HACK/etc/version.txt);uid=$device_uid"
+agent="LSCamoflash/$VERSION;uid=$device_uid"
 curl_cmd="$curl -A $agent"
 
 [ "$update_ssl_ignore" = "1" ] && curl_cmd="$curl_cmd --insecure"
@@ -61,6 +69,7 @@ if [ "$U_MAJOR" -gt "$V_MAJOR" ] ||
                         $rm -f $updatetgz
                         echo $UPDATE > $sd_etc/version.txt
                         echo "Update from $VERSION to $UPDATE extracted" >> $sd_log/update.log
+                        [ -x "$sd_update/prepare.sh" ] && $sd_update/prepare.sh >> $sd_log/update.log
                         echo "Rebooting device" >> $sd_log/update.log
                         $touch /tmp/hostapd.reboot
         else
