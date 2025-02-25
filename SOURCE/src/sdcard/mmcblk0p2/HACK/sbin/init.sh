@@ -238,7 +238,7 @@ if [ ! -e $sd_bin/anyka_ipc_patched -a -e $sd_bin/anyka_ipc ]; then
 	patch_file=`$find $sd_patch -type f -name "$anyka_checksum.ips.gz" | $awk '{print $1}'`
 	
 	if [ "$patch_file" != "" -a -f $patch_file ]; then
-		$sd_bin/apply_ips_patch.sh $patch_file $sd_bin/anyka_ipc $sd_bin/anyka_ipc_patched
+		$sd_sbin/apply_ips_patch.sh $patch_file $sd_bin/anyka_ipc $sd_bin/anyka_ipc_patched
 	fi
 fi
 
