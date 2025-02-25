@@ -45,11 +45,11 @@ encoder_sub="H264"
 camera_model=`cat $sd_config/anyka_cfg.ini | grep "^dev_name" | awk '{print $3}'`
 camera_manufacturer="LSC"
 
-ONVIF_PROFILE_0="--name HD --width $hd_width --height $hd_height --url rtsp://$IP_ADDR:554/main_ch --type $encoder_main"
+ONVIF_PROFILE_0="--name HD --width $hd_width --height $hd_height --url rtsp://$IP_ADDR:88/videoMain --type $encoder_main"
 ONVIF_PROFILE_1=""
 
 if [ "$sd_width" != "" -a "$sd_height" != "" ]; then
-	ONVIF_PROFILE_1="--name SD --width $sd_width --height $sd_height --url rtsp://$IP_ADDR:554/sub_ch --type $encoder_sub"
+	ONVIF_PROFILE_1="--name SD --width $sd_width --height $sd_height --url rtsp://$IP_ADDR:89/videoSub --type $encoder_sub"
 fi
 
 echo $ONVIF_PROFILE_0
