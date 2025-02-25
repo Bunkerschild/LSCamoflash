@@ -234,7 +234,7 @@ fi
 
 # Check, whether anyka_ipc_patched exists and if there are patches
 if [ ! -e $sd_bin/anyka_ipc_patched -a -e $sd_bin/anyka_ipc ]; then
-	anyka_checksum=`$md5sum -b $sd_bin/anyka_ipc`
+	anyka_checksum=`$md5sum -b $sd_bin/anyka_ipc | $awk '{print $1}'`
 	patch_file=`$find $sd_patch -type f -name "$anyka_checksum.ips.gz" | $awk '{print $1}'`
 	
 	if [ "$patch_file" != "" -a -f $patch_file ]; then
