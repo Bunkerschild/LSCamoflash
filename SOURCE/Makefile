@@ -512,10 +512,7 @@ $(PACKAGES_DIR)/$(FFMPEG)/ffbuild/config.mak:
 	@cd $(PACKAGES_DIR)/$(FFMPEG); ./configure --prefix=$(SDROOT) --arch=arm --cross-prefix=$(HOST)- --target-os=linux \
 	--extra-cflags="-Dstatic_assert=_Static_assert -I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/include/opus -I$(STAGING_DIR)/$(SDROOT)/include/openjpeg-2.5" \
 	--extra-ldflags="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -lgmp -lgcrypt -lgpg-error -lilbc -lopenjp2 -lopus" \
-	--enable-cross-compile --disable-asm --stdc=c11 --disable-pthreads --disable-doc --enable-ffmpeg --enable-ffplay --enable-ffprobe \
-	--enable-zlib --enable-gmp --enable-gcrypt --enable-gpl --enable-version3 \
-	--enable-libilbc --enable-libopus
-	#--enable-libopenjpeg --enable-libx264 --enable-libx265 --enable-libvvenc --enable-librtmp --enable-libxeve --enable-libxevd --enable-libxavs --enable-libxavs2
+	--enable-cross-compile --stdc=c11 --disable-doc --enable-zlib --enable-gmp --enable-gcrypt --enable-gpl --enable-version3 --enable-libilbc --enable-libopus
 	
 $(PACKAGES_DIR)/$(FFMPEG)/ffprobe: $(PACKAGES_DIR)/$(FFMPEG)/ffbuild/config.mak
 	@make -C $(PACKAGES_DIR)/$(FFMPEG) -j$(nproc)
@@ -617,6 +614,9 @@ $(BUILD_HACK)/sbin/onvif_srvd:
 $(BUILD_HACK)/bin/ffprobe:
 	@cp $(STAGE_HACK)/bin/ffprobe $@
 
+$(BUILD_HACK)/bin/ffmpeg:
+	@cp $(STAGE_HACK)/bin/ffmpeg $@
+
 $(BUILD_HACK)/bin/opj_dump:
 	@cp $(STAGE_HACK)/bin/opj_dump $@
 
@@ -629,7 +629,7 @@ $(BUILD_HACK)/bin/opj_decompress:
 $(BUILD_HACK)/etc/version.txt: 
 	@cp version.txt $@
 
-build: $(BUILD_DIR)/install.ps1 $(BUILD_HACK)/bin/ffprobe $(BUILD_HACK)/bin/opj_dump $(BUILD_HACK)/bin/opj_compress $(BUILD_HACK)/bin/opj_decompress $(BUILD_HACK)/sbin/onvif_srvd $(BUILD_HACK)/bin/upnpc $(BUILD_HACK)/bin/tcpdump-static $(BUILD_HACK)/bin/tcpdump $(BUILD_HACK)/bin/strace-log-merge $(BUILD_HACK)/bin/strace $(BUILD_HACK)/bin/sqlite3 $(BUILD_HACK)/bin/sqlcipher $(BUILD_HACK)/bin/pcap-config $(BUILD_HACK)/bin/openssl $(BUILD_HACK)/sbin/msmtpd $(BUILD_HACK)/bin/msmtp $(BUILD_HACK)/bin/joe $(BUILD_HACK)/bin/curl-config $(BUILD_HACK)/bin/curl $(BUILD_HACK)/bin/busybox $(BUILD_HACK)/bin/mosquitto_rr $(BUILD_HACK)/bin/mosquitto_pub $(BUILD_HACK)/bin/mosquitto_sub $(BUILD_HACK)/bin/mosquitto_passwd $(BUILD_HACK)/sbin/mosquitto $(BUILD_HACK)/etc/version.txt
+build: $(BUILD_DIR)/install.ps1 $(BUILD_HACK)/bin/ffmpeg $(BUILD_HACK)/bin/ffprobe $(BUILD_HACK)/bin/opj_dump $(BUILD_HACK)/bin/opj_compress $(BUILD_HACK)/bin/opj_decompress $(BUILD_HACK)/sbin/onvif_srvd $(BUILD_HACK)/bin/upnpc $(BUILD_HACK)/bin/tcpdump-static $(BUILD_HACK)/bin/tcpdump $(BUILD_HACK)/bin/strace-log-merge $(BUILD_HACK)/bin/strace $(BUILD_HACK)/bin/sqlite3 $(BUILD_HACK)/bin/sqlcipher $(BUILD_HACK)/bin/pcap-config $(BUILD_HACK)/bin/openssl $(BUILD_HACK)/sbin/msmtpd $(BUILD_HACK)/bin/msmtp $(BUILD_HACK)/bin/joe $(BUILD_HACK)/bin/curl-config $(BUILD_HACK)/bin/curl $(BUILD_HACK)/bin/busybox $(BUILD_HACK)/bin/mosquitto_rr $(BUILD_HACK)/bin/mosquitto_pub $(BUILD_HACK)/bin/mosquitto_sub $(BUILD_HACK)/bin/mosquitto_passwd $(BUILD_HACK)/sbin/mosquitto $(BUILD_HACK)/etc/version.txt
 	
 build-clean:
 	@rm -rf $(BUILD_DIR)
