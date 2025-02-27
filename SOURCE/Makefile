@@ -629,7 +629,12 @@ $(BUILD_HACK)/bin/opj_compress:
 $(BUILD_HACK)/bin/opj_decompress:
 	@cp $(STAGE_HACK)/bin/opj_decompress $@
 
-$(BUILD_HACK)/etc/version.txt: 
+$(BUILD_HACK)/etc/version.txt:
+	@find $(BUILD_HACK)/lib -name "*.a" -exec rm {} \;
+	@find $(BUILD_HACK)/lib -name "*.la" -exec rm {} \;
+	@find $(BUILD_HACK)/lib -name "*.pc" -exec rm {} \;
+	@find $(BUILD_HACK)/lib -name "*.cmake" -exec rm {} \;
+	@rm -rf $(BUILD_HACK)/usr/share/locale
 	@cp version.txt $@
 
 build: $(BUILD_DIR)/install.ps1 $(BUILD_HACK)/bin/ffmpeg $(BUILD_HACK)/bin/ffprobe $(BUILD_HACK)/bin/opj_dump $(BUILD_HACK)/bin/opj_compress $(BUILD_HACK)/bin/opj_decompress $(BUILD_HACK)/sbin/onvif_srvd $(BUILD_HACK)/bin/upnpc $(BUILD_HACK)/bin/tcpdump-static $(BUILD_HACK)/bin/tcpdump $(BUILD_HACK)/bin/strace-log-merge $(BUILD_HACK)/bin/strace $(BUILD_HACK)/bin/sqlite3 $(BUILD_HACK)/bin/sqlcipher $(BUILD_HACK)/bin/pcap-config $(BUILD_HACK)/bin/openssl $(BUILD_HACK)/sbin/msmtpd $(BUILD_HACK)/bin/msmtp $(BUILD_HACK)/bin/joe $(BUILD_HACK)/bin/curl-config $(BUILD_HACK)/bin/curl $(BUILD_HACK)/bin/busybox $(BUILD_HACK)/bin/mosquitto_rr $(BUILD_HACK)/bin/mosquitto_pub $(BUILD_HACK)/bin/mosquitto_sub $(BUILD_HACK)/bin/mosquitto_passwd $(BUILD_HACK)/sbin/mosquitto $(BUILD_HACK)/etc/version.txt
