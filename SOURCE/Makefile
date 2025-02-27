@@ -31,6 +31,8 @@ GCC := $(TOOLCHAIN_PATH)/bin/$(HOST)-g++
 CXX := $(TOOLCHAIN_PATH)/bin/$(HOST)-g++
 CPP := $(TOOLCHAIN_PATH)/bin/$(HOST)-cpp
 AR := $(TOOLCHAIN_PATH)/bin/$(HOST)-ar
+NM := $(TOOLCHAIN_PATH)/bin/$(HOST)-nm
+LD := $(TOOLCHAIN_PATH)/bin/$(HOST)-ld
 RANLIB := $(TOOLCHAIN_PATH)/bin/$(HOST)-ranlib
 STRIP := $(TOOLCHAIN_PATH)/bin/$(HOST)-strip
 CROSS_PREFIX := $(HOST)
@@ -52,6 +54,13 @@ MOSQUITTO := mosquitto-2.0.20
 CJSON := cJSON-1.7.18
 GSOAP := gsoap-2.8
 ONVIF := onvif_srvd-1.1
+GMP := gmp-6.3.0
+LIBGPG_ERROR := libgpg-error-1.51
+LIBGCRYPT := libgcrypt-1.11.0
+LIBILBC := libilbc-3.0.4
+OPENJPEG := openjpeg-2.5.3
+OPUS := opus-1.5.2
+FFMPEG := ffmpeg-7.1
 
 # Exportiere die Variablen für alle Ziele
 export TOOLCHAIN_PATH PKG_CONFIG_PATH PATH C CC GCC CXX CPP AR RANLIB CROSS_PREFIX
@@ -75,6 +84,13 @@ URLS := \
     https://github.com/eclipse-mosquitto/mosquitto/archive/refs/tags/v2.0.20.tar.gz\#f=/$(MOSQUITTO).tar.gz \
     https://sourceforge.net/projects/gsoap2/files/gsoap_2.8.137.zip/download\#f=/$(GSOAP).zip \
     https://github.com/KoynovStas/onvif_srvd/archive/refs/tags/v1.1.tar.gz\#f=/$(ONVIF).tar.gz \
+    https://ffmpeg.org/releases/ffmpeg-7.1.tar.xz \
+    https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz \
+    https://www.gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.51.tar.bz2 \
+    https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-1.11.0.tar.bz2 \
+    https://github.com/TimothyGu/libilbc/releases/download/v3.0.4/libilbc-3.0.4.tar.gz \
+    https://github.com/uclouvain/openjpeg/archive/refs/tags/v2.5.3.tar.gz\#f=/$(OPENJPEG).tar.gz \
+    https://downloads.xiph.org/releases/opus/opus-1.5.2.tar.gz \
     https://github.com/miniupnp/miniupnp/archive/refs/tags/$(MINIUPNPC).tar.gz
 
 # Ziele definieren
@@ -382,7 +398,138 @@ onvif-clean:
 	@rm -rf $(PACKAGES_DIR)/$(ONVIF)/build
 	@rm $(PACKAGES_DIR)/$(ONVIF)/onvif-config
 
-staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif
+$(PACKAGES_DIR)/$(LIBGPG_ERROR)/Makefile:
+	@ln -sf $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/syscfg/lock-obj-pub.arm-unknown-linux-gnueabi.h $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/syscfg/lock-obj-pub.linux-uclibcgnueabi.h
+	@cd $(PACKAGES_DIR)/$(LIBGPG_ERROR); ./configure --prefix=$(SDROOT) --enable-static --with-gnu-ld --host=$(HOST) --disable-nls \
+	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/usr/include" LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib"
+	
+$(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/libgpg-error.la: $(PACKAGES_DIR)/$(LIBGPG_ERROR)/Makefile
+	@make -C $(PACKAGES_DIR)/$(LIBGPG_ERROR) -j$(nproc)
+	
+$(STAGING_DIR)/$(SDROOT)/lib/libgpg-error.la: $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/libgpg-error.la
+	@cp $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/gpg-error-config $(STAGING_DIR)/$(SDROOT)/bin
+	@sed -i -e "s|prefix=$(SDROOT)|prefix=$(STAGING_DIR)/$(SDROOT)|g" $(STAGING_DIR)/$(SDROOT)/bin/gpg-error-config
+	@make -C $(PACKAGES_DIR)/$(LIBGPG_ERROR) install DESTDIR=$(STAGING_DIR)
+	
+libgpg-error: $(STAGING_DIR)/$(SDROOT)/lib/libgpg-error.la
+
+libgpg-error-clean:
+	@make -C $(PACKAGES_DIR)/$(LIBGPG_ERROR) clean distclean
+
+$(PACKAGES_DIR)/$(LIBGCRYPT)/Makefile:
+	@cd $(PACKAGES_DIR)/$(LIBGCRYPT); ./configure --prefix=$(SDROOT) --enable-static --enable-cxx --with-gnu-ld --host=$(HOST) --disable-asm \
+	 --disable-jent-support --disable-padlock-support --disable-aesni-support --disable-shaext-support --disable-pclmul-support --disable-sse41-support \
+	 --disable-drng-support --disable-avx-support --disable-avx2-support --disable-avx512-support --disable-gfni-support --disable-sve-support --disable-sve2-support --disable-ppc-crypto-support \
+ 	 --disable-doc --disable-optimization --disable-amd64-as-feature-detection --disable-instrumentation-munging --disable-O-flag-munging --enable-static \
+	 --with-libgpg-error-prefix=$(STAGING_DIR)/$(SDROOT) CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/usr/include" LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -lgpg-error"
+	
+$(PACKAGES_DIR)/$(LIBGCRYPT)/src/libgcrypt.la: $(PACKAGES_DIR)/$(LIBGCRYPT)/Makefile
+	@make -C $(PACKAGES_DIR)/$(LIBGCRYPT) -j$(nproc)
+	
+$(STAGING_DIR)/$(SDROOT)/lib/libgcrypt.la: $(PACKAGES_DIR)/$(LIBGCRYPT)/src/libgcrypt.la
+	@make -C $(PACKAGES_DIR)/$(LIBGCRYPT) install DESTDIR=$(STAGING_DIR)
+	
+libgcrypt: $(STAGING_DIR)/$(SDROOT)/lib/libgcrypt.la
+
+libgcrypt-clean:
+	@make -C $(PACKAGES_DIR)/$(LIBGCRYPT) clean distclean
+
+$(PACKAGES_DIR)/$(GMP)/Makefile:
+	@cd $(PACKAGES_DIR)/$(GMP); ./configure --prefix=$(SDROOT) --enable-static --enable-cxx --with-gnu-ld --host=$(HOST)
+	
+$(PACKAGES_DIR)/$(GMP)/libgmp.la: $(PACKAGES_DIR)/$(GMP)/Makefile
+	@make -C $(PACKAGES_DIR)/$(GMP) -j$(nproc)
+	
+$(STAGING_DIR)/$(SDROOT)/lib/libgmp.la: $(PACKAGES_DIR)/$(GMP)/libgmp.la
+	@make -C $(PACKAGES_DIR)/$(GMP) install DESTDIR=$(STAGING_DIR)
+	
+gmp: $(STAGING_DIR)/$(SDROOT)/lib/libgmp.la
+
+gmp-clean:
+	@make -C $(PACKAGES_DIR)/$(GMP) clean distclean
+
+$(PACKAGES_DIR)/$(LIBILBC)/build-shared/Makefile:
+	@mkdir -p $(PACKAGES_DIR)/$(LIBILBC)/build-shared
+	@cd $(PACKAGES_DIR)/$(LIBILBC)/build-shared; cmake .. -DBUILD_SHARED_LIBS=on -DCMAKE_INSTALL_PREFIX=$(STAGING_DIR)/$(SDROOT)
+		
+$(PACKAGES_DIR)/$(LIBILBC)/build-static/Makefile:
+	@mkdir -p $(PACKAGES_DIR)/$(LIBILBC)/build-static
+	@cd $(PACKAGES_DIR)/$(LIBILBC)/build-static; cmake .. -DBUILD_SHARED_LIBS=off -DCMAKE_INSTALL_PREFIX=$(STAGING_DIR)/$(SDROOT)
+		
+$(PACKAGES_DIR)/$(LIBILBC)/build-shared/libilbc.so: $(PACKAGES_DIR)/$(LIBILBC)/build-shared/Makefile
+	@make -C $(PACKAGES_DIR)/$(LIBILBC)/build-shared -j$(nproc)
+	
+$(PACKAGES_DIR)/$(LIBILBC)/build-static/libilbc.a: $(PACKAGES_DIR)/$(LIBILBC)/build-static/Makefile
+	@make -C $(PACKAGES_DIR)/$(LIBILBC)/build-static -j$(nproc)
+		
+$(STAGING_DIR)/$(SDROOT)/lib/libilbc.so: $(PACKAGES_DIR)/$(LIBILBC)/build-shared/libilbc.so
+	@make -C $(PACKAGES_DIR)/$(LIBILBC)/build-shared install
+	@touch $@
+	
+$(STAGING_DIR)/$(SDROOT)/lib/libilbc.a: $(PACKAGES_DIR)/$(LIBILBC)/build-static/libilbc.a
+	@make -C $(PACKAGES_DIR)/$(LIBILBC)/build-static install
+	@touch $@
+		
+libilbc: $(STAGING_DIR)/$(SDROOT)/lib/libilbc.a $(STAGING_DIR)/$(SDROOT)/lib/libilbc.so
+
+libilbc-clean:
+	@rm -rf $(PACKAGES_DIR)/$(LIBILBC)/build-shared
+	@rm -rf $(PACKAGES_DIR)/$(LIBILBC)/build-static
+
+$(PACKAGES_DIR)/$(OPENJPEG)/build/Makefile:
+	@mkdir -p $(PACKAGES_DIR)/$(OPENJPEG)/build
+	@cd $(PACKAGES_DIR)/$(OPENJPEG)/build; cmake .. -DCMAKE_INSTALL_PREFIX=$(STAGING_DIR)/$(SDROOT)
+	
+$(PACKAGES_DIR)/$(OPENJPEG)/libopenjp2.a: $(PACKAGES_DIR)/$(OPENJPEG)/build/Makefile
+	@make -C $(PACKAGES_DIR)/$(OPENJPEG)/build -j$(nproc)
+	@touch $@
+	
+$(STAGING_DIR)/$(SDROOT)/lib/libopenjp2.a: $(PACKAGES_DIR)/$(OPENJPEG)/libopenjp2.a
+	@make -C $(PACKAGES_DIR)/$(OPENJPEG)/build install
+	@touch $@
+	
+openjpeg: $(STAGING_DIR)/$(SDROOT)/lib/libopenjp2.a
+
+openjpeg-clean:
+	@make -C $(PACKAGES_DIR)/$(OPENJPEG) clean distclean
+
+$(PACKAGES_DIR)/$(OPUS)/Makefile:
+	@cd $(PACKAGES_DIR)/$(OPUS); ./configure --prefix=$(SDROOT) --enable-static --with-gnu-ld --host=$(HOST)
+	
+$(PACKAGES_DIR)/$(OPUS)/libopus.la: $(PACKAGES_DIR)/$(OPUS)/Makefile
+	@make -C $(PACKAGES_DIR)/$(OPUS) -j$(nproc)
+	
+$(STAGING_DIR)/$(SDROOT)/lib/libopus.la: $(PACKAGES_DIR)/$(OPUS)/libopus.la
+	@make -C $(PACKAGES_DIR)/$(OPUS) install DESTDIR=$(STAGING_DIR)
+	
+opus: $(STAGING_DIR)/$(SDROOT)/lib/libopus.la
+
+opus-clean:
+	@make -C $(PACKAGES_DIR)/$(OPUS) clean distclean
+
+$(PACKAGES_DIR)/$(FFMPEG)/ffbuild/config.mak:
+	@cp ./ffmpeg-configure $(PACKAGES_DIR)/$(FFMPEG)/configure
+	@cd $(PACKAGES_DIR)/$(FFMPEG); ./configure --prefix=$(SDROOT) --arch=arm --cross-prefix=$(HOST)- --target-os=linux \
+	--extra-cflags="-Dstatic_assert=_Static_assert -I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/include/opus -I$(STAGING_DIR)/$(SDROOT)/include/openjpeg-2.5" \
+	--extra-ldflags="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -lgmp -lgcrypt -lgpg-error -lilbc -lopenjp2 -lopus" \
+	--enable-cross-compile --disable-asm --stdc=c11 --disable-pthreads --disable-doc --enable-ffmpeg --enable-ffplay --enable-ffprobe \
+	--enable-zlib --enable-gmp --enable-gcrypt --enable-gpl --enable-version3 \
+	--enable-libilbc --enable-libopus
+	#--enable-libopenjpeg --enable-libx264 --enable-libx265 --enable-libvvenc --enable-librtmp --enable-libxeve --enable-libxevd --enable-libxavs --enable-libxavs2
+	
+$(PACKAGES_DIR)/$(FFMPEG)/ffprobe: $(PACKAGES_DIR)/$(FFMPEG)/ffbuild/config.mak
+	@make -C $(PACKAGES_DIR)/$(FFMPEG) -j$(nproc)
+	
+$(STAGING_DIR)/$(SDROOT)/bin/ffprobe: $(PACKAGES_DIR)/$(FFMPEG)/ffprobe
+	@make -C $(PACKAGES_DIR)/$(FFMPEG) install DESTDIR=$(STAGING_DIR)
+	@touch $@
+	
+ffmpeg: $(STAGING_DIR)/$(SDROOT)/bin/ffprobe
+
+ffmpeg-clean:
+	@make -C $(PACKAGES_DIR)/$(FFMPEG) clean distclean
+
+staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif opus openjpeg libilbc libgpg-error gmp libgcrypt ffmpeg
 
 $(BUILD_DIR)/install.ps1: $(BUILD_DIR)
 	@cp -aL $(SRC_DIR)/sdcard/* $(BUILD_DIR)
@@ -467,10 +614,22 @@ $(BUILD_HACK)/sbin/onvif_srvd:
 	@chmod +x $@
 	@touch $@
 	
+$(BUILD_HACK)/bin/ffprobe:
+	@cp $(STAGE_HACK)/bin/ffprobe $@
+
+$(BUILD_HACK)/bin/opj_dump:
+	@cp $(STAGE_HACK)/bin/opj_dump $@
+
+$(BUILD_HACK)/bin/opj_compress:
+	@cp $(STAGE_HACK)/bin/opj_compress $@
+
+$(BUILD_HACK)/bin/opj_decompress:
+	@cp $(STAGE_HACK)/bin/opj_decompress $@
+
 $(BUILD_HACK)/etc/version.txt: 
 	@cp version.txt $@
 
-build: $(BUILD_DIR)/install.ps1 $(BUILD_HACK)/sbin/onvif_srvd $(BUILD_HACK)/bin/upnpc $(BUILD_HACK)/bin/tcpdump-static $(BUILD_HACK)/bin/tcpdump $(BUILD_HACK)/bin/strace-log-merge $(BUILD_HACK)/bin/strace $(BUILD_HACK)/bin/sqlite3 $(BUILD_HACK)/bin/sqlcipher $(BUILD_HACK)/bin/pcap-config $(BUILD_HACK)/bin/openssl $(BUILD_HACK)/sbin/msmtpd $(BUILD_HACK)/bin/msmtp $(BUILD_HACK)/bin/joe $(BUILD_HACK)/bin/curl-config $(BUILD_HACK)/bin/curl $(BUILD_HACK)/bin/busybox $(BUILD_HACK)/bin/mosquitto_rr $(BUILD_HACK)/bin/mosquitto_pub $(BUILD_HACK)/bin/mosquitto_sub $(BUILD_HACK)/bin/mosquitto_passwd $(BUILD_HACK)/sbin/mosquitto $(BUILD_HACK)/etc/version.txt
+build: $(BUILD_DIR)/install.ps1 $(BUILD_HACK)/bin/ffprobe $(BUILD_HACK)/bin/opj_dump $(BUILD_HACK)/bin/opj_compress $(BUILD_HACK)/bin/opj_decompress $(BUILD_HACK)/sbin/onvif_srvd $(BUILD_HACK)/bin/upnpc $(BUILD_HACK)/bin/tcpdump-static $(BUILD_HACK)/bin/tcpdump $(BUILD_HACK)/bin/strace-log-merge $(BUILD_HACK)/bin/strace $(BUILD_HACK)/bin/sqlite3 $(BUILD_HACK)/bin/sqlcipher $(BUILD_HACK)/bin/pcap-config $(BUILD_HACK)/bin/openssl $(BUILD_HACK)/sbin/msmtpd $(BUILD_HACK)/bin/msmtp $(BUILD_HACK)/bin/joe $(BUILD_HACK)/bin/curl-config $(BUILD_HACK)/bin/curl $(BUILD_HACK)/bin/busybox $(BUILD_HACK)/bin/mosquitto_rr $(BUILD_HACK)/bin/mosquitto_pub $(BUILD_HACK)/bin/mosquitto_sub $(BUILD_HACK)/bin/mosquitto_passwd $(BUILD_HACK)/sbin/mosquitto $(BUILD_HACK)/etc/version.txt
 	
 build-clean:
 	@rm -rf $(BUILD_DIR)
@@ -489,7 +648,7 @@ toolchain-clean:
 
 mrproper: staging-clean packages-clean download-clean toolchain-clean build-clean
 	
-clean: onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
+clean: ffmpeg-clean opus-clean openjpeg-clean libilbc-clean libgpg-error-clean gmp-clean libgcrypt-clean onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
 
 LSCamoflash-$(VERSION).tar.gz: download toolchain packages staging build
 	@tar -C $(BUILD_DIR) -cvzf $@ .
