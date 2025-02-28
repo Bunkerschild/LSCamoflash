@@ -749,6 +749,8 @@ toolchain-clean:
 	@rm -rf $(TOOLCHAIN_DIR)
 
 mrproper: staging-clean packages-clean download-clean toolchain-clean build-clean
+	@rm -f $(ROOT_DIR)/LSCamoflash-*.tar.gz || true
+	@rm -f $(ROOT_DIR)/update-*.tgz || true
 	
 clean: radare2-clean libexecinfo-clean ffmpeg-clean opus-clean openjpeg-clean libilbc-clean libgpg-error-clean gmp-clean libgcrypt-clean onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
 
