@@ -556,22 +556,22 @@ $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h: $(PACKAGES_DIR)/$(RADARE2)/plugi
 	@cp $(ROOT_DIR)/radare2-fenv.h $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h
 	@touch $@
 
-$(PACKAGES_DIR)/$(RADARE2)/binr/radate2/radare2: $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h
+$(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2: $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h
 	@cp $(STAGING_DIR)/$(SDROOT)/include/execinfo.h $(PACKAGES_DIR)/$(RADARE2)/libr/include
 	@make -C $(PACKAGES_DIR)/$(RADARE2) -j$(nproc) \
 	CPPFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/sysroot/usr/include -L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/usr/lib -lexecinfo -latomic" 
 	
 $(STAGING_DIR)/$(SDROOT)/bin/radare2: $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2
 	@make -C $(PACKAGES_DIR)/$(RADARE2) install DESTDIR=$(STAGING_DIR)
-	@rm $(STAGING_DIR)/$(SDROOT)/lib/radare2/last || true
 	@rm $(STAGING_DIR)/$(SDROOT)/lib/radare2/5.9.8/5.9.8 || true
-	@cp -a $(STAGING_DIR)/$(SDROOT)/lib/radare2/5.9.8 $(STAGING_DIR)/$(SDROOT)/lib/radare2/last || true
+	@rm $(STAGING_DIR)/$(SDROOT)/lib/radare2/last/5.9.8 || true
 	@touch $@
 	
 radare2: $(STAGING_DIR)/$(SDROOT)/bin/radare2
 
 radare2-clean:
 	@make -C $(PACKAGES_DIR)/$(RADARE2) clean distclean
+	@rm $(STAGING_DIR)/$(SDROOT)/bin/radare2
 
 staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif opus openjpeg libilbc libgpg-error gmp libgcrypt ffmpeg libexecinfo radare2
 
