@@ -662,7 +662,13 @@ LSCamoflash-$(VERSION).tar.gz: download toolchain packages staging build
 	@tar -C $(BUILD_DIR) -cvzf $@ .
 	@touch $@
 	
+update-$(VERSION).tgz: download toolchain packages staging build
+	@tar -C $(BUILD_DIR) -cvzf $@ --exclude=mmcblk0p2/HACK/etc --exclude=mmcblk0p2/HACK/var/spool/cron/crontabs/root mmcblk0p1 mmcblk0p2
+	@touch $@
+	
 release: LSCamoflash-$(VERSION).tar.gz
+
+update: update-$(VERSION).tgz
 
 install: all
 	@cd $(BUILD_DIR); sh install.sh
