@@ -61,6 +61,8 @@ LIBILBC := libilbc-3.0.4
 OPENJPEG := openjpeg-2.5.3
 OPUS := opus-1.5.2
 FFMPEG := ffmpeg-7.1
+LIBEXECINFO := libexecinfo-1.1
+RADARE2 := radare2-5.9.8
 
 # Exportiere die Variablen für alle Ziele
 export TOOLCHAIN_PATH PKG_CONFIG_PATH PATH C CC GCC CXX CPP AR RANLIB CROSS_PREFIX
@@ -91,6 +93,8 @@ URLS := \
     https://github.com/TimothyGu/libilbc/releases/download/v3.0.4/libilbc-3.0.4.tar.gz \
     https://github.com/uclouvain/openjpeg/archive/refs/tags/v2.5.3.tar.gz\#f=/$(OPENJPEG).tar.gz \
     https://downloads.xiph.org/releases/opus/opus-1.5.2.tar.gz \
+    https://github.com/radareorg/radare2/archive/refs/tags/5.9.8.tar.gz\#f=/$(RADARE2).tar.gz \
+    https://github.com/Bunkerschild/libexecinfo/archive/refs/tags/v1.1.tar.gz\#f=/$(LIBEXECINFO).tar.gz \
     https://github.com/miniupnp/miniupnp/archive/refs/tags/$(MINIUPNPC).tar.gz
 
 # Ziele definieren
@@ -529,7 +533,44 @@ ffmpeg: $(STAGING_DIR)/$(SDROOT)/bin/ffprobe
 ffmpeg-clean:
 	@make -C $(PACKAGES_DIR)/$(FFMPEG) clean distclean
 
-staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif opus openjpeg libilbc libgpg-error gmp libgcrypt ffmpeg
+$(PACKAGES_DIR)/$(LIBEXECINFO)/libexecinfo.so:
+	@make -C $(PACKAGES_DIR)/$(LIBEXECINFO) -j$(nproc)
+	@touch $@
+	
+$(STAGING_DIR)/$(SDROOT)/lib/libexecinfo.so: $(PACKAGES_DIR)/$(LIBEXECINFO)/libexecinfo.so
+	@make -C $(PACKAGES_DIR)/$(LIBEXECINFO) install PREFIX=$(SDROOT) DESTDIR=$(STAGING_DIR)
+	@touch $@
+	
+libexecinfo: $(STAGING_DIR)/$(SDROOT)/lib/libexecinfo.so
+
+libexecinfo-clean:
+	@make -C $(PACKAGES_DIR)/$(LIBEXECINFO) clean
+
+$(PACKAGES_DIR)/$(RADARE2)/plugins.cfg:
+	@cd $(PACKAGES_DIR)/$(RADARE2); ./configure --prefix=$(SDROOT) --host=$(HOST) --with-static-themes --with-ssl --with-ostype=gnulinux \
+	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/sysroot/usr/include" \
+	LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/usr/lib -lssl -lz -lexecinfo -latomic"
+	@touch $@
+
+$(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h: $(PACKAGES_DIR)/$(RADARE2)/plugins.cfg
+	@cp $(ROOT_DIR)/radare2-fenv.h $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h
+	@touch $@
+
+$(PACKAGES_DIR)/$(RADARE2)/binr/radate2/radare2: $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h
+	@cp $(STAGING_DIR)/$(SDROOT)/include/execinfo.h $(PACKAGES_DIR)/$(RADARE2)/libr/include
+	@make -C $(PACKAGES_DIR)/$(RADARE2) -j$(nproc) \
+	CPPFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/sysroot/usr/include -L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/usr/lib -lexecinfo -latomic" 
+	
+$(STAGING_DIR)/$(SDROOT)/bin/radare2: $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2
+	@make -C $(PACKAGES_DIR)/$(RADARE2) install DESTDIR=$(STAGING_DIR)
+	@touch $@
+	
+radare2: $(STAGING_DIR)/$(SDROOT)/bin/radare2
+
+radare2-clean:
+	@make -C $(PACKAGES_DIR)/$(RADARE2) clean distclean
+
+staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif opus openjpeg libilbc libgpg-error gmp libgcrypt ffmpeg libexecinfo radare2
 
 $(BUILD_DIR)/install.ps1: $(BUILD_DIR)
 	@cp -aL $(SRC_DIR)/sdcard/* $(BUILD_DIR)
@@ -629,6 +670,50 @@ $(BUILD_HACK)/bin/opj_compress:
 $(BUILD_HACK)/bin/opj_decompress:
 	@cp $(STAGE_HACK)/bin/opj_decompress $@
 
+$(BUILD_HACK)/bin/radare2:
+	@cp $(STAGE_HACK)/bin/radare2 $(BUILD_HACK)/bin/r2
+	@cp $(STAGE_HACK)/bin/radare2 $(BUILD_HACK)/bin/r2p
+	@cp $(STAGE_HACK)/bin/radare2 $@
+
+$(BUILD_HACK)/bin/r2agent:
+	@cp $(STAGE_HACK)/bin/r2agent $@
+
+$(BUILD_HACK)/bin/r2r:
+	@cp $(STAGE_HACK)/bin/r2r $@
+
+$(BUILD_HACK)/bin/rasign2:
+	@cp $(STAGE_HACK)/bin/rasign2 $@
+
+$(BUILD_HACK)/bin/rax2:
+	@cp $(STAGE_HACK)/bin/rax2 $@
+
+$(BUILD_HACK)/bin/ragg2:
+	@cp $(STAGE_HACK)/bin/ragg2 $@
+
+$(BUILD_HACK)/bin/rarun2:
+	@cp $(STAGE_HACK)/bin/rarun2 $@
+
+$(BUILD_HACK)/bin/rabin2:
+	@cp $(STAGE_HACK)/bin/rabin2 $@
+
+$(BUILD_HACK)/bin/radiff2:
+	@cp $(STAGE_HACK)/bin/radiff2 $@
+
+$(BUILD_HACK)/bin/ravc2:
+	@cp $(STAGE_HACK)/bin/ravc2 $@
+
+$(BUILD_HACK)/bin/rahash2:
+	@cp $(STAGE_HACK)/bin/rahash2 $@
+
+$(BUILD_HACK)/bin/rafind2:
+	@cp $(STAGE_HACK)/bin/rafind2 $@
+
+$(BUILD_HACK)/bin/r2pm:
+	@cp $(STAGE_HACK)/bin/r2pm $@
+
+$(BUILD_HACK)/bin/rasm2:
+	@cp $(STAGE_HACK)/bin/rasm2 $@
+
 $(BUILD_HACK)/etc/version.txt:
 	@find $(BUILD_HACK)/lib -name "*.a" -exec rm {} \;
 	@find $(BUILD_HACK)/lib -name "*.la" -exec rm {} \;
@@ -637,7 +722,12 @@ $(BUILD_HACK)/etc/version.txt:
 	@rm -rf $(BUILD_HACK)/usr/share/locale
 	@cp version.txt $@
 
-build: $(BUILD_DIR)/install.ps1 $(BUILD_HACK)/bin/ffmpeg $(BUILD_HACK)/bin/ffprobe $(BUILD_HACK)/bin/opj_dump $(BUILD_HACK)/bin/opj_compress $(BUILD_HACK)/bin/opj_decompress $(BUILD_HACK)/sbin/onvif_srvd $(BUILD_HACK)/bin/upnpc $(BUILD_HACK)/bin/tcpdump-static $(BUILD_HACK)/bin/tcpdump $(BUILD_HACK)/bin/strace-log-merge $(BUILD_HACK)/bin/strace $(BUILD_HACK)/bin/sqlite3 $(BUILD_HACK)/bin/sqlcipher $(BUILD_HACK)/bin/pcap-config $(BUILD_HACK)/bin/openssl $(BUILD_HACK)/sbin/msmtpd $(BUILD_HACK)/bin/msmtp $(BUILD_HACK)/bin/joe $(BUILD_HACK)/bin/curl-config $(BUILD_HACK)/bin/curl $(BUILD_HACK)/bin/busybox $(BUILD_HACK)/bin/mosquitto_rr $(BUILD_HACK)/bin/mosquitto_pub $(BUILD_HACK)/bin/mosquitto_sub $(BUILD_HACK)/bin/mosquitto_passwd $(BUILD_HACK)/sbin/mosquitto $(BUILD_HACK)/etc/version.txt
+build: $(BUILD_DIR)/install.ps1 $(BUILD_HACK)/bin/radare2 $(BUILD_HACK)/bin/r2agent $(BUILD_HACK)/bin/r2r $(BUILD_HACK)/bin/rasign2 $(BUILD_HACK)/bin/rax2 $(BUILD_HACK)/bin/ragg2 $(BUILD_HACK)/bin/rarun2 $(BUILD_HACK)/bin/rabin2 \
+       $(BUILD_HACK)/bin/radiff2 $(BUILD_HACK)/bin/ravc2 $(BUILD_HACK)/bin/rahash2 $(BUILD_HACK)/bin/rafind2 $(BUILD_HACK)/bin/r2pm $(BUILD_HACK)/bin/rasm2 $(BUILD_HACK)/bin/ffmpeg $(BUILD_HACK)/bin/ffprobe $(BUILD_HACK)/bin/opj_dump \
+       $(BUILD_HACK)/bin/opj_compress $(BUILD_HACK)/bin/opj_decompress $(BUILD_HACK)/sbin/onvif_srvd $(BUILD_HACK)/bin/upnpc $(BUILD_HACK)/bin/tcpdump-static $(BUILD_HACK)/bin/tcpdump $(BUILD_HACK)/bin/strace-log-merge \
+       $(BUILD_HACK)/bin/strace $(BUILD_HACK)/bin/sqlite3 $(BUILD_HACK)/bin/sqlcipher $(BUILD_HACK)/bin/pcap-config $(BUILD_HACK)/bin/openssl $(BUILD_HACK)/sbin/msmtpd $(BUILD_HACK)/bin/msmtp $(BUILD_HACK)/bin/joe \
+       $(BUILD_HACK)/bin/curl-config $(BUILD_HACK)/bin/curl $(BUILD_HACK)/bin/busybox $(BUILD_HACK)/bin/mosquitto_rr $(BUILD_HACK)/bin/mosquitto_pub $(BUILD_HACK)/bin/mosquitto_sub $(BUILD_HACK)/bin/mosquitto_passwd \
+       $(BUILD_HACK)/sbin/mosquitto $(BUILD_HACK)/etc/version.txt
 	
 build-clean:
 	@rm -rf $(BUILD_DIR)
@@ -656,7 +746,7 @@ toolchain-clean:
 
 mrproper: staging-clean packages-clean download-clean toolchain-clean build-clean
 	
-clean: ffmpeg-clean opus-clean openjpeg-clean libilbc-clean libgpg-error-clean gmp-clean libgcrypt-clean onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
+clean: radare2-clean libexecinfo-clean ffmpeg-clean opus-clean openjpeg-clean libilbc-clean libgpg-error-clean gmp-clean libgcrypt-clean onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
 
 LSCamoflash-$(VERSION).tar.gz: download toolchain packages staging build
 	@tar -C $(BUILD_DIR) -cvzf $@ .
