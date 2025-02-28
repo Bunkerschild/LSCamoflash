@@ -1,5 +1,5 @@
 ARCH=arm
-CROSS_ROOT := ../../toolchain/bin
+CROSS_ROOT := toolchain/bin
 CROSS_TRIPLET=arm-buildroot-linux-uclibcgnueabi
 CROSS=${CROSS_ROOT}/${CROSS_TRIPLET}-
 

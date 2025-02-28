@@ -563,11 +563,11 @@ $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h: $(PACKAGES_DIR)/$(RADARE2)/plugi
 
 $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2: $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h
 	@cp $(STAGING_DIR)/$(SDROOT)/include/execinfo.h $(PACKAGES_DIR)/$(RADARE2)/libr/include
-	@make -C $(PACKAGES_DIR)/$(RADARE2) -j$(nproc) \
+	@make -C $(PACKAGES_DIR)/$(RADARE2) -j$(nproc) CROSS_ROOT=$(TOOLCHAIN_PATH)/bin \
 	CPPFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/sysroot/usr/include -L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/usr/lib -lexecinfo -latomic" 
 	
 $(STAGING_DIR)/$(SDROOT)/bin/radare2: $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2
-	@make -C $(PACKAGES_DIR)/$(RADARE2) install DESTDIR=$(STAGING_DIR)
+	@make -C $(PACKAGES_DIR)/$(RADARE2) install DESTDIR=$(STAGING_DIR) CROSS_ROOT=$(TOOLCHAIN_PATH)/bin
 	@rm $(STAGING_DIR)/$(SDROOT)/lib/radare2/5.9.8/5.9.8 || true
 	@rm $(STAGING_DIR)/$(SDROOT)/lib/radare2/last/5.9.8 || true
 	@touch $@
