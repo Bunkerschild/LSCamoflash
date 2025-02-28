@@ -547,7 +547,7 @@ libexecinfo-clean:
 	@make -C $(PACKAGES_DIR)/$(LIBEXECINFO) clean
 
 $(PACKAGES_DIR)/$(RADARE2)/plugins.cfg:
-	@cd $(PACKAGES_DIR)/$(RADARE2); ./configure --prefix=$(SDROOT) --host=$(HOST) --with-static-themes --with-ssl --with-ostype=gnulinux \
+	@cd $(PACKAGES_DIR)/$(RADARE2); ./configure --prefix=$(SDROOT) --host=$(HOST) --with-static-themes --with-ssl --with-ostype=gnulinux --datadir=$(SDROOT)/usr/share \
 	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/sysroot/usr/include" \
 	LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/usr/lib -lssl -lz -lexecinfo -latomic"
 	@touch $@
@@ -674,6 +674,7 @@ $(BUILD_HACK)/bin/opj_decompress:
 	@cp $(STAGE_HACK)/bin/opj_decompress $@
 
 $(BUILD_HACK)/bin/radare2:
+	@cp -aL $(STATE_HACK)/usr/share/radare2 $(BUILD_HACK)/usr/share
 	@cp $(STAGE_HACK)/bin/radare2 $(BUILD_HACK)/bin/r2
 	@cp $(STAGE_HACK)/bin/radare2 $(BUILD_HACK)/bin/r2p
 	@cp $(STAGE_HACK)/bin/radare2 $@
