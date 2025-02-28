@@ -546,10 +546,15 @@ libexecinfo: $(STAGING_DIR)/$(SDROOT)/lib/libexecinfo.so
 libexecinfo-clean:
 	@make -C $(PACKAGES_DIR)/$(LIBEXECINFO) clean
 
-$(PACKAGES_DIR)/$(RADARE2)/plugins.cfg:
-	@cd $(PACKAGES_DIR)/$(RADARE2); ./configure --prefix=$(SDROOT) --host=$(HOST) --with-static-themes --with-ssl --with-ostype=gnulinux --datadir=$(SDROOT)/usr/share \
+$(PACKAGES_DIR)/$(RADARE2)/mk/arm-buildroot.mk:
+	@cp $(ROOT_DIR)/arm-buildroot.mk $(PACKAGES_DIR)/$(RADARE2)/mk
+	@touch $@
+
+$(PACKAGES_DIR)/$(RADARE2)/plugins.cfg: $(PACKAGES_DIR)/$(RADARE2)/mk/arm-buildroot.mk
+	@cd $(PACKAGES_DIR)/$(RADARE2); ./configure --prefix=$(SDROOT) --host=$(HOST) --with-static-themes --with-ssl --with-compiler=arm-buildroot --datadir=$(SDROOT)/usr/share \
 	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/sysroot/usr/include" \
-	LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/usr/lib -lssl -lz -lexecinfo -latomic"
+	LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/usr/lib -lssl -lz -lexecinfo -latomic" \
+	CROSS_ROOT=$(TOOLCHAIN_PATH)/bin
 	@touch $@
 
 $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h: $(PACKAGES_DIR)/$(RADARE2)/plugins.cfg
