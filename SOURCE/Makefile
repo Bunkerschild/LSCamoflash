@@ -61,7 +61,7 @@ LIBILBC := libilbc-3.0.4
 OPENJPEG := openjpeg-2.5.3
 OPUS := opus-1.5.2
 FFMPEG := ffmpeg-7.1
-LIBEXECINFO := libexecinfo-1.1
+LIBEXECINFO := libexecinfo-1.1-rc1
 RADARE2 := radare2-5.9.8
 
 # Exportiere die Variablen für alle Ziele
@@ -94,7 +94,7 @@ URLS := \
     https://github.com/uclouvain/openjpeg/archive/refs/tags/v2.5.3.tar.gz\#f=/$(OPENJPEG).tar.gz \
     https://downloads.xiph.org/releases/opus/opus-1.5.2.tar.gz \
     https://github.com/radareorg/radare2/archive/refs/tags/5.9.8.tar.gz\#f=/$(RADARE2).tar.gz \
-    https://github.com/Bunkerschild/libexecinfo/archive/refs/tags/v1.1.tar.gz\#f=/$(LIBEXECINFO).tar.gz \
+    https://github.com/Bunkerschild/libexecinfo/archive/refs/tags/v1.1-rc1.tar.gz\#f=/$(LIBEXECINFO).tar.gz \
     https://github.com/miniupnp/miniupnp/archive/refs/tags/$(MINIUPNPC).tar.gz
 
 # Ziele definieren
