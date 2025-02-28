@@ -563,6 +563,9 @@ $(PACKAGES_DIR)/$(RADARE2)/binr/radate2/radare2: $(PACKAGES_DIR)/$(RADARE2)/libr
 	
 $(STAGING_DIR)/$(SDROOT)/bin/radare2: $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2
 	@make -C $(PACKAGES_DIR)/$(RADARE2) install DESTDIR=$(STAGING_DIR)
+	@rm $(STAGING_DIR)/$(SDROOT)/lib/radare2/last || true
+	@rm $(STAGING_DIR)/$(SDROOT)/lib/radare2/5.9.8/5.9.8 || true
+	@cp -a $(STAGING_DIR)/$(SDROOT)/lib/radare2/5.9.8 $(STAGING_DIR)/$(SDROOT)/lib/radare2/last || true
 	@touch $@
 	
 radare2: $(STAGING_DIR)/$(SDROOT)/bin/radare2

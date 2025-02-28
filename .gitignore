@@ -57,3 +57,4 @@ SOURCE/.unpack
 SOURCE/src/contrib/motor/motor
 SOURCE/src/contrib/motor/motor.o
 SOURCE/LSCamoflash-*.tar.gz
+SOURCE/update-*.tgz
