@@ -1,6 +1,6 @@
 # Projekt URLs
-PROJECT_URL = https://github.com/Bunkerschild/LSCamoflash
-DOWNLOAD_URL = $(PROJECT_URL)/raw/refs/heads/main/SOURCE/download/
+PROJECT_URL := https://github.com/Bunkerschild/LSCamoflash
+DOWNLOAD_URL := $(PROJECT_URL)/raw/refs/heads/main/SOURCE/download/
 
 # Definiere Pfade
 ROOT_DIR := $(shell pwd)
@@ -87,7 +87,7 @@ URLS := \
     $(DOWNLOAD_URL)/$(SQLITE3).tar.gz?download=\#/$(SQLITE3).tar.gz \
     $(DOWNLOAD_URL)/$(SQLCIPHER).tar.gz?download=\#/$(SQLCIPHER).tar.gz \
     $(DOWNLOAD_URL)/$(CURL).tar.gz?download=\#/$(CURL).tar.gz \
-    $(DWONLOAD_URL)/cacert.pem?download=\#/cacert.pem \
+    $(DOWNLOAD_URL)/cacert.pem?download=\#/cacert.pem \
     $(DOWNLOAD_URL)/$(MSMTP).tar.xz?download=\#/$(MSMTP).tar.xz \
     $(DOWNLOAD_URL)/$(CJSON).tar.gz?download=\#/$(CJSON).tar.gz \
     $(DOWNLOAD_URL)/$(MOSQUITTO).tar.gz?download=\#/$(MOSQUITTO).tar.gz \
