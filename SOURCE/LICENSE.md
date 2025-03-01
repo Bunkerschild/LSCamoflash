@@ -7,87 +7,112 @@ This project includes various third-party software packages, each with its own l
   License: GNU General Public License (GPLv2)
   Source: https://toolchains.bootlin.com
 
+## Kernel
+- **Linux Kernel (4.4.192)**  
+  Lizenz: GNU General Public License (GPL)  
+  Quelle: [https://www.kernel.org](https://www.kernel.org)
+
 ## Libraries
-- **libpcap** (1.10.4)  
-  License: BSD License
-  Source: https://www.tcpdump.org
+- **libpcap (1.10.4)**  
+  Lizenz: BSD License  
+  Quelle: [https://www.tcpdump.org](https://www.tcpdump.org)
 
-- **OpenSSL** (3.0.12)  
-  License: Apache License 2.0
-  Source: https://www.openssl.org
+- **OpenSSL (3.0.12)**  
+  Lizenz: Apache License 2.0  
+  Quelle: [https://www.openssl.org](https://www.openssl.org)
 
-- **zlib** (1.3.1)  
-  License: zlib License
-  Source: http://www.zlib.net
+- **zlib (1.3.1)**  
+  Lizenz: zlib License  
+  Quelle: [http://www.zlib.net](http://www.zlib.net)
 
-- **libbsd** (0.11.7)  
-  License: BSD License
-  Source: https://libbsd.freedesktop.org
+- **glibc (2.32)**  
+  Lizenz: GNU Lesser General Public License (LGPL)  
+  Quelle: [https://www.gnu.org/software/libc/](https://www.gnu.org/software/libc/)
 
-- **libmd** (1.0.4)  
-  License: BSD License
-  Source: https://archive.hadrons.org
+- **GMP (6.3.0)**  
+  Lizenz: GNU Lesser General Public License (LGPL)  
+  Quelle: [https://gmplib.org](https://gmplib.org)
 
-- **libobstack** (1.1)  
-  License: GNU Lesser General Public License (LGPL)
-  Source: http://ftp.de.debian.org
+- **libexecinfo (1.1-rc1)**  
+  Lizenz: BSD License  
+  Quelle: [https://www.freshports.org/devel/libexecinfo/](https://www.freshports.org/devel/libexecinfo/)
 
-- **sqlite** (3.45.2)  
-  License: Public Domain
-  Source: https://www.sqlite.org
+- **libgcrypt (1.11.0)**  
+  Lizenz: GNU Lesser General Public License (LGPL)  
+  Quelle: [https://gnupg.org/software/libgcrypt/](https://gnupg.org/software/libgcrypt/)
 
-- **sqlcipher** (4.5.5)  
-  License: BSD License
-  Source: https://github.com/sqlcipher/sqlcipher
+- **libgpg-error (1.51)**  
+  Lizenz: GNU Lesser General Public License (LGPL)  
+  Quelle: [https://gnupg.org/software/libgpg-error/](https://gnupg.org/software/libgpg-error/)
 
-- **miniupnpc** (2.3.0)  
-  License: BSD License
-  Source: https://github.com/miniupnp/miniupnp
+- **libilbc (3.0.4)**  
+  Lizenz: BSD License  
+  Quelle: [https://github.com/TimothyGu/libilbc](https://github.com/TimothyGu/libilbc)
+
+- **OpenJPEG (2.5.3)**  
+  Lizenz: BSD License  
+  Quelle: [https://www.openjpeg.org](https://www.openjpeg.org)
+
+- **Opus (1.5.2)**  
+  Lizenz: BSD License  
+  Quelle: [https://opus-codec.org](https://opus-codec.org)
+
+- **cJSON (1.7.18)**  
+  Lizenz: MIT License  
+  Quelle: [https://github.com/DaveGamble/cJSON](https://github.com/DaveGamble/cJSON)
+
+- **gSOAP (2.8)**  
+  Lizenz: GNU General Public License (GPL)  
+  Quelle: [https://www.genivia.com/products/gsoap/](https://www.genivia.com/products/gsoap/)
 
 ## Utilities
-- **BusyBox** (1.36.1)  
-  License: GNU General Public License (GPLv2)
-  Source: https://busybox.net
+- **sqlite (3.45.2)**  
+  Lizenz: Public Domain  
+  Quelle: [https://www.sqlite.org](https://www.sqlite.org)
 
-- **Joe Text Editor** (4.6)  
-  License: GNU General Public License (GPLv2)
-  Source: https://sourceforge.net/projects/joe-editor
+- **sqlcipher (4.5.5)**  
+  Lizenz: BSD License  
+  Quelle: [https://github.com/sqlcipher/sqlcipher](https://github.com/sqlcipher/sqlcipher)
 
-- **strace** (6.9)  
-  License: GNU General Public License (GPLv2)
-  Source: https://strace.io
+- **cURL (8.7.1)**  
+  Lizenz: MIT License  
+  Quelle: [https://curl.se](https://curl.se)
 
-- **elfutils** (0.189)  
-  License: GNU General Public License (GPLv2)
-  Source: https://sourceware.org/ftp/elfutils
+- **FFmpeg (7.1)**  
+  Lizenz: GNU Lesser General Public License (LGPL)  
+  Quelle: [https://ffmpeg.org](https://ffmpeg.org)
 
-- **argp-standalone** (1.3)  
-  License: GNU General Public License (GPLv2)
-  Source: https://www.lysator.liu.se
+- **Joe's Own Editor (4.6)**  
+  Lizenz: GNU General Public License (GPL)  
+  Quelle: [http://joe-editor.sourceforge.net](http://joe-editor.sourceforge.net)
 
-- **curl** (8.7.1)  
-  License: MIT License
-  Source: https://curl.se
+- **miniupnpc (2.3.0)**  
+  Lizenz: BSD License  
+  Quelle: [https://miniupnp.tuxfamily.org](https://miniupnp.tuxfamily.org)
 
-- **GDB** (14.1)  
-  License: GNU General Public License (GPLv3)
-  Source: http://ftp.gnu.org
+- **Mosquitto (2.0.20)**  
+  Lizenz: Eclipse Public License 2.0  
+  Quelle: [https://mosquitto.org](https://mosquitto.org)
 
-- **GMP** (6.3.0)  
-  License: GNU Lesser General Public License (LGPL)
-  Source: https://gmplib.org
+- **msmtp (1.8.24)**  
+  Lizenz: GNU General Public License (GPL)  
+  Quelle: [https://marlam.de/msmtp/](https://marlam.de/msmtp/)
 
-- **MPFR** (4.2.1)  
-  License: GNU Lesser General Public License (LGPL)
-  Source: https://www.mpfr.org
+- **onvif_srvd (1.1)**  
+  Lizenz: GNU General Public License (GPL)  
+  Quelle: [https://github.com/KoynovStas/onvif_srvd](https://github.com/KoynovStas/onvif_srvd)
 
-- **Coreutils** (9.4)  
-  License: GNU General Public License (GPLv3)
-  Source: http://ftp.gnu.org
+- **radare2 (5.9.8)**  
+  Lizenz: GNU General Public License (GPL)  
+  Quelle: [https://rada.re/n/radare2.html](https://rada.re/n/radare2.html)
 
-- **msmtp** (1.8.24)  
-  License: GNU General Public License (GPLv3)
-  Source: https://marlam.de/msmtp
+- **strace (6.9)**  
+  Lizenz: GNU General Public License (GPL)  
+  Quelle: [https://strace.io](https://strace.io)
+
+- **tcpdump (4.99.4)**  
+  Lizenz: BSD License  
+  Quelle: [https://www.tcpdump.org](https://www.tcpdump.org)
 
 ## Cryptographic Functions
 - **MD5 & SHA1 Implementations** (from GNU Coreutils)  
