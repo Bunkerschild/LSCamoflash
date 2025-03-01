@@ -22,4 +22,5 @@ jobs:
       - name: Starte Build
         run: |
           cd SOURCE
-          make download toolchain packages staging
+          make mrproper
+          make release
