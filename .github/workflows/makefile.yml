@@ -22,5 +22,5 @@ jobs:
       - name: Starte Build
         run: |
           cd SOURCE
-          make mrproper
+          make mrproper-full
           make release
