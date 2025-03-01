@@ -575,11 +575,11 @@ $(PACKAGES_DIR)/$(KERNEL)/.config:
 	@touch $@
 
 $(PACKAGES_DIR)/$(KERNEL)/.modules: $(PACKAGES_DIR)/$(KERNEL)/.config
-	@make -C $(PACKAGES_DIR)/$(KERNEL) ARCH=arm CROSS_COMPILE=$(HOST)- modules
+	@make -C $(PACKAGES_DIR)/$(KERNEL) ARCH=arm CROSS_COMPILE=$(HOST)- HOSTCFLAGS="-fcommon" modules
 	@touch $@
 		
 $(PACKAGES_DIR)/$(KERNEL)/.kernel: $(PACKAGES_DIR)/$(KERNEL)/.config
-	@make -C $(PACKAGES_DIR)/$(KERNEL) ARCH=arm CROSS_COMPILE=$(HOST)- bzImage
+	@make -C $(PACKAGES_DIR)/$(KERNEL) ARCH=arm CROSS_COMPILE=$(HOST)- HOSTCFLAGS="-fcommon" bzImage
 	@touch $@
 		
 $(STAGING_DIR)/$(SDROOT)/lib/modules/.install: $(PACKAGES_DIR)/$(KERNEL)/.modules
