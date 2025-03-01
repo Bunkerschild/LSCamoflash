@@ -103,7 +103,7 @@ URLS := \
     $(DOWNLOAD_URL)/$(RADARE2).tar.gz?download=\#/$(RADARE2).tar.gz \
     $(DOWNLOAD_URL)/$(LIBEXECINFO).tar.gz?download=\#/$(LIBEXECINFO).tar.gz \
     $(DOWNLOAD_URL)/$(GLIBC).tar.gz?download=\#/$(GLIBC).tar.gz \
-    $(DOWNLAOD_URL)/$(MINIUPNPC).tar.gz?download=\#/$(MINIUPNPC).tar.gz
+    $(DOWNLOAD_URL)/$(MINIUPNPC).tar.gz?download=\#/$(MINIUPNPC).tar.gz
 
 # Ziele definieren
 all: download toolchain packages staging build
