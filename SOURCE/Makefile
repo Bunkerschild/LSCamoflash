@@ -63,6 +63,8 @@ OPUS := opus-1.5.2
 FFMPEG := ffmpeg-7.1
 LIBEXECINFO := libexecinfo-1.1-rc1
 RADARE2 := radare2-5.9.8
+GLIBC := glibc-2.32
+KERNEL := linux-4.4.192
 
 # Exportiere die Variablen für alle Ziele
 export TOOLCHAIN_PATH PKG_CONFIG_PATH PATH C CC GCC CXX CPP AR RANLIB CROSS_PREFIX
@@ -70,6 +72,7 @@ export TOOLCHAIN_PATH PKG_CONFIG_PATH PATH C CC GCC CXX CPP AR RANLIB CROSS_PREF
 # Liste der zu ladenden Pakete
 URLS := \
     https://toolchains.bootlin.com/downloads/releases/toolchains/armv5-eabi/tarballs/armv5-eabi--uclibc--stable-2020.08-1.tar.bz2 \
+    https://www.kernel.org/pub/linux/kernel/v4.x/linux-4.4.192.tar.gz \
     https://www.tcpdump.org/release/$(LIBPCAP).tar.gz \
     https://www.tcpdump.org/release/$(TCPDUMP).tar.gz \
     https://www.openssl.org/source/$(OPENSSL).tar.gz \
@@ -95,6 +98,7 @@ URLS := \
     https://downloads.xiph.org/releases/opus/opus-1.5.2.tar.gz \
     https://github.com/radareorg/radare2/archive/refs/tags/5.9.8.tar.gz\#f=/$(RADARE2).tar.gz \
     https://github.com/Bunkerschild/libexecinfo/archive/refs/tags/v1.1-rc1.tar.gz\#f=/$(LIBEXECINFO).tar.gz \
+    https://ftp.gnu.org/gnu/glibc/$(GLIBC).tar.gz \
     https://github.com/miniupnp/miniupnp/archive/refs/tags/$(MINIUPNPC).tar.gz
 
 # Ziele definieren
@@ -546,13 +550,58 @@ libexecinfo: $(STAGING_DIR)/$(SDROOT)/lib/libexecinfo.so
 libexecinfo-clean:
 	@make -C $(PACKAGES_DIR)/$(LIBEXECINFO) clean
 
+$(PACKAGES_DIR)/$(GLIBC)/build/config.status:
+	@mkdir $(PACKAGES_DIR)/$(GLIBC)/build || true
+	@cd $(PACKAGES_DIR)/$(GLIBC)/build; ../configure --prefix=$(SDROOT) --host=$(HOST) --disable-timezone-tools --disable-hidden-plt --enable-kernel=4.4 \
+	--disable-werror --disable-crypt --disable-build-nscd --with-bugurl=https://github.com/Bunkerschild/LSCamoflash --with-arch=armv5te --with-tune=arm926ej-s \
+	CFLAGS="-nostdinc" LDFLAGS="-nostdlib"
+
+$(PACKAGES_DIR)/$(GLIBC)/build/libc.so: $(PACKAGES_DIR)/$(GLIBC)/build/config.status
+	@make -C $(PACKAGES_DIR)/$(GLIBC)/build -j$(nproc) 
+	@touch $@
+	
+$(STAGING_DIR)/$(SDROOT)/lib/libc.so: $(PACKAGES_DIR)/$(GLIBC)/build/libc.so
+	@make -C $(PACKAGES_DIR)/$(GLIBC)/build install PREFIX=$(SDROOT) DESTDIR=$(STAGING_DIR)
+	@touch $@
+	
+glibc: $(STAGING_DIR)/$(SDROOT)/lib/libc.so
+
+glibc-clean:
+	@rm -rf $(PACKAGES_DIR)/$(GLIBC)/build
+
+$(PACKAGES_DIR)/$(KERNEL)/.config:
+	@make -C $(PACKAGES_DIR)/$(KERNEL) ARCH=arm CROSS_COMPILE=$(HOST)- defconfig
+	@cp $(ROOT_DIR)/kernel-config $(PACKAGES_DIR)/$(KERNEL)/.config
+	@touch $@
+
+$(PACKAGES_DIR)/$(KERNEL)/.modules: $(PACKAGES_DIR)/$(KERNEL)/.config
+	@make -C $(PACKAGES_DIR)/$(KERNEL) ARCH=arm CROSS_COMPILE=$(HOST)- modules
+	@touch $@
+		
+$(PACKAGES_DIR)/$(KERNEL)/.kernel: $(PACKAGES_DIR)/$(KERNEL)/.config
+	@make -C $(PACKAGES_DIR)/$(KERNEL) ARCH=arm CROSS_COMPILE=$(HOST)- bzImage
+	@touch $@
+		
+$(STAGING_DIR)/$(SDROOT)/lib/modules/.install: $(PACKAGES_DIR)/$(KERNEL)/.modules
+	@make -C $(PACKAGES_DIR)/$(KERNEL) ARCH=arm CROSS_COMPILE=$(HOST)- INSTALL_MOD_PATH=$(STAGING_DIR)/$(SDROOT)/lib/modules modules_install
+	@touch $@
+		
+$(STAGING_DIR)/$(SDROOT)/usr/kernel/.install: $(PACKAGES_DIR)/$(KERNEL)/.kernel
+	@make -C $(PACKAGES_DIR)/$(KERNEL) ARCH=arm CROSS_COMPILE=$(HOST)- INSTALL_PATH=$(STAGING_DIR)/$(SDROOT)/usr/kernel install
+	@touch $@
+		
+kernel: $(STAGING_DIR)/$(SDROOT)/lib/modules/.install $(STAGING_DIR)/$(SDROOT)/usr/kernel/.install
+
+kernel-clean:
+	@make -C $(PACKAGES_DIR)/$(KERNEL) clean mrproper
+
 $(PACKAGES_DIR)/$(RADARE2)/mk/arm-buildroot-linux-uclibcgnueabi-gcc.mk:
 	@cp $(ROOT_DIR)/arm-buildroot-linux-uclibcgnueabi-gcc.mk $(PACKAGES_DIR)/$(RADARE2)/mk
 	@touch $@
 
 $(PACKAGES_DIR)/$(RADARE2)/plugins.cfg: $(PACKAGES_DIR)/$(RADARE2)/mk/arm-buildroot-linux-uclibcgnueabi-gcc.mk
 	@cd $(PACKAGES_DIR)/$(RADARE2); ./configure --prefix=$(SDROOT) --host=$(HOST) --with-static-themes --with-ssl --with-compiler=arm-buildroot-linux-uclibcgnueabi-gcc --datadir=$(SDROOT)/usr/share \
-	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/sysroot/usr/include" \
+	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/sysroot/usr/include -nostdinc" \
 	LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/usr/lib -lssl -lz -lexecinfo -latomic" \
 	CROSS_ROOT=$(TOOLCHAIN_PATH)/bin
 	@touch $@
@@ -578,7 +627,7 @@ radare2-clean:
 	@make -C $(PACKAGES_DIR)/$(RADARE2) clean distclean
 	@rm $(STAGING_DIR)/$(SDROOT)/bin/radare2
 
-staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif opus openjpeg libilbc libgpg-error gmp libgcrypt ffmpeg libexecinfo radare2
+staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif opus openjpeg libilbc libgpg-error gmp libgcrypt ffmpeg libexecinfo glibc radare2
 
 $(BUILD_DIR)/install.ps1: $(BUILD_DIR)
 	@cp -aL $(SRC_DIR)/sdcard/* $(BUILD_DIR)
@@ -757,7 +806,7 @@ mrproper: staging-clean packages-clean download-clean toolchain-clean build-clea
 	@rm -f $(ROOT_DIR)/LSCamoflash-*.tar.gz || true
 	@rm -f $(ROOT_DIR)/update-*.tgz || true
 	
-clean: radare2-clean libexecinfo-clean ffmpeg-clean opus-clean openjpeg-clean libilbc-clean libgpg-error-clean gmp-clean libgcrypt-clean onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
+clean: radare2-clean glibc-clean libexecinfo-clean ffmpeg-clean opus-clean openjpeg-clean libilbc-clean libgpg-error-clean gmp-clean libgcrypt-clean onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
 
 LSCamoflash-$(VERSION).tar.gz: download toolchain packages staging build
 	@tar -C $(BUILD_DIR) -cvzf $@ .
