@@ -555,7 +555,7 @@ $(PACKAGES_DIR)/$(KERNEL)/.config:
 	@cp $(ROOT_DIR)/kernel-config $(PACKAGES_DIR)/$(KERNEL)/.config
 	@touch $@
 
-$(PACKAGES_DIR)/$(KERNEL)/.modules: $(PACKAGES_DIR)/$(KERNEL)/.config
+$(PACKAGES_DIR)/$(KERNEL)/.kernelmodules: $(PACKAGES_DIR)/$(KERNEL)/.config
 	@make -C $(PACKAGES_DIR)/$(KERNEL) ARCH=arm CROSS_COMPILE=$(HOST)- HOSTCFLAGS="-fcommon" modules
 	@touch $@
 		
@@ -563,20 +563,20 @@ $(PACKAGES_DIR)/$(KERNEL)/.kernel: $(PACKAGES_DIR)/$(KERNEL)/.config
 	@make -C $(PACKAGES_DIR)/$(KERNEL) ARCH=arm CROSS_COMPILE=$(HOST)- HOSTCFLAGS="-fcommon" zImage
 	@touch $@
 		
-$(STAGING_DIR)/$(SDROOT)/lib/modules/.install: $(PACKAGES_DIR)/$(KERNEL)/.modules
-	@make -C $(PACKAGES_DIR)/$(KERNEL) ARCH=arm CROSS_COMPILE=$(HOST)- INSTALL_MOD_PATH=$(STAGING_DIR)/$(SDROOT)/lib/modules modules_install
+$(STAGING_DIR)/$(SDROOT)/.kernelmodules: $(PACKAGES_DIR)/$(KERNEL)/.kernelmodules
+	@make -C $(PACKAGES_DIR)/$(KERNEL) ARCH=arm CROSS_COMPILE=$(HOST)- INSTALL_MOD_PATH=$(STAGING_DIR)/$(SDROOT) modules_install
 	@touch $@
 		
-$(STAGING_DIR)/$(SDROOT)/usr/kernel/.install: $(PACKAGES_DIR)/$(KERNEL)/.kernel
+$(STAGING_DIR)/$(SDROOT)/.kernel: $(PACKAGES_DIR)/$(KERNEL)/.kernel
 	@mkdir -p $(STAGING_DIR)/$(SDROOT)/usr/kernel || true
 	@make -C $(PACKAGES_DIR)/$(KERNEL) ARCH=arm CROSS_COMPILE=$(HOST)- INSTALL_PATH=$(STAGING_DIR)/$(SDROOT)/usr/kernel install
 	@touch $@
 		
-$(STAGING_DIR)/$(SDROOT)/usr/include/.kernelheaders:
-	@make -C $(PACKAGES_DIR)/$(KERNEL) ARCH=arm CROSS_COMPILE=$(HOST)- INSTALL_HDR_PATH=$(STAGING_DIR)/$(SDROOT)/usr headers_install
+$(STAGING_DIR)/$(SDROOT)/.kernelheaders: $(PACKAGES_DIR)/$(KERNEL)/.config
+	@make -C $(PACKAGES_DIR)/$(KERNEL) ARCH=arm CROSS_COMPILE=$(HOST)- INSTALL_HDR_PATH=$(STAGING_DIR)/$(SDROOT)/usr/include headers_install
 	@touch $@
 		
-kernel: $(STAGING_DIR)/$(SDROOT)/lib/modules/.install $(STAGING_DIR)/$(SDROOT)/usr/kernel/.install $(STAGING_DIR)/$(SDROOT)/usr/include/.kernelheaders
+kernel: $(STAGING_DIR)/$(SDROOT)/.kernelmodules $(STAGING_DIR)/$(SDROOT)/.kernel $(STAGING_DIR)/$(SDROOT)/.kernelheaders
 
 kernel-clean:
 	@make -C $(PACKAGES_DIR)/$(KERNEL) clean mrproper
@@ -613,7 +613,7 @@ radare2-clean:
 	@make -C $(PACKAGES_DIR)/$(RADARE2) mrproper || true
 	@rm $(STAGING_DIR)/$(SDROOT)/bin/radare2 || true
 
-$(PACKAGES_DIR)/$(GLIBC)/build/config.status: $(STAGING_DIR)/$(SDROOT)/usr/include/.kernelheaders
+$(PACKAGES_DIR)/$(GLIBC)/build/config.status: $(STAGING_DIR)/$(SDROOT)/.kernelheaders
 	@mkdir $(PACKAGES_DIR)/$(GLIBC)/build || true
 	@cp -a $(STAGING_DIR)/$(SDROOT)/usr/include/linux $(PACKAGES_DIR)/$(GLIBC)/include
 	@cd $(PACKAGES_DIR)/$(GLIBC)/build; ../configure --prefix=$(SDROOT) --host=$(HOST) --disable-timezone-tools --enable-kernel=4.4.192 \
@@ -809,9 +809,11 @@ download-clean:
 toolchain-clean:
 	@rm -rf $(TOOLCHAIN_DIR)
 
-mrproper: staging-clean packages-clean download-clean toolchain-clean build-clean
+mrproper: staging-clean packages-clean toolchain-clean build-clean
 	@rm -f $(ROOT_DIR)/LSCamoflash-*.tar.gz || true
 	@rm -f $(ROOT_DIR)/update-*.tgz || true
+
+mrproper-full: download-clean mrproper
 	
 clean: glibc-clean radare2-clean kernel-clean libexecinfo-clean ffmpeg-clean opus-clean openjpeg-clean libilbc-clean libgpg-error-clean gmp-clean libgcrypt-clean onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
 
