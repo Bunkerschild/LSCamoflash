@@ -573,7 +573,7 @@ $(STAGING_DIR)/$(SDROOT)/.kernel: $(PACKAGES_DIR)/$(KERNEL)/.kernel
 	@touch $@
 		
 $(STAGING_DIR)/$(SDROOT)/.kernelheaders: $(PACKAGES_DIR)/$(KERNEL)/.config
-	@make -C $(PACKAGES_DIR)/$(KERNEL) ARCH=arm CROSS_COMPILE=$(HOST)- INSTALL_HDR_PATH=$(STAGING_DIR)/$(SDROOT)/usr/include headers_install
+	@make -C $(PACKAGES_DIR)/$(KERNEL) ARCH=arm CROSS_COMPILE=$(HOST)- INSTALL_HDR_PATH=$(STAGING_DIR)/$(SDROOT)/usr headers_install
 	@touch $@
 		
 kernel: $(STAGING_DIR)/$(SDROOT)/.kernelmodules $(STAGING_DIR)/$(SDROOT)/.kernel $(STAGING_DIR)/$(SDROOT)/.kernelheaders
@@ -615,7 +615,6 @@ radare2-clean:
 
 $(PACKAGES_DIR)/$(GLIBC)/build/config.status: $(STAGING_DIR)/$(SDROOT)/.kernelheaders
 	@mkdir $(PACKAGES_DIR)/$(GLIBC)/build || true
-	@cp -a $(STAGING_DIR)/$(SDROOT)/usr/include/linux $(PACKAGES_DIR)/$(GLIBC)/include
 	@cd $(PACKAGES_DIR)/$(GLIBC)/build; ../configure --prefix=$(SDROOT) --host=$(HOST) --disable-timezone-tools --enable-kernel=4.4.192 \
 	--disable-crypt --disable-build-nscd --with-bugurl=https://github.com/Bunkerschild/LSCamoflash --with-arch=armv5te --with-tune=arm926ej-s \
 	--with-headers=$(STAGING_DIR)/$(SDROOT)/usr/include --with-default-link --disable-multi-arch \
