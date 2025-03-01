@@ -1,3 +1,7 @@
+# Projekt URLs
+PROJECT_URL = https://github.com/Bunkerschild/LSCamoflash
+DOWNLOAD_URL = $(PROJECT_URL)/raw/refs/heads/main/SOURCE/download/
+
 # Definiere Pfade
 ROOT_DIR := $(shell pwd)
 DOWNLOAD_DIR := $(ROOT_DIR)/download
@@ -72,34 +76,34 @@ export TOOLCHAIN_PATH PKG_CONFIG_PATH PATH C CC GCC CXX CPP AR RANLIB CROSS_PREF
 # Liste der zu ladenden Pakete
 URLS := \
     https://toolchains.bootlin.com/downloads/releases/toolchains/armv5-eabi/tarballs/armv5-eabi--uclibc--stable-2020.08-1.tar.bz2 \
-    https://www.kernel.org/pub/linux/kernel/v4.x/linux-4.4.192.tar.gz \
-    https://www.tcpdump.org/release/$(LIBPCAP).tar.gz \
-    https://www.tcpdump.org/release/$(TCPDUMP).tar.gz \
-    https://www.openssl.org/source/$(OPENSSL).tar.gz \
-    https://busybox.net/downloads/$(BUSYBOX).tar.bz2 \
-    https://sourceforge.net/projects/joe-editor/files/JOE%20sources/$(JOE)/$(JOE).tar.gz \
-    https://strace.io/files/6.9/$(STRACE).tar.xz \
-    http://www.zlib.net/$(ZLIB).tar.gz \
-    https://www.sqlite.org/2024/$(SQLITE3).tar.gz \
-    https://github.com/sqlcipher/sqlcipher/archive/refs/tags/v4.5.5.tar.gz\#f=/$(SQLCIPHER).tar.gz \
-    https://curl.se/download/$(CURL).tar.gz \
-    https://curl.se/ca/cacert.pem \
-    https://marlam.de/msmtp/releases/$(MSMTP).tar.xz \
-    https://github.com/DaveGamble/cJSON/archive/refs/tags/v1.7.18.tar.gz\#f=/$(CJSON).tar.gz \
-    https://github.com/eclipse-mosquitto/mosquitto/archive/refs/tags/v2.0.20.tar.gz\#f=/$(MOSQUITTO).tar.gz \
-    https://sourceforge.net/projects/gsoap2/files/gsoap_2.8.137.zip/download\#f=/$(GSOAP).zip \
-    https://github.com/KoynovStas/onvif_srvd/archive/refs/tags/v1.1.tar.gz\#f=/$(ONVIF).tar.gz \
-    https://ffmpeg.org/releases/ffmpeg-7.1.tar.xz \
-    https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz \
-    https://www.gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.51.tar.bz2 \
-    https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-1.11.0.tar.bz2 \
-    https://github.com/TimothyGu/libilbc/releases/download/v3.0.4/libilbc-3.0.4.tar.gz \
-    https://github.com/uclouvain/openjpeg/archive/refs/tags/v2.5.3.tar.gz\#f=/$(OPENJPEG).tar.gz \
-    https://downloads.xiph.org/releases/opus/opus-1.5.2.tar.gz \
-    https://github.com/radareorg/radare2/archive/refs/tags/5.9.8.tar.gz\#f=/$(RADARE2).tar.gz \
-    https://github.com/Bunkerschild/libexecinfo/archive/refs/tags/v1.1-rc1.tar.gz\#f=/$(LIBEXECINFO).tar.gz \
-    https://ftp.gnu.org/gnu/glibc/$(GLIBC).tar.gz \
-    https://github.com/miniupnp/miniupnp/archive/refs/tags/$(MINIUPNPC).tar.gz
+    https://www.kernel.org/pub/linux/kernel/v4.x/$(KERNEL).tar.gz \
+    $(DOWNLOAD_URL)/$(LIBPCAP).tar.gz?download=\#/$(LIBPCAP).tar.gz \
+    $(DOWNLOAD_URL)/$(TCPDUMP).tar.gz?download=\#/$(TCPDUMP).tar.gz \
+    $(DOWNLOAD_URL)/$(OPENSSL).tar.gz?download=\#/$(OPENSSL).tar.gz \
+    $(DOWNLOAD_URL)/$(BUSYBOX).tar.bz2?download=\#/$(BUSYBOX).tar.bz2 \
+    $(DOWNLOAD_URL)/$(JOE).tar.gz?download=\#/$(JOE).tar.gz \
+    $(DOWNLOAD_URL)/$(STRACE).tar.xz?download=\#/$(STRACE).tar.xz \
+    $(DOWNLOAD_URL)/$(ZLIB).tar.gz?download=\#/$(ZLIB).tar.gz \
+    $(DOWNLOAD_URL)/$(SQLITE3).tar.gz?download=\#/$(SQLITE3).tar.gz \
+    $(DOWNLOAD_URL)/$(SQLCIPHER).tar.gz?download=\#/$(SQLCIPHER).tar.gz \
+    $(DOWNLOAD_URL)/$(CURL).tar.gz?download=\#/$(CURL).tar.gz \
+    $(DWONLOAD_URL)/cacert.pem?download=\#/cacert.pem \
+    $(DOWNLOAD_URL)/$(MSMTP).tar.xz?download=\#/$(MSMTP).tar.xz \
+    $(DOWNLOAD_URL)/$(CJSON).tar.gz?download=\#/$(CJSON).tar.gz \
+    $(DOWNLOAD_URL)/$(MOSQUITTO).tar.gz?download=\#/$(MOSQUITTO).tar.gz \
+    $(DOWNLOAD_URL)/$(GSOAP).zip?download=\#/$(GSOAP).zip \
+    $(DOWNLOAD_URL)/$(ONVIF).tar.gz?download=\#/$(ONVIF).tar.gz \
+    $(DOWNLOAD_URL)/$(FFMPEG).tar.xz?download=\#/$(FFMPEG).tar.xz \
+    $(DOWNLOAD_URL)/$(GMP).tar.xz?download=\#/$(GMP).tar.xz \
+    $(DOWNLOAD_URL)/$(LIBGPG_ERROR).tar.bz2?download=\#/$(LIBGPG_ERROR).tar.bz2 \
+    $(DOWNLOAD_URL)/$(LIBGCRYPT).tar.bz2?download=\#/$(LIBGCRYPT).tar.bz2 \
+    $(DOWNLOAD_URL)/$(LIBILBC).tar.gz?download=\#/$(LIBILBC).tar.gz \
+    $(DOWNLOAD_URL)/$(OPENJPEG).tar.gz?download=\#/$(OPENJPEG).tar.gz \
+    $(DOWNLOAD_URL)/$(OPUS).tar.gz?download=\#/$(OPUS).tar.gz \
+    $(DOWNLOAD_URL)/$(RADARE2).tar.gz?download=\#/$(RADARE2).tar.gz \
+    $(DOWNLOAD_URL)/$(LIBEXECINFO).tar.gz?download=\#/$(LIBEXECINFO).tar.gz \
+    $(DOWNLOAD_URL)/$(GLIBC).tar.gz?download=\#/$(GLIBC).tar.gz \
+    $(DOWNLAOD_URL)/$(MINIUPNPC).tar.gz?download=\#/$(MINIUPNPC).tar.gz
 
 # Ziele definieren
 all: download toolchain packages staging build

@@ -46,7 +46,8 @@ SDCARD/crontab
 *~
 
 # Generated folders
-#SOURCE/download
+SOURCE/download/armv5-eabi--uclibc--stable-2020.08-1.tar.bz2
+SOURCE/download/linux-4.4.192.tar.gz
 SOURCE/packages
 SOURCE/staging
 SOURCE/toolchain
