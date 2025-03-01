@@ -610,7 +610,7 @@ $(PACKAGES_DIR)/$(RADARE2)/plugins.cfg: $(PACKAGES_DIR)/$(RADARE2)/mk/arm-buildr
 	@cd $(PACKAGES_DIR)/$(RADARE2); ./configure --host=$(HOST) --with-compiler=arm-buildroot-linux-uclibcgnueabi-gcc \
 	--prefix=$(SDROOT) --includedir=$(SDROOT)/usr/include --datadir=$(SDROOT)/usr/share --with-static-themes --with-ssl CROSS_ROOT=$(TOOLCHAIN_PATH)/bin
 	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/sysroot/usr/include" \
-	LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/usr/lib -lssl -lz -lexecinfo -latomic" \
+	LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/usr/lib -lssl -lz -lexecinfo -latomic"
 	@touch $@
 
 $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h: $(PACKAGES_DIR)/$(RADARE2)/plugins.cfg
@@ -620,7 +620,7 @@ $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h: $(PACKAGES_DIR)/$(RADARE2)/plugi
 $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2: $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h
 	@cp $(STAGING_DIR)/$(SDROOT)/include/execinfo.h $(PACKAGES_DIR)/$(RADARE2)/libr/include
 	@make -C $(PACKAGES_DIR)/$(RADARE2) -j$(nproc) CROSS_ROOT=$(TOOLCHAIN_PATH)/bin \
-	LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/usr/lib -lexecinfo $(TOOLCHAIN_PATH)/$(HOST)/sysroot/lib/libuClibc-1.0.34.so" \ 
+	LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/usr/lib -lexecinfo -latomic" \
 	CPPFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/sysroot/usr/include" 
 	
 $(STAGING_DIR)/$(SDROOT)/bin/radare2: $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2
@@ -635,7 +635,7 @@ radare2-clean:
 	@make -C $(PACKAGES_DIR)/$(RADARE2) mrproper || true
 	@rm $(STAGING_DIR)/$(SDROOT)/bin/radare2 || true
 
-staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif opus openjpeg libilbc libgpg-error gmp libgcrypt ffmpeg libexecinfo kernel glibc radare2
+staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif opus openjpeg libilbc libgpg-error gmp libgcrypt ffmpeg libexecinfo kernel radare2
 
 $(BUILD_DIR)/install.ps1: $(BUILD_DIR)
 	@cp -aL $(SRC_DIR)/sdcard/* $(BUILD_DIR)
@@ -814,7 +814,7 @@ mrproper: staging-clean packages-clean download-clean toolchain-clean build-clea
 	@rm -f $(ROOT_DIR)/LSCamoflash-*.tar.gz || true
 	@rm -f $(ROOT_DIR)/update-*.tgz || true
 	
-clean: radare2-clean glibc-clean kernel-clean libexecinfo-clean ffmpeg-clean opus-clean openjpeg-clean libilbc-clean libgpg-error-clean gmp-clean libgcrypt-clean onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
+clean: radare2-clean kernel-clean libexecinfo-clean ffmpeg-clean opus-clean openjpeg-clean libilbc-clean libgpg-error-clean gmp-clean libgcrypt-clean onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
 
 LSCamoflash-$(VERSION).tar.gz: download toolchain packages staging build
 	@tar -C $(BUILD_DIR) -cvzf $@ .
