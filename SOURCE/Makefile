@@ -5,6 +5,7 @@ DOWNLOAD_URL := $(PROJECT_URL)/raw/refs/heads/main/SOURCE/download/
 # Zu verwendende LIBC
 #USE_LIBC ?= uclibc
 USE_LIBC ?= glibc
+#USE_LIBC ?= musl
 
 # Definiere Pfade
 ROOT_DIR := $(shell pwd)
@@ -52,7 +53,7 @@ PATH := $(TOOLCHAIN_PATH)/bin:$(PATH)
 # Definiere die Cross-Compiler Variablen
 HOST_UCLIBC := arm-buildroot-linux-uclibcgnueabi
 HOST_GLIBC := arm-buildroot-linux-gnueabi
-HOST_GLIBC := arm-buildroot-linux-muslabi
+HOST_GLIBC := arm-buildroot-linux-musleabi
 ifeq ($(USE_LIBC), glibc)
 	HOST := $(HOST_GLIBC)
 else ifeq ($(USE_LIBC), uclibc)
@@ -498,7 +499,7 @@ onvif-clean:
 $(PACKAGES_DIR)/$(LIBGPG_ERROR)/Makefile:
 	@ln -sf $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/syscfg/lock-obj-pub.arm-unknown-linux-gnueabi.h $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/syscfg/lock-obj-pub.linux-uclibcgnueabi.h
 	@ln -sf $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/syscfg/lock-obj-pub.arm-unknown-linux-gnueabi.h $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/syscfg/lock-obj-pub.linux-gnueabi.h
-	@ln -sf $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/syscfg/lock-obj-pub.arm-unknown-linux-gnueabi.h $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/syscfg/lock-obj-pub.linux-muslabi.h
+	@ln -sf $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/syscfg/lock-obj-pub.arm-unknown-linux-gnueabi.h $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/syscfg/lock-obj-pub.linux-musleabi.h
 	@cd $(PACKAGES_DIR)/$(LIBGPG_ERROR); ./configure --prefix=$(SDROOT) --with-gnu-ld --host=$(HOST) --disable-nls \
 	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/usr/include" LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib"
 	
@@ -715,6 +716,10 @@ glibc-clean:
 uclibc:
 
 uclibc-clean:
+
+musl:
+
+musl-clean:
 
 staging: $(STAGING_DIR) $(USE_LIBC) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif opus openjpeg libilbc libgpg-error gmp libgcrypt ffmpeg libexecinfo kernel radare2
 
