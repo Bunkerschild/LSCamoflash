@@ -316,7 +316,7 @@ curl-clean:
 
 $(PACKAGES_DIR)/$(BUSYBOX)/.config:
 	@make -C $(PACKAGES_DIR)/$(BUSYBOX) defconfig
-	@cp busybox-config $(PACKAGES_DIR)/$(BUSYBOX)/.config
+	@cp $(SRC_DIR)/patches/$(BUSYBOX)/.config $(PACKAGES_DIR)/$(BUSYBOX)/.config
 
 $(PACKAGES_DIR)/$(BUSYBOX)/busybox: $(PACKAGES_DIR)/$(BUSYBOX)/.config
 	@make -C $(PACKAGES_DIR)/$(BUSYBOX) -j$(nproc)
@@ -331,11 +331,11 @@ busybox: $(STAGING_DIR)/$(SDROOT)/bin/busybox
 busybox-clean:
 	@make -C $(PACKAGES_DIR)/$(BUSYBOX) clean distclean
 
-$(PACKAGES_DIR)/$(CJSON)/cjson-config:
-	@cp cjson-config $(PACKAGES_DIR)/$(CJSON)/CMakeLists.txt
-	@cp cjson-config $(PACKAGES_DIR)/$(CJSON)
+$(PACKAGES_DIR)/$(CJSON)/CMakeLists.txt.patch:
+	@cp $(SRC_DIR)/patches/$(CJSON)/CMakeLists.txt $(PACKAGES_DIR)/$(CJSON)/CMakeLists.txt
+	@touch $@
 
-$(PACKAGES_DIR)/$(CJSON)/build/Makefile: $(PACKAGES_DIR)/$(CJSON)/cjson-config
+$(PACKAGES_DIR)/$(CJSON)/build/Makefile: $(PACKAGES_DIR)/$(CJSON)/CMakeLists.txt.patch
 	@mkdir -p $(PACKAGES_DIR)/$(CJSON)/build
 	@cd $(PACKAGES_DIR)/$(CJSON)/build; cmake -DCMAKE_PREFIX_PATH=/ ..
 
@@ -353,11 +353,11 @@ cjson-clean:
 	@rm -rf $(PACKAGES_DIR)/$(CJSON)/build
 	@rm $(PACKAGES_DIR)/$(CJSON)/cjson-config
 
-$(PACKAGES_DIR)/$(MOSQUITTO)/mosquitto-config: $(STAGING_DIR)/$(SDROOT)/bin/openssl $(STAGING_DIR)/$(SDROOT)/lib/libz.a
-	@cp mosquitto-config $(PACKAGES_DIR)/$(MOSQUITTO)/config.mk
-	@cp mosquitto-config $(PACKAGES_DIR)/$(MOSQUITTO)/mosquitto-config
+$(PACKAGES_DIR)/$(MOSQUITTO)/config.mk.patch: $(STAGING_DIR)/$(SDROOT)/bin/openssl $(STAGING_DIR)/$(SDROOT)/lib/libz.a
+	@cp $(SRC_DIR)/patches/$(MOSQUITTO)/config.mk $(PACKAGES_DIR)/$(MOSQUITTO)/config.mk
+	@touch $@
 
-$(PACKAGES_DIR)/$(MOSQUITTO)/build/Makefile: $(PACKAGES_DIR)/$(MOSQUITTO)/mosquitto-config
+$(PACKAGES_DIR)/$(MOSQUITTO)/build/Makefile: $(PACKAGES_DIR)/$(MOSQUITTO)/config.mk.patch
 	@mkdir -p $(PACKAGES_DIR)/$(MOSQUITTO)/build
 	@mv $(PACKAGES_DIR)/$(MOSQUITTO)/man $(PACKAGES_DIR)/$(MOSQUITTO)/man.orig
 	@mkdir $(PACKAGES_DIR)/$(MOSQUITTO)/man
@@ -393,13 +393,11 @@ gsoap: $(STAGING_DIR)/$(SDROOT)/lib/libgsoap.a
 gsoap-clean:
 	@make -C $(PACKAGES_DIR)/$(GSOAP) clean distclean
 
-$(PACKAGES_DIR)/$(ONVIF)/Makefile.new:
-	@cp onvif-makefile $(PACKAGES_DIR)/$(ONVIF)/Makefile.new
-	@cp $(PACKAGES_DIR)/$(ONVIF)/Makefile $(PACKAGES_DIR)/$(ONVIF)/Makefile.old
-	@cp onvif-makefile $(PACKAGES_DIR)/$(ONVIF)/Makefile
+$(PACKAGES_DIR)/$(ONVIF)/Makefile.patch:
+	@cp $(SRC_DIR)/patches/$(ONVIF)/Makefile $(PACKAGES_DIR)/$(ONVIF)/Makefile
 	@touch $@
 
-$(PACKAGES_DIR)/$(ONVIF)/onvif_srvd: $(PACKAGES_DIR)/$(ONVIF)/Makefile.new
+$(PACKAGES_DIR)/$(ONVIF)/onvif_srvd: $(PACKAGES_DIR)/$(ONVIF)/Makefile.patch
 	@make -C $(PACKAGES_DIR)/$(ONVIF) -j$(nproc) release
 	@touch $@
 
@@ -524,7 +522,7 @@ opus-clean:
 	@make -C $(PACKAGES_DIR)/$(OPUS) clean distclean
 
 $(PACKAGES_DIR)/$(FFMPEG)/ffbuild/config.mak:
-	@cp ./ffmpeg-configure $(PACKAGES_DIR)/$(FFMPEG)/configure
+	@cp $(SRC_DIR)/patches/$(FFMPEG)/configure $(PACKAGES_DIR)/$(FFMPEG)/configure
 	@cd $(PACKAGES_DIR)/$(FFMPEG); ./configure --prefix=$(SDROOT) --arch=arm --cross-prefix=$(HOST)- --target-os=linux \
 	--extra-cflags="-Dstatic_assert=_Static_assert -I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/include/opus -I$(STAGING_DIR)/$(SDROOT)/include/openjpeg-2.5" \
 	--extra-ldflags="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -lgmp -lgcrypt -lgpg-error -lilbc -lopenjp2 -lopus" \
@@ -560,7 +558,7 @@ libexecinfo-clean:
 
 $(PACKAGES_DIR)/$(KERNEL)/.config:
 	@make -C $(PACKAGES_DIR)/$(KERNEL) ARCH=arm CROSS_COMPILE=$(HOST)- defconfig
-	@cp $(ROOT_DIR)/kernel-config $(PACKAGES_DIR)/$(KERNEL)/.config
+	@cp $(SRC_DIR)/patches/$(KERNEL)/.config $(PACKAGES_DIR)/$(KERNEL)/.config
 	@touch $@
 
 $(PACKAGES_DIR)/$(KERNEL)/.kernelmodules: $(PACKAGES_DIR)/$(KERNEL)/.config
@@ -590,7 +588,7 @@ kernel-clean:
 	@make -C $(PACKAGES_DIR)/$(KERNEL) clean mrproper
 
 $(PACKAGES_DIR)/$(RADARE2)/mk/arm-buildroot-linux-uclibcgnueabi-gcc.mk:
-	@cp $(ROOT_DIR)/arm-buildroot-linux-uclibcgnueabi-gcc.mk $(PACKAGES_DIR)/$(RADARE2)/mk
+	@cp $(SRC_DIR)/patches/$(RADARE2)/arm-buildroot-linux-uclibcgnueabi-gcc.mk $(PACKAGES_DIR)/$(RADARE2)/mk
 	@touch $@
 
 $(PACKAGES_DIR)/$(RADARE2)/plugins.cfg: $(PACKAGES_DIR)/$(RADARE2)/mk/arm-buildroot-linux-uclibcgnueabi-gcc.mk
@@ -601,7 +599,7 @@ $(PACKAGES_DIR)/$(RADARE2)/plugins.cfg: $(PACKAGES_DIR)/$(RADARE2)/mk/arm-buildr
 	@touch $@
 
 $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h: $(PACKAGES_DIR)/$(RADARE2)/plugins.cfg
-	@cp $(ROOT_DIR)/radare2-fenv.h $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h
+	@cp $(SRC_DIR)/patches/$(RADARE2)/fenv.h $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h
 	@touch $@
 
 $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2: $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h
@@ -834,13 +832,13 @@ mrproper-full: download-clean mrproper
 clean: glibc-clean radare2-clean kernel-clean libexecinfo-clean ffmpeg-clean opus-clean openjpeg-clean libilbc-clean libgpg-error-clean gmp-clean libgcrypt-clean onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
 
 update-version-major:
-	@$(ROOT_DIR)/update-version.sh --major
+	@$(SRC_DIR)/bin/update-version.sh --major
 
 update-version-minor:
-	@$(ROOT_DIR)/update-version.sh --minor
+	@$(SRC_DIR)/bin/update-version.sh --minor
 
 update-version-revision:
-	@$(ROOT_DIR)/update-version.sh --revision
+	@$(SRC_DIR)/bin/update-version.sh --revision
 	
 version:
 	@cat $(ROOT_DIR)/version.txt
