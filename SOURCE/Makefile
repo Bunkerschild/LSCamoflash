@@ -80,7 +80,7 @@ export TOOLCHAIN_PATH PKG_CONFIG_PATH PATH C CC GCC CXX CPP AR RANLIB CROSS_PREF
 # Liste der zu ladenden Pakete
 URLS := \
     $(DOWNLOAD_URL)/$(TOOLCHAIN).tar.bz2?download=\#/$(TOOLCHAIN).tar.bz2 \
-    https://www.kernel.org/pub/linux/kernel/v4.x/$(KERNEL).tar.gz \
+    $(DOWNLOAD_URL)/$(KERNEL).tar.gz?download=\#/$(KERNEL).tar.gz \
     $(DOWNLOAD_URL)/$(LIBPCAP).tar.gz?download=\#/$(LIBPCAP).tar.gz \
     $(DOWNLOAD_URL)/$(TCPDUMP).tar.gz?download=\#/$(TCPDUMP).tar.gz \
     $(DOWNLOAD_URL)/$(OPENSSL).tar.gz?download=\#/$(OPENSSL).tar.gz \
