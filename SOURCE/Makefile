@@ -70,6 +70,9 @@ RADARE2 := radare2-5.9.8
 GLIBC := glibc-2.32
 KERNEL := linux-4.4.192
 
+# Kernel version
+KERNEL_VERSION := 4.4.192V2.1
+
 # Exportiere die Variablen für alle Ziele
 export TOOLCHAIN_PATH PKG_CONFIG_PATH PATH C CC GCC CXX CPP AR RANLIB CROSS_PREFIX
 
@@ -140,6 +143,7 @@ $(STAGING_DIR):
 	@mkdir -p $@
 
 $(BUILD_DIR):
+	@make update-version-revision
 	@mkdir -p $@
 
 $(DOWNLOAD_DIR)/%:
@@ -645,6 +649,15 @@ $(BUILD_DIR)/install.ps1: $(BUILD_DIR)
 	@cp -aL $(STAGE_HACK)/lib/* $(BUILD_HACK)/lib
 	@cp -aL $(STAGE_HACK)/usr/lib/* $(BUILD_HACK)/lib
 	@cp -aL $(STAGE_HACK)/usr/local/lib/* $(BUILD_HACK)/lib
+	@find $(BUILD_HACK)/lib -name "*.c" -exec rm {} \;
+	@find $(BUILD_HACK)/lib -name "*.o" -exec rm {} \;
+	@find $(BUILD_HACK)/lib -name "*.a" -exec rm {} \;
+	@find $(BUILD_HACK)/lib -name "*.la" -exec rm {} \;
+	@find $(BUILD_HACK)/lib -name "*.pc" -exec rm {} \;
+	@find $(BUILD_HACK)/lib -name "*.cmake" -exec rm {} \;
+	@rm -rf $(BUILD_HACK)/usr/share/locale
+	@rm -rf $(BUILD_HACK)/lib/modules/$(KERNEL_VERSION)/build
+	@rm -rf $(BUILD_HACK)/lib/modules/$(KERNEL_VERSION)/source
 	@touch $@
 	
 $(BUILD_HACK)/sbin/mosquitto:
@@ -683,7 +696,6 @@ $(BUILD_HACK)/bin/joe:
 	@cp $(STAGE_HACK)/bin/joe $@
 
 $(BUILD_HACK)/bin/msmtp:
-	@cp -aL $(STATE_HACK)/usr/share/locale $(BUILD_HACK)/usr/share
 	@cp $(STAGE_HACK)/bin/msmtp $@
 
 $(BUILD_HACK)/sbin/msmtpd:
@@ -783,19 +795,20 @@ $(BUILD_HACK)/bin/rasm2:
 	@cp $(STAGE_HACK)/bin/rasm2 $@
 
 $(BUILD_HACK)/etc/version.txt:
-	@find $(BUILD_HACK)/lib -name "*.a" -exec rm {} \;
-	@find $(BUILD_HACK)/lib -name "*.la" -exec rm {} \;
-	@find $(BUILD_HACK)/lib -name "*.pc" -exec rm {} \;
-	@find $(BUILD_HACK)/lib -name "*.cmake" -exec rm {} \;
-	@rm -rf $(BUILD_HACK)/usr/share/locale
-	@cp version.txt $@
+	@cp $(ROOT_DIR)/version.txt $@
+	@touch $@
+	
+$(BUILD_DIR)/LICENSE.md:
+	@cp $(ROOT_DIR)/LICENSE.MIT $(BUILD_DIR)/LICENSE.MIT
+	@cp $(ROOT_DIR)/LICENSE.md $@
+	@touch $@
 
 build: $(BUILD_DIR)/install.ps1 $(BUILD_HACK)/bin/radare2 $(BUILD_HACK)/bin/r2agent $(BUILD_HACK)/bin/r2r $(BUILD_HACK)/bin/rasign2 $(BUILD_HACK)/bin/rax2 $(BUILD_HACK)/bin/ragg2 $(BUILD_HACK)/bin/rarun2 $(BUILD_HACK)/bin/rabin2 \
        $(BUILD_HACK)/bin/radiff2 $(BUILD_HACK)/bin/ravc2 $(BUILD_HACK)/bin/rahash2 $(BUILD_HACK)/bin/rafind2 $(BUILD_HACK)/bin/r2pm $(BUILD_HACK)/bin/rasm2 $(BUILD_HACK)/bin/ffmpeg $(BUILD_HACK)/bin/ffprobe $(BUILD_HACK)/bin/opj_dump \
        $(BUILD_HACK)/bin/opj_compress $(BUILD_HACK)/bin/opj_decompress $(BUILD_HACK)/sbin/onvif_srvd $(BUILD_HACK)/bin/upnpc $(BUILD_HACK)/bin/tcpdump-static $(BUILD_HACK)/bin/tcpdump $(BUILD_HACK)/bin/strace-log-merge \
        $(BUILD_HACK)/bin/strace $(BUILD_HACK)/bin/sqlite3 $(BUILD_HACK)/bin/sqlcipher $(BUILD_HACK)/bin/pcap-config $(BUILD_HACK)/bin/openssl $(BUILD_HACK)/sbin/msmtpd $(BUILD_HACK)/bin/msmtp $(BUILD_HACK)/bin/joe \
        $(BUILD_HACK)/bin/curl-config $(BUILD_HACK)/bin/curl $(BUILD_HACK)/bin/busybox $(BUILD_HACK)/bin/mosquitto_rr $(BUILD_HACK)/bin/mosquitto_pub $(BUILD_HACK)/bin/mosquitto_sub $(BUILD_HACK)/bin/mosquitto_passwd \
-       $(BUILD_HACK)/sbin/mosquitto $(BUILD_HACK)/etc/version.txt
+       $(BUILD_HACK)/sbin/mosquitto $(BUILD_HACK)/etc/version.txt $(BUILD_DIR)/LICENSE.md
 	
 build-clean:
 	@rm -rf $(BUILD_DIR)
@@ -819,6 +832,18 @@ mrproper: staging-clean packages-clean toolchain-clean build-clean
 mrproper-full: download-clean mrproper
 	
 clean: glibc-clean radare2-clean kernel-clean libexecinfo-clean ffmpeg-clean opus-clean openjpeg-clean libilbc-clean libgpg-error-clean gmp-clean libgcrypt-clean onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
+
+update-version-major:
+	@$(ROOT_DIR)/update-version.sh --major
+
+update-version-minor:
+	@$(ROOT_DIR)/update-version.sh --minor
+
+update-version-revision:
+	@$(ROOT_DIR)/update-version.sh --revision
+	
+version:
+	@cat $(ROOT_DIR)/version.txt
 
 LSCamoflash-$(VERSION).tar.gz: download toolchain packages staging build
 	@tar -C $(BUILD_DIR) -cvzf $@ .
