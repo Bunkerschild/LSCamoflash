@@ -509,7 +509,7 @@ $(PACKAGES_DIR)/$(BUSYBOX)/.config:
 	@cp $(SRC_DIR)/patches/$(BUSYBOX)/uclibc-config $(PACKAGES_DIR)/$(BUSYBOX)/.config
 
 $(PACKAGES_DIR)/$(BUSYBOX)/busybox: $(PACKAGES_DIR)/$(BUSYBOX)/.config
-	@$(FORCE_TOOLCHAIN_UCLIBC) make -C $(PACKAGES_DIR)/$(BUSYBOX) -j$(nproc)
+	@make -C $(PACKAGES_DIR)/$(BUSYBOX) -j$(nproc) $(FORCE_TOOLCHAIN_UCLIBC)
 	
 $(STAGING_DIR)/$(SDROOT)/bin/busybox: $(PACKAGES_DIR)/$(BUSYBOX)/busybox
 	@make -C $(PACKAGES_DIR)/$(BUSYBOX) install
@@ -786,7 +786,7 @@ $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h: $(PACKAGES_DIR)/$(RADARE2)/plugi
 
 $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2: $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h
 	@cp $(STAGING_DIR)/$(SDROOT)/include/execinfo.h $(PACKAGES_DIR)/$(RADARE2)/libr/include
-	@$(FORCE_TOOLCHAIN_GLIBC) make -C $(PACKAGES_DIR)/$(RADARE2) -j$(nproc) CROSS_ROOT=$(TOOLCHAIN_GLIBC_PATH)/bin \
+	@make -C $(PACKAGES_DIR)/$(RADARE2) -j$(nproc) CROSS_ROOT=$(TOOLCHAIN_GLIBC_PATH)/bin $(FORCE_TOOLCHAIN_GLIBC) \
 	CPPFLAGS="-I$(PACKAGES_DIR)/$(RADARE2)/shlr/ar -I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(TOOLCHAIN_GLIBC_PATH)/$(HOST)/sysroot/usr/include -L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(TOOLCHAIN_GLIBC_PATH)/$(HOST)/sysroot/lib -L$(TOOLCHAIN_GLIBC_PATH)/$(HOST)/sysroot/usr/lib -lexecinfo -latomic" 
 	
 $(STAGING_DIR)/$(SDROOT)/bin/radare2: $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2
