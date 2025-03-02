@@ -13,7 +13,6 @@ download/msmtp-1.8.24.tar.xz filter=lfs diff=lfs merge=lfs -text
 download/joe-4.6.tar.gz filter=lfs diff=lfs merge=lfs -text
 download/libexecinfo-1.1.tar.gz filter=lfs diff=lfs merge=lfs -text
 download/openjpeg-2.5.3.tar.gz filter=lfs diff=lfs merge=lfs -text
-download/armv5-eabi--uclibc--stable-2020.08-1.tar.bz2 filter=lfs diff=lfs merge=lfs -text
 download/ffmpeg-7.1.tar.xz filter=lfs diff=lfs merge=lfs -text
 download/libgcrypt-1.11.0.tar.bz2 filter=lfs diff=lfs merge=lfs -text
 download/libpcap-1.10.4.tar.gz filter=lfs diff=lfs merge=lfs -text
@@ -29,6 +28,9 @@ download/cacert.pem filter=lfs diff=lfs merge=lfs -text
 download/linux-4.4.192.tar.gz filter=lfs diff=lfs merge=lfs -text
 download/glibc-2.32.tar.gz filter=lfs diff=lfs merge=lfs -text
 download/libexecinfo-1.1-rc2.tar.gz filter=lfs diff=lfs merge=lfs -text
-download/armv5-eabi--glibc--stable-2020.02-2.tar.bz2 filter=lfs diff=lfs merge=lfs -text
 download/armv5-eabi--uclibc--stable-2020.02-2.tar.bz2 filter=lfs diff=lfs merge=lfs -text
+download/armv5-eabi--glibc--stable-2020.02-2.tar.bz2 filter=lfs diff=lfs merge=lfs -text
 download/armv5-eabi--musl--stable-2020.02-2.tar.bz2 filter=lfs diff=lfs merge=lfs -text
+download/armv5-eabi--uclibc--stable-2020.08-1.tar.bz2 filter=lfs diff=lfs merge=lfs -text
+download/armv5-eabi--glibc--stable-2020.08-1.tar.bz2 filter=lfs diff=lfs merge=lfs -text
+download/armv5-eabi--musl--stable-2020.08-1.tar.bz2 filter=lfs diff=lfs merge=lfs -text

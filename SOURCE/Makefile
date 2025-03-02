@@ -81,6 +81,12 @@ AUTOUPDATE := $(TOOLCHAIN_PATH)/bin/autoupdate
 IFNAMES := $(TOOLCHAIN_PATH)/bin/ifnames
 CROSS_PREFIX := $(HOST)
 
+# Kernel version
+KERNEL_VERSION := 4.4.192V2.1
+
+# Toolchain version
+TOOLCHAIN_VERSION := 2020.08-1
+
 # Definiere Paketversionen
 LIBPCAP := libpcap-1.10.4
 TCPDUMP := tcpdump-4.99.4
@@ -109,9 +115,9 @@ LIBEXECINFO := libexecinfo-1.1-rc2
 RADARE2 := radare2-5.9.8
 GLIBC := glibc-2.32
 KERNEL := linux-4.4.192
-TOOLCHAIN_UCLIBC := armv5-eabi--uclibc--stable-2020.02-2
-TOOLCHAIN_GLIBC := armv5-eabi--glibc--stable-2020.02-2
-TOOLCHAIN_MUSL := armv5-eabi--musl--stable-2020.02-2
+TOOLCHAIN_UCLIBC := armv5-eabi--uclibc--stable-$(TOOLCHAIN_VERSION)
+TOOLCHAIN_GLIBC := armv5-eabi--glibc--stable-$(TOOLCHAIN_VERSION)
+TOOLCHAIN_MUSL := armv5-eabi--musl--stable-$(TOOLCHAIN_VERSION)
 ifeq ($(USE_LIBC), glibc)
 	TOOLCHAIN := $(TOOLCHAIN_GLIBC)
 else ifeq ($(USE_LIBC), uclibc)
@@ -119,9 +125,6 @@ else ifeq ($(USE_LIBC), uclibc)
 else ifeq ($(USE_LIBC), musl)
 	TOOLCHAIN := $(TOOLCHAIN_MUSL)
 endif
-
-# Kernel version
-KERNEL_VERSION := 4.4.192V2.1
 
 # Exportiere die Variablen für alle Ziele
 export TOOLCHAIN_PATH PKG_CONFIG_PATH PATH C CC GCC CXX CPP AR RANLIB AUTOCONF AUTOHEADER AUTOM4TE AUTORECONF ACLOCAL AUTOSCAN AUTOUPDATE IFNAMES CROSS_PREFIX
