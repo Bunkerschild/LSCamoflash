@@ -1,6 +1,6 @@
 ARCH=arm
-CROSS_ROOT := toolchain/uclibc/bin
-CROSS_TRIPLET=arm-buildroot-linux-uclibcgnueabi
+CROSS_ROOT := toolchain/glibc/bin
+CROSS_TRIPLET=arm-buildroot-linux-glibcgnueabi
 CROSS=${CROSS_ROOT}/${CROSS_TRIPLET}-
 
 CC=${CROSS}gcc

@@ -633,12 +633,12 @@ kernel: $(STAGING_DIR)/$(SDROOT)/.kernelmodules $(STAGING_DIR)/$(SDROOT)/.kernel
 kernel-clean:
 	@make -C $(PACKAGES_DIR)/$(KERNEL) clean mrproper
 
-$(PACKAGES_DIR)/$(RADARE2)/mk/arm-buildroot-linux-uclibcgnueabi-gcc.mk:
-	@cp $(SRC_DIR)/patches/$(RADARE2)/arm-buildroot-linux-uclibcgnueabi-gcc.mk $(PACKAGES_DIR)/$(RADARE2)/mk
+$(PACKAGES_DIR)/$(RADARE2)/mk/$(HOST)-gcc.mk:
+	@cp $(SRC_DIR)/patches/$(RADARE2)/$(HOST)-gcc.mk $(PACKAGES_DIR)/$(RADARE2)/mk
 	@touch $@
 
-$(PACKAGES_DIR)/$(RADARE2)/plugins.cfg: $(PACKAGES_DIR)/$(RADARE2)/mk/arm-buildroot-linux-uclibcgnueabi-gcc.mk
-	@cd $(PACKAGES_DIR)/$(RADARE2); ./configure --host=$(HOST) --with-compiler=arm-buildroot-linux-uclibcgnueabi-gcc --disable-plugins --disable-shared \
+$(PACKAGES_DIR)/$(RADARE2)/plugins.cfg: $(PACKAGES_DIR)/$(RADARE2)/mk/$(HOST)-gcc.mk
+	@cd $(PACKAGES_DIR)/$(RADARE2); ./configure --host=$(HOST) --with-compiler=$(HOST)-gcc --disable-plugins --disable-shared \
 	--prefix=$(SDROOT) --includedir=$(SDROOT)/usr/include --datadir=$(SDROOT)/usr/share --with-static-themes --with-ssl CROSS_ROOT=$(TOOLCHAIN_PATH)/bin \
 	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/sysroot/usr/include --static" \
 	LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/usr/lib -lssl -lz -lexecinfo -latomic --static"
