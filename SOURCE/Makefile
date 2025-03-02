@@ -49,7 +49,7 @@ else ifeq ($(USE_LIBC), musl)
 	TOOLCHAIN_PATH := $(TOOLCHAIN_MUSL_PATH)
 endif
 PKG_CONFIG_PATH := $(TOOLCHAIN_PATH)/lib/pkgconfig:$(TOOLCHAIN_PATH)/share/pkgconfig
-PATH := $(TOOLCHAIN_PATH)/bin:$(PATH)
+PATH := $(TOOLCHAIN_PATH)/bin:$(TOOLCHAIN_UCLIBC_PATH)/bin:$(TOOLCHAIN_GLIBC_PATH)/bin:$(TOOLCHAIN_MUSL_PATH)/bin:$(PATH)
 
 # GLIBC toolchain
 HOST_UCLIBC := arm-buildroot-linux-uclibcgnueabi
@@ -774,9 +774,9 @@ $(PACKAGES_DIR)/$(RADARE2)/mk/$(HOST_GLIBC)-gcc.mk:
 
 $(PACKAGES_DIR)/$(RADARE2)/plugins.cfg: $(PACKAGES_DIR)/$(RADARE2)/mk/$(HOST_GLIBC)-gcc.mk
 	@cd $(PACKAGES_DIR)/$(RADARE2); ./configure --host=$(HOST) --with-compiler=$(HOST)-gcc \
-	--prefix=$(SDROOT) --includedir=$(SDROOT)/usr/include --datadir=$(SDROOT)/usr/share --with-static-themes --with-ssl CROSS_ROOT=$(TOOLCHAIN_PATH)/bin \
-	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(TOOLCHAIN_PATH)/$(HOST)/sysroot/usr/include" \
-	LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(TOOLCHAIN_PATH)/$(HOST)/sysroot/lib -L$(TOOLCHAIN_PATH)/$(HOST)/sysroot/usr/lib -lssl -lz -lexecinfo -latomic" \
+	--prefix=$(SDROOT) --includedir=$(SDROOT)/usr/include --datadir=$(SDROOT)/usr/share --with-static-themes --with-ssl CROSS_ROOT=$(TOOLCHAIN_GLIBC_PATH)/bin \
+	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(TOOLCHAIN_GLIBC_PATH)/$(HOST)/sysroot/usr/include" \
+	LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(TOOLCHAIN_GLIBC_PATH)/$(HOST)/sysroot/lib -L$(TOOLCHAIN_GLIBC_PATH)/$(HOST)/sysroot/usr/lib -lssl -lz -lexecinfo -latomic" \
 	$(FORCE_TOOLCHAIN_GLIBC)
 	@touch $@
 
@@ -786,11 +786,11 @@ $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h: $(PACKAGES_DIR)/$(RADARE2)/plugi
 
 $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2: $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h
 	@cp $(STAGING_DIR)/$(SDROOT)/include/execinfo.h $(PACKAGES_DIR)/$(RADARE2)/libr/include
-	@make -C $(PACKAGES_DIR)/$(RADARE2) -j$(nproc) CROSS_ROOT=$(TOOLCHAIN_PATH)/bin $(FORCE_TOOLCHAIN_GLIBC) \
-	CPPFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(TOOLCHAIN_PATH)/$(HOST)/sysroot/usr/include -L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(TOOLCHAIN_PATH)/$(HOST)/sysroot/lib -L$(TOOLCHAIN_PATH)/$(HOST)/sysroot/usr/lib -lexecinfo -latomic" 
+	@$(FORCE_TOOLCHAIN_GLIBC) make -C $(PACKAGES_DIR)/$(RADARE2) -j$(nproc) CROSS_ROOT=$(TOOLCHAIN_GLIBC_PATH)/bin \
+	CPPFLAGS="-I$(PACKAGES_DIR)/$(RADARE2)/shlr/ar -I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(TOOLCHAIN_GLIBC_PATH)/$(HOST)/sysroot/usr/include -L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(TOOLCHAIN_GLIBC_PATH)/$(HOST)/sysroot/lib -L$(TOOLCHAIN_GLIBC_PATH)/$(HOST)/sysroot/usr/lib -lexecinfo -latomic" 
 	
 $(STAGING_DIR)/$(SDROOT)/bin/radare2: $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2
-	@make -C $(PACKAGES_DIR)/$(RADARE2) install DESTDIR=$(STAGING_DIR) CROSS_ROOT=$(TOOLCHAIN_PATH)/bin
+	@make -C $(PACKAGES_DIR)/$(RADARE2) install DESTDIR=$(STAGING_DIR) CROSS_ROOT=$(TOOLCHAIN_GLIBC_PATH)/bin
 	@rm $(STAGING_DIR)/$(SDROOT)/lib/radare2/5.9.8/5.9.8 || true
 	@rm $(STAGING_DIR)/$(SDROOT)/lib/radare2/last/5.9.8 || true
 	@touch $@
