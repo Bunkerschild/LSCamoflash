@@ -52,7 +52,7 @@ PATH := $(TOOLCHAIN_PATH)/bin:$(PATH)
 # Definiere die Cross-Compiler Variablen
 HOST_UCLIBC := arm-buildroot-linux-uclibcgnueabi
 HOST_GLIBC := arm-buildroot-linux-gnueabi
-HOST_GLIBC := arm-buildroot-linux-musl
+HOST_GLIBC := arm-buildroot-linux-muslabi
 ifeq ($(USE_LIBC), glibc)
 	HOST := $(HOST_GLIBC)
 else ifeq ($(USE_LIBC), uclibc)
@@ -179,15 +179,21 @@ $(TOOLCHAIN_GLIBC_DIR)/buildroot.config: $(TOOLCHAIN_GLIBC_DIR)
 	@cp /usr/bin/ifnames $(IFNAMES)
 	@touch $@
 	
+$(TOOLCHAIN_MUSL_DIR)/buildroot.config: $(TOOLCHAIN_MUSL_DIR)
+	@tar -xf $(DOWNLOAD_DIR)/$(TOOLCHAIN_MUSL).tar.bz2 -C $(TOOLCHAIN_MUSL_DIR) --strip-components=1
+	@touch $@
+	
 toolchain-uclibc: $(TOOLCHAIN_UCLIBC_DIR)/buildroot.config
 
 toolchain-glibc: $(TOOLCHAIN_GLIBC_DIR)/buildroot.config
 
-toolchain: toolchain-uclibc toolchain-glibc
+toolchain-musl: $(TOOLCHAIN_MUSL_DIR)/buildroot.config
+
+toolchain: toolchain-uclibc toolchain-glibc toolchain-musl
 
 $(PACKAGES_DIR)/cacert.pem: $(PACKAGES_DIR)
 	@for file in $(DOWNLOAD_DIR)/*; do \
-	  if [ "$$file" != "$(DOWNLOAD_DIR)/$(TOOLCHAIN_UCLIBC).tar.bz2" -a "$$file" != "$(DOWNLOAD_DIR)/$(TOOLCHAIN_GLIBC).tar.bz2" -a "$$file" != "$(DOWNLOAD_DIR)/cacert.pem" ]; then \
+	  if [ "$$file" != "$(DOWNLOAD_DIR)/$(TOOLCHAIN_UCLIBC).tar.bz2" -a "$$file" != "$(DOWNLOAD_DIR)/$(TOOLCHAIN_GLIBC).tar.bz2" -a "$$file" != "$(DOWNLOAD_DIR)/$(TOOLCHAIN_MUSL).tar.bz2" -a "$$file" != "$(DOWNLOAD_DIR)/cacert.pem" ]; then \
 	  	cd $(PACKAGES_DIR); \
 	  	unzip -o $$file 2>/dev/null || tar -xvf $$file -C $(PACKAGES_DIR) || echo "Skipping $$file"; \
 	  fi; \
@@ -203,6 +209,9 @@ $(TOOLCHAIN_UCLIBC_DIR):
 	@mkdir -p $@
 
 $(TOOLCHAIN_GLIBC_DIR):
+	@mkdir -p $@
+
+$(TOOLCHAIN_MUSL_DIR):
 	@mkdir -p $@
 
 $(PACKAGES_DIR):
@@ -488,6 +497,8 @@ onvif-clean:
 
 $(PACKAGES_DIR)/$(LIBGPG_ERROR)/Makefile:
 	@ln -sf $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/syscfg/lock-obj-pub.arm-unknown-linux-gnueabi.h $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/syscfg/lock-obj-pub.linux-uclibcgnueabi.h
+	@ln -sf $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/syscfg/lock-obj-pub.arm-unknown-linux-gnueabi.h $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/syscfg/lock-obj-pub.linux-gnueabi.h
+	@ln -sf $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/syscfg/lock-obj-pub.arm-unknown-linux-gnueabi.h $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/syscfg/lock-obj-pub.linux-muslabi.h
 	@cd $(PACKAGES_DIR)/$(LIBGPG_ERROR); ./configure --prefix=$(SDROOT) --with-gnu-ld --host=$(HOST) --disable-nls \
 	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/usr/include" LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib"
 	
