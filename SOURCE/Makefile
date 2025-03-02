@@ -900,17 +900,23 @@ update-version-revision:
 version:
 	@cat $(ROOT_DIR)/version.txt
 
-LSCamoflash-$(VERSION).tar.gz: download toolchain packages staging build
+LSCamoflash-$(VERSION)-$(USE_LIBC).tar.gz: download toolchain packages staging build
 	@tar -C $(BUILD_DIR) -cvzf $@ .
 	@touch $@
 	
-update-$(VERSION).tgz: download toolchain packages staging build
+update-$(VERSION)-$(USE_LIBC).tgz: download toolchain packages staging build
 	@tar -C $(BUILD_DIR) -cvzf $@ --exclude=mmcblk0p2/HACK/etc --exclude=mmcblk0p2/HACK/var/spool/cron/crontabs/root mmcblk0p1 mmcblk0p2
 	@touch $@
 	
-release: LSCamoflash-$(VERSION).tar.gz
+release: LSCamoflash-$(VERSION)-$(USE_LIBC).tar.gz
 
-update: update-$(VERSION).tgz
+update: update-$(VERSION)-$(USE_LIBC).tgz
+
+build-test-glibc:
+	@make USE_LIBC=glibc mrproper-full download toolchain packages staging mrproper
+
+build-test-uclibc:
+	@make USE_LIBC=uclibc mrproper-full download toolchain packages staging mrproper
 
 install: all
 	@cd $(BUILD_DIR); sh install.sh

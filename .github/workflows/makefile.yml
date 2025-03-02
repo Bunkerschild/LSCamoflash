@@ -19,8 +19,13 @@ jobs:
       - name: Installiere Build-Tools
         run: sudo apt update && sudo apt install -y build-essential flex bison gsoap binutils make automake autoconf autoconf-archive
 
-      - name: Starte Build
+      - name: Starte Build-Test mit glibc
         run: |
           cd SOURCE
-          make mrproper-full
-          make download toolchain packages staging
+          make build-test-glibc
+
+      - name: Starte Build-Test mit uclibc
+        run: |
+          cd SOURCE
+          make build-test-uclibc
+          
