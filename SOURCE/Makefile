@@ -46,7 +46,7 @@ PATH := $(TOOLCHAIN_PATH)/bin:$(PATH)
 
 # Definiere die Cross-Compiler Variablen
 HOST_UCLIBC := arm-buildroot-linux-uclibcgnueabi
-HOST_GLIBC := arm-buildroot-linux-glibcgnueabi
+HOST_GLIBC := arm-buildroot-linux-gnueabi
 ifeq ($(USE_LIBC), glibc)
 	HOST := $(HOST_GLIBC)
 else ifeq ($(USE_LIBC), uclibc)
@@ -104,7 +104,7 @@ endif
 KERNEL_VERSION := 4.4.192V2.1
 
 # Exportiere die Variablen für alle Ziele
-export HOST TOOLCHAIN_PATH PKG_CONFIG_PATH PATH C CC GCC CXX CPP AR RANLIB CROSS_PREFIX
+export TOOLCHAIN_PATH PKG_CONFIG_PATH PATH C CC GCC CXX CPP AR RANLIB CROSS_PREFIX
 
 # Liste der zu ladenden Pakete
 URLS := \
@@ -358,7 +358,7 @@ curl-clean:
 
 $(PACKAGES_DIR)/$(BUSYBOX)/.config:
 	@make -C $(PACKAGES_DIR)/$(BUSYBOX) defconfig
-	@cp $(SRC_DIR)/patches/$(BUSYBOX)/.config $(PACKAGES_DIR)/$(BUSYBOX)/.config
+	@cp $(SRC_DIR)/patches/$(BUSYBOX)/$(USE_LIBC)-config $(PACKAGES_DIR)/$(BUSYBOX)/.config
 
 $(PACKAGES_DIR)/$(BUSYBOX)/busybox: $(PACKAGES_DIR)/$(BUSYBOX)/.config
 	@make -C $(PACKAGES_DIR)/$(BUSYBOX) -j$(nproc)
@@ -436,7 +436,7 @@ gsoap-clean:
 	@make -C $(PACKAGES_DIR)/$(GSOAP) clean distclean
 
 $(PACKAGES_DIR)/$(ONVIF)/Makefile.patch:
-	@cp $(SRC_DIR)/patches/$(ONVIF)/Makefile $(PACKAGES_DIR)/$(ONVIF)/Makefile
+	@cp $(SRC_DIR)/patches/$(ONVIF)/$(USE_LIBC)-Makefile $(PACKAGES_DIR)/$(ONVIF)/Makefile
 	@touch $@
 
 $(PACKAGES_DIR)/$(ONVIF)/onvif_srvd: $(PACKAGES_DIR)/$(ONVIF)/Makefile.patch
@@ -638,10 +638,10 @@ $(PACKAGES_DIR)/$(RADARE2)/mk/$(HOST)-gcc.mk:
 	@touch $@
 
 $(PACKAGES_DIR)/$(RADARE2)/plugins.cfg: $(PACKAGES_DIR)/$(RADARE2)/mk/$(HOST)-gcc.mk
-	@cd $(PACKAGES_DIR)/$(RADARE2); ./configure --host=$(HOST) --with-compiler=$(HOST)-gcc --disable-plugins --disable-shared \
+	@cd $(PACKAGES_DIR)/$(RADARE2); ./configure --host=$(HOST) --with-compiler=$(HOST)-gcc \
 	--prefix=$(SDROOT) --includedir=$(SDROOT)/usr/include --datadir=$(SDROOT)/usr/share --with-static-themes --with-ssl CROSS_ROOT=$(TOOLCHAIN_PATH)/bin \
-	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/sysroot/usr/include --static" \
-	LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/usr/lib -lssl -lz -lexecinfo -latomic --static"
+	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/sysroot/usr/include" \
+	LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/usr/lib -lssl -lz -lexecinfo -latomic"
 	@touch $@
 
 $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h: $(PACKAGES_DIR)/$(RADARE2)/plugins.cfg
@@ -651,7 +651,7 @@ $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h: $(PACKAGES_DIR)/$(RADARE2)/plugi
 $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2: $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h
 	@cp $(STAGING_DIR)/$(SDROOT)/include/execinfo.h $(PACKAGES_DIR)/$(RADARE2)/libr/include
 	@make -C $(PACKAGES_DIR)/$(RADARE2) -j$(nproc) CROSS_ROOT=$(TOOLCHAIN_PATH)/bin \
-	CPPFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/sysroot/usr/include -L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/usr/lib -lexecinfo -latomic --static" 
+	CPPFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/sysroot/usr/include -L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/usr/lib -lexecinfo -latomic" 
 	
 $(STAGING_DIR)/$(SDROOT)/bin/radare2: $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2
 	@make -C $(PACKAGES_DIR)/$(RADARE2) install DESTDIR=$(STAGING_DIR) CROSS_ROOT=$(TOOLCHAIN_PATH)/bin
