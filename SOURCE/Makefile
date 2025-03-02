@@ -44,7 +44,7 @@ TOOLCHAIN_MUSL_PATH := $(TOOLCHAIN_MUSL_DIR)
 ifeq ($(USE_LIBC), glibc)
 	TOOLCHAIN_PATH := $(TOOLCHAIN_GLIBC_PATH)
 else ifeq ($(USE_LIBC), uclibc)
-	TOOLCHAIN_PATH := $(TOOLCHAIN_UCLIBC_PATH)	
+	TOOLCHAIN_PATH := $(TOOLCHAIN_UCLIBC_PATH)
 else ifeq ($(USE_LIBC), musl)
 	TOOLCHAIN_PATH := $(TOOLCHAIN_MUSL_PATH)
 endif
@@ -509,7 +509,7 @@ $(PACKAGES_DIR)/$(BUSYBOX)/.config:
 	@cp $(SRC_DIR)/patches/$(BUSYBOX)/uclibc-config $(PACKAGES_DIR)/$(BUSYBOX)/.config
 
 $(PACKAGES_DIR)/$(BUSYBOX)/busybox: $(PACKAGES_DIR)/$(BUSYBOX)/.config
-	@make -C $(PACKAGES_DIR)/$(BUSYBOX) -j$(nproc) $(FORCE_TOOLCHAIN_UCLIBC)
+	@$(FORCE_TOOLCHAIN_UCLIBC) make -C $(PACKAGES_DIR)/$(BUSYBOX) -j$(nproc) 
 	
 $(STAGING_DIR)/$(SDROOT)/bin/busybox: $(PACKAGES_DIR)/$(BUSYBOX)/busybox
 	@make -C $(PACKAGES_DIR)/$(BUSYBOX) install
@@ -786,7 +786,7 @@ $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h: $(PACKAGES_DIR)/$(RADARE2)/plugi
 
 $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2: $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h
 	@cp $(STAGING_DIR)/$(SDROOT)/include/execinfo.h $(PACKAGES_DIR)/$(RADARE2)/libr/include
-	@make -C $(PACKAGES_DIR)/$(RADARE2) -j$(nproc) CROSS_ROOT=$(TOOLCHAIN_GLIBC_PATH)/bin $(FORCE_TOOLCHAIN_GLIBC) \
+	@$(FORCE_TOOLCHAIN_GLIBC) make -C $(PACKAGES_DIR)/$(RADARE2) -j$(nproc) CROSS_ROOT=$(TOOLCHAIN_GLIBC_PATH)/bin \
 	CPPFLAGS="-I$(PACKAGES_DIR)/$(RADARE2)/shlr/ar -I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(TOOLCHAIN_GLIBC_PATH)/$(HOST)/sysroot/usr/include -L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(TOOLCHAIN_GLIBC_PATH)/$(HOST)/sysroot/lib -L$(TOOLCHAIN_GLIBC_PATH)/$(HOST)/sysroot/usr/lib -lexecinfo -latomic" 
 	
 $(STAGING_DIR)/$(SDROOT)/bin/radare2: $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2
