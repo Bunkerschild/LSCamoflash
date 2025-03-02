@@ -9,8 +9,9 @@ USE_LIBC ?= glibc
 # Definiere Pfade
 ROOT_DIR := $(shell pwd)
 DOWNLOAD_DIR := $(ROOT_DIR)/download
-TOOLCHAIN_UCLIBC_DIR := $(ROOT_DIR)/toolchain/uclibc
-TOOLCHAIN_GLIBC_DIR := $(ROOT_DIR)/toolchain/glibc
+TOOLCHAIN_BASE_DIR := $(ROOT_DIR)/toolchain
+TOOLCHAIN_UCLIBC_DIR := $(TOOLCHAIN_BASE_DIR)/uclibc
+TOOLCHAIN_GLIBC_DIR := $(TOOLCHAIN_BASE_DIR)/glibc
 ifeq ($(USE_LIBC), glibc)
 	TOOLCHAIN_DIR := $(TOOLCHAIN_GLIBC_DIR)
 else ifeq ($(USE_LIBC), uclibc)
@@ -872,6 +873,7 @@ toolchain-glibc-clean:
 	@rm -rf $(TOOLCHAIN_GLIBC_DIR)
 
 toolchain-clean: toolchain-uclibc-clean toolchain-glibc-clean
+	@rm -rf $(TOOLCHAIN_BASE_DIR)
 
 mrproper: staging-clean packages-clean toolchain-clean build-clean
 	@rm -f $(ROOT_DIR)/LSCamoflash-*.tar.gz || true
