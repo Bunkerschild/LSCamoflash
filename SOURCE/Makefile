@@ -3,8 +3,8 @@ PROJECT_URL := https://github.com/Bunkerschild/LSCamoflash
 DOWNLOAD_URL := $(PROJECT_URL)/raw/refs/heads/main/SOURCE/download/
 
 # Zu verwendende LIBC
-#USE_LIBC ?= uclibc
-USE_LIBC ?= glibc
+USE_LIBC ?= uclibc
+#USE_LIBC ?= glibc
 #USE_LIBC ?= musl
 
 # Definiere Pfade
@@ -40,6 +40,7 @@ VERSION = $(shell cat version.txt)
 # Definiere die Toolchain-Pfade
 TOOLCHAIN_UCLIBC_PATH := $(TOOLCHAIN_UCLIBC_DIR)
 TOOLCHAIN_GLIBC_PATH := $(TOOLCHAIN_GLIBC_DIR)
+TOOLCHAIN_MUSL_PATH := $(TOOLCHAIN_MUSL_DIR)
 ifeq ($(USE_LIBC), glibc)
 	TOOLCHAIN_PATH := $(TOOLCHAIN_GLIBC_PATH)
 else ifeq ($(USE_LIBC), uclibc)
@@ -70,6 +71,7 @@ AUTOSCAN_UCLIBC := $(TOOLCHAIN_UCLIBC_PATH)/bin/autoscan
 AUTOUPDATE_UCLIBC := $(TOOLCHAIN_UCLIBC_PATH)/bin/autoupdate
 ACLOCAL_UCLIBC := $(TOOLCHAIN_UCLIBC_PATH)/bin/aclocal
 IFNAMES_UCLIBC := $(TOOLCHAIN_UCLIBC_PATH)/bin/ifnames
+FORCE_TOOLCHAIN_UCLIBC = TOOLCHAIN_PATH=$(TOOLCHAIN_UCLIBC_PATH) C=$(C_UCLIBC) CC=$(CC_UCLIBC) GCC=$(GCC_UCLIBC) CXX=$(CXX_UCLIBC) CPP=$(CPP_UCLIBC) AR=$(AR_UCLIBC) NM=$(NM_UCLIBC) LD=$(LD_UCLIBC) RANLIB=$(RANLIB_UCLIBC) STRIP=$(STRIP_UCLIBC) AUTOCONF=$(AUTOCONF_UCLIBC) AUTOHEADER=$(AUTOHEADER_UCLIBC) AUTOM4TE=$(AUTOM4TE_UCLIBC) AUTORECONF=$(AUTORECONF_UCLIBC) AUTOSCAN=$(AUTOSCAN_UCLIBC) AUTOUPDATE=$(AUTOUPDATE_UCLIBC) ACLOCAL=$(ACLOCAL_UCLIBC) IFNAMES=$(IFNAMES_UCLIBC) HOST=$(HOST_UCLIBC) CROSS_PREFIX=$(HOST_UCLIBC)
 
 # MUSL toolchain
 HOST_MUSL := arm-buildroot-linux-musleabi
@@ -91,6 +93,7 @@ AUTOSCAN_MUSL := $(TOOLCHAIN_MUSL_PATH)/bin/autoscan
 AUTOUPDATE_MUSL := $(TOOLCHAIN_MUSL_PATH)/bin/autoupdate
 ACLOCAL_MUSL := $(TOOLCHAIN_MUSL_PATH)/bin/aclocal
 IFNAMES_MUSL := $(TOOLCHAIN_MUSL_PATH)/bin/ifnames
+FORCE_TOOLCHAIN_GLIBC = TOOLCHAIN_PATH=$(TOOLCHAIN_GLIBC_PATH) C=$(C_GLIBC) CC=$(CC_GLIBC) GCC=$(GCC_GLIBC) CXX=$(CXX_GLIBC) CPP=$(CPP_GLIBC) AR=$(AR_GLIBC) NM=$(NM_GLIBC) LD=$(LD_GLIBC) RANLIB=$(RANLIB_GLIBC) STRIP=$(STRIP_GLIBC) AUTOCONF=$(AUTOCONF_GLIBC) AUTOHEADER=$(AUTOHEADER_GLIBC) AUTOM4TE=$(AUTOM4TE_GLIBC) AUTORECONF=$(AUTORECONF_GLIBC) AUTOSCAN=$(AUTOSCAN_GLIBC) AUTOUPDATE=$(AUTOUPDATE_GLIBC) ACLOCAL=$(ACLOCAL_GLIBC) IFNAMES=$(IFNAMES_GLIBC) HOST=$(HOST_GLIBC) CROSS_PREFIX=$(HOST_GLIBC)
 
 # GLIBC toolchain
 HOST_GLIBC := arm-buildroot-linux-gnueabi
@@ -112,6 +115,7 @@ AUTOSCAN_GLIBC := $(TOOLCHAIN_GLIBC_PATH)/bin/autoscan
 AUTOUPDATE_GLIBC := $(TOOLCHAIN_GLIBC_PATH)/bin/autoupdate
 ACLOCAL_GLIBC := $(TOOLCHAIN_GLIBC_PATH)/bin/aclocal
 IFNAMES_GLIBC := $(TOOLCHAIN_GLIBC_PATH)/bin/ifnames
+FORCE_TOOLCHAIN_MUSL = TOOLCHAIN_PATH=$(TOOLCHAIN_MUSL_PATH) C=$(C_MUSL) CC=$(CC_MUSL) GCC=$(GCC_MUSL) CXX=$(CXX_MUSL) CPP=$(CPP_MUSL) AR=$(AR_MUSL) NM=$(NM_MUSL) LD=$(LD_MUSL) RANLIB=$(RANLIB_MUSL) STRIP=$(STRIP_MUSL) AUTOCONF=$(AUTOCONF_MUSL) AUTOHEADER=$(AUTOHEADER_MUSL) AUTOM4TE=$(AUTOM4TE_MUSL) AUTORECONF=$(AUTORECONF_MUSL) AUTOSCAN=$(AUTOSCAN_MUSL) AUTOUPDATE=$(AUTOUPDATE_MUSL) ACLOCAL=$(ACLOCAL_MUSL) IFNAMES=$(IFNAMES_MUSL) HOST=$(HOST_MUSL) CROSS_PREFIX=$(HOST_MUSL)
 
 # Definiere die Cross-Compiler Variablen
 ifeq ($(USE_LIBC), glibc)
@@ -499,12 +503,13 @@ curl: $(STAGING_DIR)/$(SDROOT)/bin/curl $(STAGING_DIR)/$(SDROOT)/etc/config/ssl/
 curl-clean:
 	@make -C $(PACKAGES_DIR)/$(CURL) clean distclean
 
+# Force busybox to use uclibc
 $(PACKAGES_DIR)/$(BUSYBOX)/.config:
-	@make -C $(PACKAGES_DIR)/$(BUSYBOX) defconfig
-	@cp $(SRC_DIR)/patches/$(BUSYBOX)/$(USE_LIBC)-config $(PACKAGES_DIR)/$(BUSYBOX)/.config
+	@make -C $(PACKAGES_DIR)/$(BUSYBOX) defconfig $(FORCE_TOOLCHAIN_UCLIBC)
+	@cp $(SRC_DIR)/patches/$(BUSYBOX)/uclibc-config $(PACKAGES_DIR)/$(BUSYBOX)/.config
 
 $(PACKAGES_DIR)/$(BUSYBOX)/busybox: $(PACKAGES_DIR)/$(BUSYBOX)/.config
-	@make -C $(PACKAGES_DIR)/$(BUSYBOX) -j$(nproc)
+	@make -C $(PACKAGES_DIR)/$(BUSYBOX) -j$(nproc) $(FORCE_TOOLCHAIN_UCLIBC)
 	
 $(STAGING_DIR)/$(SDROOT)/bin/busybox: $(PACKAGES_DIR)/$(BUSYBOX)/busybox
 	@make -C $(PACKAGES_DIR)/$(BUSYBOX) install
@@ -762,15 +767,17 @@ kernel: $(STAGING_DIR)/$(SDROOT)/.kernelmodules $(STAGING_DIR)/$(SDROOT)/.kernel
 kernel-clean:
 	@make -C $(PACKAGES_DIR)/$(KERNEL) clean mrproper
 
-$(PACKAGES_DIR)/$(RADARE2)/mk/$(HOST)-gcc.mk:
-	@cp $(SRC_DIR)/patches/$(RADARE2)/$(HOST)-gcc.mk $(PACKAGES_DIR)/$(RADARE2)/mk
+# Force radare2 to use glibc
+$(PACKAGES_DIR)/$(RADARE2)/mk/$(HOST_GLIBC)-gcc.mk:
+	@cp $(SRC_DIR)/patches/$(RADARE2)/$(HOST_GLIBC)-gcc.mk $(PACKAGES_DIR)/$(RADARE2)/mk
 	@touch $@
 
-$(PACKAGES_DIR)/$(RADARE2)/plugins.cfg: $(PACKAGES_DIR)/$(RADARE2)/mk/$(HOST)-gcc.mk
+$(PACKAGES_DIR)/$(RADARE2)/plugins.cfg: $(PACKAGES_DIR)/$(RADARE2)/mk/$(HOST_GLIBC)-gcc.mk
 	@cd $(PACKAGES_DIR)/$(RADARE2); ./configure --host=$(HOST) --with-compiler=$(HOST)-gcc \
 	--prefix=$(SDROOT) --includedir=$(SDROOT)/usr/include --datadir=$(SDROOT)/usr/share --with-static-themes --with-ssl CROSS_ROOT=$(TOOLCHAIN_PATH)/bin \
 	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(TOOLCHAIN_PATH)/$(HOST)/sysroot/usr/include" \
-	LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(TOOLCHAIN_PATH)/$(HOST)/sysroot/lib -L$(TOOLCHAIN_PATH)/$(HOST)/sysroot/usr/lib -lssl -lz -lexecinfo -latomic"
+	LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(TOOLCHAIN_PATH)/$(HOST)/sysroot/lib -L$(TOOLCHAIN_PATH)/$(HOST)/sysroot/usr/lib -lssl -lz -lexecinfo -latomic" \
+	$(FORCE_TOOLCHAIN_GLIBC)
 	@touch $@
 
 $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h: $(PACKAGES_DIR)/$(RADARE2)/plugins.cfg
@@ -779,7 +786,7 @@ $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h: $(PACKAGES_DIR)/$(RADARE2)/plugi
 
 $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2: $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h
 	@cp $(STAGING_DIR)/$(SDROOT)/include/execinfo.h $(PACKAGES_DIR)/$(RADARE2)/libr/include
-	@make -C $(PACKAGES_DIR)/$(RADARE2) -j$(nproc) CROSS_ROOT=$(TOOLCHAIN_PATH)/bin \
+	@make -C $(PACKAGES_DIR)/$(RADARE2) -j$(nproc) CROSS_ROOT=$(TOOLCHAIN_PATH)/bin $(FORCE_TOOLCHAIN_GLIBC) \
 	CPPFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(TOOLCHAIN_PATH)/$(HOST)/sysroot/usr/include -L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(TOOLCHAIN_PATH)/$(HOST)/sysroot/lib -L$(TOOLCHAIN_PATH)/$(HOST)/sysroot/usr/lib -lexecinfo -latomic" 
 	
 $(STAGING_DIR)/$(SDROOT)/bin/radare2: $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2
