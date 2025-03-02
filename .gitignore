@@ -46,7 +46,7 @@ SDCARD/crontab
 *~
 
 # Generated folders
-SOURCE/download/linux-4.4.192.tar.gz
+#SOURCE/download/linux-4.4.192.tar.gz
 SOURCE/packages
 SOURCE/staging
 SOURCE/toolchain
