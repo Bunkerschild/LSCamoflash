@@ -4,8 +4,8 @@ DOWNLOAD_URL := $(PROJECT_URL)/raw/refs/heads/main/SOURCE/download/
 
 # Zu verwendende LIBC
 #USE_LIBC ?= uclibc
-#USE_LIBC ?= glibc
-USE_LIBC ?= musl
+USE_LIBC ?= glibc
+#USE_LIBC ?= musl
 
 # Definiere Pfade
 ROOT_DIR := $(shell pwd)
@@ -505,16 +505,16 @@ curl-clean:
 
 # Force busybox to use uclibc
 $(PACKAGES_DIR)/$(BUSYBOX)/.config:
-	@make -C $(PACKAGES_DIR)/$(BUSYBOX) defconfig $(FORCE_TOOLCHAIN_UCLIBC)
+	@make -C $(PACKAGES_DIR)/$(BUSYBOX) defconfig
 	@cp $(SRC_DIR)/patches/$(BUSYBOX)/uclibc-config $(PACKAGES_DIR)/$(BUSYBOX)/.config
 
 $(PACKAGES_DIR)/$(BUSYBOX)/busybox: $(PACKAGES_DIR)/$(BUSYBOX)/.config
-	@make -C $(PACKAGES_DIR)/$(BUSYBOX) -j$(nproc) $(FORCE_TOOLCHAIN_UCLIBC)
+	@$(FORCE_TOOLCHAIN_UCLIBC) make -C $(PACKAGES_DIR)/$(BUSYBOX) -j$(nproc)
 	
 $(STAGING_DIR)/$(SDROOT)/bin/busybox: $(PACKAGES_DIR)/$(BUSYBOX)/busybox
 	@make -C $(PACKAGES_DIR)/$(BUSYBOX) install
 	@cp $(PACKAGES_DIR)/$(BUSYBOX)/_install/bin/busybox $(STAGING_DIR)/$(SDROOT)/bin
-	@$(STRIP) $(STAGING_DIR)/$(SDROOT)/bin/busybox
+	@$(STRIP_UCLIBC) $(STAGING_DIR)/$(SDROOT)/bin/busybox
 	
 busybox: $(STAGING_DIR)/$(SDROOT)/bin/busybox
 
