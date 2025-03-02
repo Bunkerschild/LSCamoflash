@@ -3,8 +3,8 @@ PROJECT_URL := https://github.com/Bunkerschild/LSCamoflash
 DOWNLOAD_URL := $(PROJECT_URL)/raw/refs/heads/main/SOURCE/download/
 
 # Zu verwendende LIBC
-#USE_LIBC ?= uclibc
-USE_LIBC ?= glibc
+USE_LIBC ?= uclibc
+#USE_LIBC ?= glibc
 #USE_LIBC ?= musl
 
 # Definiere Pfade
