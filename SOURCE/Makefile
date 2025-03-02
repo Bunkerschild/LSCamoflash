@@ -12,10 +12,13 @@ DOWNLOAD_DIR := $(ROOT_DIR)/download
 TOOLCHAIN_BASE_DIR := $(ROOT_DIR)/toolchain
 TOOLCHAIN_UCLIBC_DIR := $(TOOLCHAIN_BASE_DIR)/uclibc
 TOOLCHAIN_GLIBC_DIR := $(TOOLCHAIN_BASE_DIR)/glibc
+TOOLCHAIN_MUSL_DIR := $(TOOLCHAIN_BASE_DIR)/musl
 ifeq ($(USE_LIBC), glibc)
 	TOOLCHAIN_DIR := $(TOOLCHAIN_GLIBC_DIR)
 else ifeq ($(USE_LIBC), uclibc)
 	TOOLCHAIN_DIR := $(TOOLCHAIN_UCLIBC_DIR)
+else ifeq ($(USE_LIBC), musl)
+	TOOLCHAIN_DIR := $(TOOLCHAIN_MUSL_DIR)
 endif 
 PACKAGES_DIR := $(ROOT_DIR)/packages
 STAGING_DIR := $(ROOT_DIR)/staging
@@ -40,6 +43,8 @@ ifeq ($(USE_LIBC), glibc)
 	TOOLCHAIN_PATH := $(TOOLCHAIN_GLIBC_PATH)
 else ifeq ($(USE_LIBC), uclibc)
 	TOOLCHAIN_PATH := $(TOOLCHAIN_UCLIBC_PATH)	
+else ifeq ($(USE_LIBC), musl)
+	TOOLCHAIN_PATH := $(TOOLCHAIN_MUSL_PATH)
 endif
 PKG_CONFIG_PATH := $(TOOLCHAIN_PATH)/lib/pkgconfig:$(TOOLCHAIN_PATH)/share/pkgconfig
 PATH := $(TOOLCHAIN_PATH)/bin:$(PATH)
@@ -47,10 +52,13 @@ PATH := $(TOOLCHAIN_PATH)/bin:$(PATH)
 # Definiere die Cross-Compiler Variablen
 HOST_UCLIBC := arm-buildroot-linux-uclibcgnueabi
 HOST_GLIBC := arm-buildroot-linux-gnueabi
+HOST_GLIBC := arm-buildroot-linux-musl
 ifeq ($(USE_LIBC), glibc)
 	HOST := $(HOST_GLIBC)
 else ifeq ($(USE_LIBC), uclibc)
 	HOST := $(HOST_UCLIBC)
+else ifeq ($(USE_LIBC), musl)
+	HOST := $(HOST_MUSL)
 endif
 C := $(TOOLCHAIN_PATH)/bin/$(HOST)-gcc
 CC := $(TOOLCHAIN_PATH)/bin/$(HOST)-gcc
@@ -100,12 +108,15 @@ LIBEXECINFO := libexecinfo-1.1-rc2
 RADARE2 := radare2-5.9.8
 GLIBC := glibc-2.32
 KERNEL := linux-4.4.192
-TOOLCHAIN_UCLIBC := armv5-eabi--uclibc--stable-2020.08-1
-TOOLCHAIN_GLIBC := armv5-eabi--glibc--stable-2020.08-1
+TOOLCHAIN_UCLIBC := armv5-eabi--uclibc--stable-2020.02-2
+TOOLCHAIN_GLIBC := armv5-eabi--glibc--stable-2020.02-2
+TOOLCHAIN_MUSL := armv5-eabi--musl--stable-2020.02-2
 ifeq ($(USE_LIBC), glibc)
 	TOOLCHAIN := $(TOOLCHAIN_GLIBC)
 else ifeq ($(USE_LIBC), uclibc)
 	TOOLCHAIN := $(TOOLCHAIN_UCLIBC)
+else ifeq ($(USE_LIBC), musl)
+	TOOLCHAIN := $(TOOLCHAIN_MUSL)
 endif
 
 # Kernel version
@@ -118,6 +129,7 @@ export TOOLCHAIN_PATH PKG_CONFIG_PATH PATH C CC GCC CXX CPP AR RANLIB AUTOCONF A
 URLS := \
     $(DOWNLOAD_URL)/$(TOOLCHAIN_UCLIBC).tar.bz2?download=\#/$(TOOLCHAIN_UCLIBC).tar.bz2 \
     $(DOWNLOAD_URL)/$(TOOLCHAIN_GLIBC).tar.bz2?download=\#/$(TOOLCHAIN_GLIBC).tar.bz2 \
+    $(DOWNLOAD_URL)/$(TOOLCHAIN_MUSL).tar.bz2?download=\#/$(TOOLCHAIN_MUSL).tar.bz2 \
     $(DOWNLOAD_URL)/$(KERNEL).tar.gz?download=\#/$(KERNEL).tar.gz \
     $(DOWNLOAD_URL)/$(LIBPCAP).tar.gz?download=\#/$(LIBPCAP).tar.gz \
     $(DOWNLOAD_URL)/$(TCPDUMP).tar.gz?download=\#/$(TCPDUMP).tar.gz \
@@ -917,6 +929,9 @@ build-test-glibc:
 
 build-test-uclibc:
 	@make USE_LIBC=uclibc mrproper-full download toolchain packages staging mrproper
+
+build-test-musl:
+	@make USE_LIBC=musl mrproper-full download toolchain packages staging mrproper
 
 install: all
 	@cd $(BUILD_DIR); sh install.sh

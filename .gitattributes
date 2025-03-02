@@ -26,3 +26,9 @@ SOURCE/download/libgpg-error-1.51.tar.bz2 filter=lfs diff=lfs merge=lfs -text
 SOURCE/download/onvif_srvd-1.1.tar.gz filter=lfs diff=lfs merge=lfs -text
 SOURCE/download/openssl-3.0.12.tar.gz filter=lfs diff=lfs merge=lfs -text
 SOURCE/download/cacert.pem filter=lfs diff=lfs merge=lfs -text
+SOURCE/download/linux-4.4.192.tar.gz filter=lfs diff=lfs merge=lfs -text
+SOURCE/download/glibc-2.32.tar.gz filter=lfs diff=lfs merge=lfs -text
+SOURCE/download/libexecinfo-1.1-rc2.tar.gz filter=lfs diff=lfs merge=lfs -text
+SOURCE/download/armv5-eabi--glibc--stable-2020.02-2.tar.bz2 filter=lfs diff=lfs merge=lfs -text
+SOURCE/download/armv5-eabi--uclibc--stable-2020.02-2.tar.bz2 filter=lfs diff=lfs merge=lfs -text
+SOURCE/download/armv5-eabi--musl--stable-2020.02-2.tar.bz2 filter=lfs diff=lfs merge=lfs -text
