@@ -340,10 +340,10 @@ $(PACKAGES_DIR)/$(LIBPCAP)/config.status:
 $(PACKAGES_DIR)/$(LIBPCAP)/libpcap.a: $(PACKAGES_DIR)/$(LIBPCAP)/config.status
 	@make -C $(PACKAGES_DIR)/$(LIBPCAP) -j$(nproc)
 
-$(STAGING_DIR)/$(SDROOT)/lib/libpcap.so: $(PACKAGES_DIR)/$(LIBPCAP)/libpcap.a
+$(STAGING_DIR)/$(SDROOT)/lib/libpcap.a: $(PACKAGES_DIR)/$(LIBPCAP)/libpcap.a
 	@make -C $(PACKAGES_DIR)/$(LIBPCAP) install DESTDIR=$(STAGING_DIR)
 
-libpcap: $(STAGING_DIR)/$(SDROOT)/lib/libpcap.so
+libpcap: $(STAGING_DIR)/$(SDROOT)/lib/libpcap.a
 
 libpcap-clean:
 	@make -C $(PACKAGES_DIR)/$(LIBPCAP) clean distclean
@@ -384,13 +384,13 @@ openssl-clean:
 $(PACKAGES_DIR)/$(ZLIB)/configure.log:
 	@cd $(PACKAGES_DIR)/$(ZLIB); ./configure --prefix=$(SDROOT)
 	
-$(PACKAGES_DIR)/$(ZLIB)/libz.so: $(PACKAGES_DIR)/$(ZLIB)/configure.log
+$(PACKAGES_DIR)/$(ZLIB)/libz.a: $(PACKAGES_DIR)/$(ZLIB)/configure.log
 	@make -C $(PACKAGES_DIR)/$(ZLIB) -j$(nproc)
 	
-$(STAGING_DIR)/$(SDROOT)/lib/libz.so: $(PACKAGES_DIR)/$(ZLIB)/libz.so
+$(STAGING_DIR)/$(SDROOT)/lib/libz.a: $(PACKAGES_DIR)/$(ZLIB)/libz.a
 	@make -C $(PACKAGES_DIR)/$(ZLIB) install DESTDIR=$(STAGING_DIR)
 	
-zlib: $(STAGING_DIR)/$(SDROOT)/lib/libz.so
+zlib: $(STAGING_DIR)/$(SDROOT)/lib/libz.a
 
 zlib-clean:
 	@make -C $(PACKAGES_DIR)/$(ZLIB) clean distclean
@@ -529,21 +529,21 @@ $(PACKAGES_DIR)/$(CJSON)/build/Makefile: $(PACKAGES_DIR)/$(CJSON)/CMakeLists.txt
 	@mkdir -p $(PACKAGES_DIR)/$(CJSON)/build
 	@cd $(PACKAGES_DIR)/$(CJSON)/build; cmake -DCMAKE_PREFIX_PATH=/ ..
 
-$(PACKAGES_DIR)/$(CJSON)/build/libcjson.so: $(PACKAGES_DIR)/$(CJSON)/build/Makefile
+$(PACKAGES_DIR)/$(CJSON)/build/libcjson.a: $(PACKAGES_DIR)/$(CJSON)/build/Makefile
 	@make -C $(PACKAGES_DIR)/$(CJSON)/build -j$(nproc)
 	@touch $@
 
-$(STAGING_DIR)/$(SDROOT)/usr/local/lib/libcjson.so: $(PACKAGES_DIR)/$(CJSON)/build/libcjson.so
+$(STAGING_DIR)/$(SDROOT)/usr/local/lib/libcjson.a: $(PACKAGES_DIR)/$(CJSON)/build/libcjson.a
 	@make -C $(PACKAGES_DIR)/$(CJSON)/build install DESTDIR=$(STAGING_DIR)/$(SDROOT)
 	@touch $@
 
-cjson: $(STAGING_DIR)/$(SDROOT)/usr/local/lib/libcjson.so
+cjson: $(STAGING_DIR)/$(SDROOT)/usr/local/lib/libcjson.a
 
 cjson-clean:
 	@rm -rf $(PACKAGES_DIR)/$(CJSON)/build
 	@rm $(PACKAGES_DIR)/$(CJSON)/cjson-config
 
-$(PACKAGES_DIR)/$(MOSQUITTO)/config.mk.patch: $(STAGING_DIR)/$(SDROOT)/bin/openssl $(STAGING_DIR)/$(SDROOT)/lib/libz.so
+$(PACKAGES_DIR)/$(MOSQUITTO)/config.mk.patch: $(STAGING_DIR)/$(SDROOT)/bin/openssl $(STAGING_DIR)/$(SDROOT)/lib/libz.a
 	@cp $(SRC_DIR)/patches/$(MOSQUITTO)/config.mk $(PACKAGES_DIR)/$(MOSQUITTO)/config.mk
 	@touch $@
 
@@ -658,14 +658,14 @@ $(PACKAGES_DIR)/$(LIBILBC)/build/Makefile:
 	@mkdir -p $(PACKAGES_DIR)/$(LIBILBC)/build
 	@cd $(PACKAGES_DIR)/$(LIBILBC)/build; cmake .. -DBUILD_SHARED_LIBS=on -DCMAKE_INSTALL_PREFIX=$(STAGING_DIR)/$(SDROOT)
 		
-$(PACKAGES_DIR)/$(LIBILBC)/build/libilbc.so: $(PACKAGES_DIR)/$(LIBILBC)/build/Makefile
+$(PACKAGES_DIR)/$(LIBILBC)/build/libilbc.pc: $(PACKAGES_DIR)/$(LIBILBC)/build/Makefile
 	@make -C $(PACKAGES_DIR)/$(LIBILBC)/build -j$(nproc)
 	
-$(STAGING_DIR)/$(SDROOT)/lib/libilbc.so: $(PACKAGES_DIR)/$(LIBILBC)/build/libilbc.so
+$(STAGING_DIR)/$(SDROOT)/lib/libilbc.pc: $(PACKAGES_DIR)/$(LIBILBC)/build/libilbc.pc
 	@make -C $(PACKAGES_DIR)/$(LIBILBC)/build install
 	@touch $@
 			
-libilbc: $(STAGING_DIR)/$(SDROOT)/lib/libilbc.so
+libilbc: $(STAGING_DIR)/$(SDROOT)/lib/libilbc.pc
 
 libilbc-clean:
 	@rm -rf $(PACKAGES_DIR)/$(LIBILBC)/build
@@ -817,7 +817,7 @@ $(STAGING_DIR)/$(SDROOT)/lib/libc.a: $(PACKAGES_DIR)/$(GLIBC)/build/libc.a
 	@make -C $(PACKAGES_DIR)/$(GLIBC)/build install PREFIX=$(SDROOT) DESTDIR=$(STAGING_DIR)
 	@touch $@
 	
-glibc: $(STAGING_DIR)/$(SDROOT)/lib/libc.so
+glibc: $(STAGING_DIR)/$(SDROOT)/lib/libc.a
 
 glibc-clean:
 	@rm -rf $(PACKAGES_DIR)/$(GLIBC)/build
