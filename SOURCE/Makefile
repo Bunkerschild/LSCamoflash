@@ -3,9 +3,9 @@ PROJECT_URL := https://github.com/Bunkerschild/LSCamoflash
 DOWNLOAD_URL := $(PROJECT_URL)/raw/refs/heads/main/SOURCE/download/
 
 # Zu verwendende LIBC
-USE_LIBC ?= uclibc
+#USE_LIBC ?= uclibc
 #USE_LIBC ?= glibc
-#USE_LIBC ?= musl
+USE_LIBC ?= musl
 
 # Definiere Pfade
 ROOT_DIR := $(shell pwd)
@@ -276,13 +276,13 @@ $(TOOLCHAIN_UCLIBC_DIR)/buildroot.config: $(TOOLCHAIN_UCLIBC_DIR)
 	
 $(TOOLCHAIN_GLIBC_DIR)/buildroot.config: $(TOOLCHAIN_GLIBC_DIR)
 	@tar -xf $(DOWNLOAD_DIR)/$(TOOLCHAIN_GLIBC).tar.bz2 -C $(TOOLCHAIN_GLIBC_DIR) --strip-components=1
-	@cp /usr/bin/autom4te $(AUTOM4TE)
-	@cp /usr/bin/aclocal $(ACLOCAL)
-	@cp /usr/bin/autoheader $(AUTOHEADER)
-	@cp /usr/bin/autoreconf $(AUTORECONF)
-	@cp /usr/bin/autoscan $(AUTOSCAN)
-	@cp /usr/bin/autoupdate $(AUTOUPDATE)
-	@cp /usr/bin/ifnames $(IFNAMES)
+	@cp /usr/bin/autom4te $(AUTOM4TE_GLIBC)
+	@cp /usr/bin/aclocal $(ACLOCAL_GLIBC)
+	@cp /usr/bin/autoheader $(AUTOHEADER_GLIBC)
+	@cp /usr/bin/autoreconf $(AUTORECONF_GLIBC)
+	@cp /usr/bin/autoscan $(AUTOSCAN_GLIBC)
+	@cp /usr/bin/autoupdate $(AUTOUPDATE_GLIBC)
+	@cp /usr/bin/ifnames $(IFNAMES_GLIBC)
 	@touch $@
 	
 $(TOOLCHAIN_MUSL_DIR)/buildroot.config: $(TOOLCHAIN_MUSL_DIR)
@@ -829,7 +829,7 @@ musl:
 
 musl-clean:
 
-staging: $(STAGING_DIR) glibc libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif opus openjpeg libilbc libgpg-error gmp libgcrypt ffmpeg libexecinfo kernel radare2
+staging: $(STAGING_DIR) $(USE_LIBC) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif opus openjpeg libilbc libgpg-error gmp libgcrypt ffmpeg libexecinfo kernel radare2
 
 $(BUILD_DIR)/install.ps1: $(BUILD_DIR)
 	@cp -aL $(SRC_DIR)/sdcard/* $(BUILD_DIR)
@@ -1022,7 +1022,7 @@ mrproper: staging-clean packages-clean toolchain-clean build-clean
 
 mrproper-full: download-clean mrproper
 	
-clean: radare2-clean kernel-clean libexecinfo-clean ffmpeg-clean opus-clean openjpeg-clean libilbc-clean libgpg-error-clean gmp-clean libgcrypt-clean onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean glibc-clean
+clean: radare2-clean kernel-clean libexecinfo-clean ffmpeg-clean opus-clean openjpeg-clean libilbc-clean libgpg-error-clean gmp-clean libgcrypt-clean onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean $(USE_LIBC)-clean
 
 update-version-major:
 	@$(SRC_DIR)/bin/update-version.sh --major
