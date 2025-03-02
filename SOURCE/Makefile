@@ -160,7 +160,7 @@ toolchain: toolchain-uclibc toolchain-glibc
 
 $(PACKAGES_DIR)/cacert.pem: $(PACKAGES_DIR)
 	@for file in $(DOWNLOAD_DIR)/*; do \
-	  if [ "$$file" != "$(DOWNLOAD_DIR)/$(TOOLCHAIN_UCLIBC).tar.bz2" -a "$$file" != "$(DOWNLOAD_DIR)/$(TOOLCHAIN_GLIBC.tar.bz2" -a "$$file" != "$(DOWNLOAD_DIR)/cacert.pem" ]; then \
+	  if [ "$$file" != "$(DOWNLOAD_DIR)/$(TOOLCHAIN_UCLIBC).tar.bz2" -a "$$file" != "$(DOWNLOAD_DIR)/$(TOOLCHAIN_GLIBC).tar.bz2" -a "$$file" != "$(DOWNLOAD_DIR)/cacert.pem" ]; then \
 	  	cd $(PACKAGES_DIR); \
 	  	unzip -o $$file 2>/dev/null || tar -xvf $$file -C $(PACKAGES_DIR) || echo "Skipping $$file"; \
 	  fi; \
