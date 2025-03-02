@@ -572,13 +572,13 @@ $(PACKAGES_DIR)/$(GSOAP)/config.status:
 	@cd $(PACKAGES_DIR)/$(GSOAP); ac_cv_func_malloc_0_nonnull=yes ./configure --host=$(HOST) --prefix=$(SDROOT) --sysconfdir=$(SDROOT)/etc/config --datarootdir=$(SDROOT)/usr/share --with-zlib=$(STAGING_DIR)/$(SDROOT) --with-openssl=$(STAGING_DIR)/$(SDROOT) LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -lssl -lcrypto" CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include"
 	@echo -e "all:\n\ninstall:\n" > $(PACKAGES_DIR)/$(GSOAP)/gsoap/wsdl/Makefile
 
-$(PACKAGES_DIR)/$(GSOAP)/gsoap/libgsoap.so: $(PACKAGES_DIR)/$(GSOAP)/config.status
+$(PACKAGES_DIR)/$(GSOAP)/gsoap/libgsoap.a: $(PACKAGES_DIR)/$(GSOAP)/config.status
 	@make -C $(PACKAGES_DIR)/$(GSOAP) -j$(nproc)
 	
-$(STAGING_DIR)/$(SDROOT)/lib/libgsoap.so: $(PACKAGES_DIR)/$(GSOAP)/gsoap/libgsoap.so
+$(STAGING_DIR)/$(SDROOT)/lib/libgsoap.a: $(PACKAGES_DIR)/$(GSOAP)/gsoap/libgsoap.a
 	@make -C $(PACKAGES_DIR)/$(GSOAP) install DESTDIR=$(STAGING_DIR)
 		
-gsoap: $(STAGING_DIR)/$(SDROOT)/lib/libgsoap.so
+gsoap: $(STAGING_DIR)/$(SDROOT)/lib/libgsoap.a
 
 gsoap-clean:
 	@make -C $(PACKAGES_DIR)/$(GSOAP) clean distclean
@@ -609,15 +609,15 @@ $(PACKAGES_DIR)/$(LIBGPG_ERROR)/Makefile:
 	@cd $(PACKAGES_DIR)/$(LIBGPG_ERROR); ./configure --prefix=$(SDROOT) --with-gnu-ld --host=$(HOST) --disable-nls \
 	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/usr/include" LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib"
 	
-$(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/libgpg-error.so: $(PACKAGES_DIR)/$(LIBGPG_ERROR)/Makefile
+$(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/libgpg-error.la: $(PACKAGES_DIR)/$(LIBGPG_ERROR)/Makefile
 	@make -C $(PACKAGES_DIR)/$(LIBGPG_ERROR) -j$(nproc)
 	
-$(STAGING_DIR)/$(SDROOT)/lib/libgpg-error.so: $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/libgpg-error.so
+$(STAGING_DIR)/$(SDROOT)/lib/libgpg-error.la: $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/libgpg-error.la
 	@cp $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/gpg-error-config $(STAGING_DIR)/$(SDROOT)/bin
 	@sed -i -e "s|prefix=$(SDROOT)|prefix=$(STAGING_DIR)/$(SDROOT)|g" $(STAGING_DIR)/$(SDROOT)/bin/gpg-error-config
 	@make -C $(PACKAGES_DIR)/$(LIBGPG_ERROR) install DESTDIR=$(STAGING_DIR)
 	
-libgpg-error: $(STAGING_DIR)/$(SDROOT)/lib/libgpg-error.so
+libgpg-error: $(STAGING_DIR)/$(SDROOT)/lib/libgpg-error.la
 
 libgpg-error-clean:
 	@make -C $(PACKAGES_DIR)/$(LIBGPG_ERROR) clean distclean
@@ -629,13 +629,13 @@ $(PACKAGES_DIR)/$(LIBGCRYPT)/Makefile:
  	 --disable-doc --disable-optimization --disable-amd64-as-feature-detection --disable-instrumentation-munging --disable-O-flag-munging \
 	 --with-libgpg-error-prefix=$(STAGING_DIR)/$(SDROOT) CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/usr/include" LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -lgpg-error"
 	
-$(PACKAGES_DIR)/$(LIBGCRYPT)/src/libgcrypt.so: $(PACKAGES_DIR)/$(LIBGCRYPT)/Makefile
+$(PACKAGES_DIR)/$(LIBGCRYPT)/src/libgcrypt.la: $(PACKAGES_DIR)/$(LIBGCRYPT)/Makefile
 	@make -C $(PACKAGES_DIR)/$(LIBGCRYPT) -j$(nproc)
 	
-$(STAGING_DIR)/$(SDROOT)/lib/libgcrypt.so: $(PACKAGES_DIR)/$(LIBGCRYPT)/src/libgcrypt.so
+$(STAGING_DIR)/$(SDROOT)/lib/libgcrypt.la: $(PACKAGES_DIR)/$(LIBGCRYPT)/src/libgcrypt.la
 	@make -C $(PACKAGES_DIR)/$(LIBGCRYPT) install DESTDIR=$(STAGING_DIR)
 	
-libgcrypt: $(STAGING_DIR)/$(SDROOT)/lib/libgcrypt.so
+libgcrypt: $(STAGING_DIR)/$(SDROOT)/lib/libgcrypt.la
 
 libgcrypt-clean:
 	@make -C $(PACKAGES_DIR)/$(LIBGCRYPT) clean distclean
@@ -643,13 +643,13 @@ libgcrypt-clean:
 $(PACKAGES_DIR)/$(GMP)/Makefile:
 	@cd $(PACKAGES_DIR)/$(GMP); ./configure --prefix=$(SDROOT) --enable-cxx --with-gnu-ld --host=$(HOST)
 	
-$(PACKAGES_DIR)/$(GMP)/libgmp.so: $(PACKAGES_DIR)/$(GMP)/Makefile
+$(PACKAGES_DIR)/$(GMP)/libgmp.la: $(PACKAGES_DIR)/$(GMP)/Makefile
 	@make -C $(PACKAGES_DIR)/$(GMP) -j$(nproc)
 	
-$(STAGING_DIR)/$(SDROOT)/lib/libgmp.so: $(PACKAGES_DIR)/$(GMP)/libgmp.so
+$(STAGING_DIR)/$(SDROOT)/lib/libgmp.la: $(PACKAGES_DIR)/$(GMP)/libgmp.la
 	@make -C $(PACKAGES_DIR)/$(GMP) install DESTDIR=$(STAGING_DIR)
 	
-gmp: $(STAGING_DIR)/$(SDROOT)/lib/libgmp.so
+gmp: $(STAGING_DIR)/$(SDROOT)/lib/libgmp.la
 
 gmp-clean:
 	@make -C $(PACKAGES_DIR)/$(GMP) clean distclean
@@ -690,13 +690,13 @@ openjpeg-clean:
 $(PACKAGES_DIR)/$(OPUS)/Makefile:
 	@cd $(PACKAGES_DIR)/$(OPUS); ./configure --prefix=$(SDROOT) --with-gnu-ld --host=$(HOST)
 	
-$(PACKAGES_DIR)/$(OPUS)/libopus.so: $(PACKAGES_DIR)/$(OPUS)/Makefile
+$(PACKAGES_DIR)/$(OPUS)/libopus.la: $(PACKAGES_DIR)/$(OPUS)/Makefile
 	@make -C $(PACKAGES_DIR)/$(OPUS) -j$(nproc)
 	
-$(STAGING_DIR)/$(SDROOT)/lib/libopus.so: $(PACKAGES_DIR)/$(OPUS)/libopus.so
+$(STAGING_DIR)/$(SDROOT)/lib/libopus.la: $(PACKAGES_DIR)/$(OPUS)/libopus.la
 	@make -C $(PACKAGES_DIR)/$(OPUS) install DESTDIR=$(STAGING_DIR)
 	
-opus: $(STAGING_DIR)/$(SDROOT)/lib/libopus.so
+opus: $(STAGING_DIR)/$(SDROOT)/lib/libopus.la
 
 opus-clean:
 	@make -C $(PACKAGES_DIR)/$(OPUS) clean distclean
@@ -807,12 +807,13 @@ $(PACKAGES_DIR)/$(GLIBC)/build/config.status: $(STAGING_DIR)/$(SDROOT)/.kernelhe
 	--disable-crypt --disable-build-nscd --with-bugurl=https://github.com/Bunkerschild/LSCamoflash --with-arch=armv5te --with-tune=arm926ej-s \
 	--with-headers=$(STAGING_DIR)/$(SDROOT)/usr/include --with-default-link --disable-multi-arch \
 	CFLAGS="-nostdinc -I$(STAGING_DIR)/$(SDROOT)/usr/include -O2 --sysroot=$(TOOLCHAIN_PATH)/$(HOST)/sysroot" LDFLAGS="-nostdlib"
+	@touch $@
 
-$(PACKAGES_DIR)/$(GLIBC)/build/libc.so: $(PACKAGES_DIR)/$(GLIBC)/build/config.status
+$(PACKAGES_DIR)/$(GLIBC)/build/libc.a: $(PACKAGES_DIR)/$(GLIBC)/build/config.status
 	@make -C $(PACKAGES_DIR)/$(GLIBC)/build -j$(nproc) CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/usr/include -O2"
 	@touch $@
 	
-$(STAGING_DIR)/$(SDROOT)/lib/libc.so: $(PACKAGES_DIR)/$(GLIBC)/build/libc.so
+$(STAGING_DIR)/$(SDROOT)/lib/libc.a: $(PACKAGES_DIR)/$(GLIBC)/build/libc.a
 	@make -C $(PACKAGES_DIR)/$(GLIBC)/build install PREFIX=$(SDROOT) DESTDIR=$(STAGING_DIR)
 	@touch $@
 	
