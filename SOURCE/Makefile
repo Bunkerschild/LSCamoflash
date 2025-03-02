@@ -676,6 +676,7 @@ $(PACKAGES_DIR)/$(LIBILBC)/build/Makefile:
 		
 $(PACKAGES_DIR)/$(LIBILBC)/build/libilbc.pc: $(PACKAGES_DIR)/$(LIBILBC)/build/Makefile
 	@make -C $(PACKAGES_DIR)/$(LIBILBC)/build -j$(nproc)
+	@touch $@
 	
 $(STAGING_DIR)/$(SDROOT)/lib/libilbc.pc: $(PACKAGES_DIR)/$(LIBILBC)/build/libilbc.pc
 	@make -C $(PACKAGES_DIR)/$(LIBILBC)/build install
