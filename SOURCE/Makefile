@@ -53,7 +53,7 @@ PATH := $(TOOLCHAIN_PATH)/bin:$(PATH)
 # Definiere die Cross-Compiler Variablen
 HOST_UCLIBC := arm-buildroot-linux-uclibcgnueabi
 HOST_GLIBC := arm-buildroot-linux-gnueabi
-HOST_GLIBC := arm-buildroot-linux-musleabi
+HOST_MUSL := arm-buildroot-linux-musleabi
 ifeq ($(USE_LIBC), glibc)
 	HOST := $(HOST_GLIBC)
 else ifeq ($(USE_LIBC), uclibc)
