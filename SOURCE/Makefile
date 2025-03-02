@@ -274,13 +274,13 @@ download: $(DOWNLOAD_DIR) $(patsubst %,$(DOWNLOAD_DIR)/%,$(notdir $(URLS)))
 
 $(TOOLCHAIN_UCLIBC_DIR)/buildroot.config: $(TOOLCHAIN_UCLIBC_DIR)
 	@tar -xf $(DOWNLOAD_DIR)/$(TOOLCHAIN_UCLIBC).tar.bz2 -C $(TOOLCHAIN_UCLIBC_DIR) --strip-components=1
-	@cp /usr/bin/autom4te $(AUTOM4TE_GLIBC)
-	@cp /usr/bin/aclocal $(ACLOCAL_GLIBC)
-	@cp /usr/bin/autoheader $(AUTOHEADER_GLIBC)
-	@cp /usr/bin/autoreconf $(AUTORECONF_GLIBC)
-	@cp /usr/bin/autoscan $(AUTOSCAN_GLIBC)
-	@cp /usr/bin/autoupdate $(AUTOUPDATE_GLIBC)
-	@cp /usr/bin/ifnames $(IFNAMES_GLIBC)
+	@cp /usr/bin/autom4te $(AUTOM4TE_UCLIBC)
+	@cp /usr/bin/aclocal $(ACLOCAL_UCLIBC)
+	@cp /usr/bin/autoheader $(AUTOHEADER_UCLIBC)
+	@cp /usr/bin/autoreconf $(AUTORECONF_UCLIBC)
+	@cp /usr/bin/autoscan $(AUTOSCAN_UCLIBC)
+	@cp /usr/bin/autoupdate $(AUTOUPDATE_UCLIBC)
+	@cp /usr/bin/ifnames $(IFNAMES_UCLIBC)
 	@touch $@
 	
 $(TOOLCHAIN_GLIBC_DIR)/buildroot.config: $(TOOLCHAIN_GLIBC_DIR)
@@ -296,13 +296,13 @@ $(TOOLCHAIN_GLIBC_DIR)/buildroot.config: $(TOOLCHAIN_GLIBC_DIR)
 	
 $(TOOLCHAIN_MUSL_DIR)/buildroot.config: $(TOOLCHAIN_MUSL_DIR)
 	@tar -xf $(DOWNLOAD_DIR)/$(TOOLCHAIN_MUSL).tar.bz2 -C $(TOOLCHAIN_MUSL_DIR) --strip-components=1
-	@cp /usr/bin/autom4te $(AUTOM4TE_GLIBC)
-	@cp /usr/bin/aclocal $(ACLOCAL_GLIBC)
-	@cp /usr/bin/autoheader $(AUTOHEADER_GLIBC)
-	@cp /usr/bin/autoreconf $(AUTORECONF_GLIBC)
-	@cp /usr/bin/autoscan $(AUTOSCAN_GLIBC)
-	@cp /usr/bin/autoupdate $(AUTOUPDATE_GLIBC)
-	@cp /usr/bin/ifnames $(IFNAMES_GLIBC)
+	@cp /usr/bin/autom4te $(AUTOM4TE_MUSL)
+	@cp /usr/bin/aclocal $(ACLOCAL_MUSL)
+	@cp /usr/bin/autoheader $(AUTOHEADER_MUSL)
+	@cp /usr/bin/autoreconf $(AUTORECONF_MUSL)
+	@cp /usr/bin/autoscan $(AUTOSCAN_MUSL)
+	@cp /usr/bin/autoupdate $(AUTOUPDATE_MUSL)
+	@cp /usr/bin/ifnames $(IFNAMES_MUSL)
 	@touch $@
 	
 toolchain-uclibc: $(TOOLCHAIN_UCLIBC_DIR)/buildroot.config
