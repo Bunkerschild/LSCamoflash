@@ -2,10 +2,20 @@
 PROJECT_URL := https://github.com/Bunkerschild/LSCamoflash
 DOWNLOAD_URL := $(PROJECT_URL)/raw/refs/heads/main/SOURCE/download/
 
+# Zu verwendende LIBC
+#USE_LIBC ?= uclibc
+USE_LIBC ?= glibc
+
 # Definiere Pfade
 ROOT_DIR := $(shell pwd)
 DOWNLOAD_DIR := $(ROOT_DIR)/download
-TOOLCHAIN_DIR := $(ROOT_DIR)/toolchain
+TOOLCHAIN_UCLIBC_DIR := $(ROOT_DIR)/toolchain/uclibc
+TOOLCHAIN_GLIBC_DIR := $(ROOT_DIR)/toolchain/glibc
+ifeq ($(USE_LIBC), glibc)
+	TOOLCHAIN_DIR := $(TOOLCHAIN_GLIBC_DIR)
+else ifeq ($(USE_LIBC), uclibc)
+	TOOLCHAIN_DIR := $(TOOLCHAIN_UCLIBC_DIR)
+endif 
 PACKAGES_DIR := $(ROOT_DIR)/packages
 STAGING_DIR := $(ROOT_DIR)/staging
 BUILD_DIR := $(ROOT_DIR)/build
@@ -23,12 +33,24 @@ SDROOT := $(SDCARD)/HACK
 VERSION = $(shell cat version.txt)
 
 # Definiere die Toolchain-Pfade
-TOOLCHAIN_PATH := $(TOOLCHAIN_DIR)
+TOOLCHAIN_UCLIBC_PATH := $(TOOLCHAIN_UCLIBC_DIR)
+TOOLCHAIN_GLIBC_PATH := $(TOOLCHAIN_GLIBC_DIR)
+ifeq ($(USE_LIBC), glibc)
+	TOOLCHAIN_PATH := $(TOOLCHAIN_GLIBC_PATH)
+else ifeq ($(USE_LIBC), uclibc)
+	TOOLCHAIN_PATH := $(TOOLCHAIN_UCLIBC_PATH)	
+endif
 PKG_CONFIG_PATH := $(TOOLCHAIN_PATH)/lib/pkgconfig:$(TOOLCHAIN_PATH)/share/pkgconfig
 PATH := $(TOOLCHAIN_PATH)/bin:$(PATH)
 
 # Definiere die Cross-Compiler Variablen
-HOST := arm-buildroot-linux-uclibcgnueabi
+HOST_UCLIBC := arm-buildroot-linux-uclibcgnueabi
+HOST_GLIBC := arm-buildroot-linux-glibcgnueabi
+ifeq ($(USE_LIBC), glibc)
+	HOST := $(HOST_GLIBC)
+else ifeq ($(USE_LIBC), uclibc)
+	HOST := $(HOST_UCLIBC)
+endif
 C := $(TOOLCHAIN_PATH)/bin/$(HOST)-gcc
 CC := $(TOOLCHAIN_PATH)/bin/$(HOST)-gcc
 GCC := $(TOOLCHAIN_PATH)/bin/$(HOST)-g++
@@ -65,21 +87,28 @@ LIBILBC := libilbc-3.0.4
 OPENJPEG := openjpeg-2.5.3
 OPUS := opus-1.5.2
 FFMPEG := ffmpeg-7.1
-LIBEXECINFO := libexecinfo-1.1-rc1
+LIBEXECINFO := libexecinfo-1.1-rc2
 RADARE2 := radare2-5.9.8
 GLIBC := glibc-2.32
 KERNEL := linux-4.4.192
-TOOLCHAIN := armv5-eabi--uclibc--stable-2020.08-1
+TOOLCHAIN_UCLIBC := armv5-eabi--uclibc--stable-2020.08-1
+TOOLCHAIN_GLIBC := armv5-eabi--glibc--stable-2020.08-1
+ifeq ($(USE_LIBC), glibc)
+	TOOLCHAIN := $(TOOLCHAIN_GLIBC)
+else ifeq ($(USE_LIBC), uclibc)
+	TOOLCHAIN := $(TOOLCHAIN_UCLIBC)
+endif
 
 # Kernel version
 KERNEL_VERSION := 4.4.192V2.1
 
 # Exportiere die Variablen für alle Ziele
-export TOOLCHAIN_PATH PKG_CONFIG_PATH PATH C CC GCC CXX CPP AR RANLIB CROSS_PREFIX
+export HOST TOOLCHAIN_PATH PKG_CONFIG_PATH PATH C CC GCC CXX CPP AR RANLIB CROSS_PREFIX
 
 # Liste der zu ladenden Pakete
 URLS := \
-    $(DOWNLOAD_URL)/$(TOOLCHAIN).tar.bz2?download=\#/$(TOOLCHAIN).tar.bz2 \
+    $(DOWNLOAD_URL)/$(TOOLCHAIN_UCLIBC).tar.bz2?download=\#/$(TOOLCHAIN_UCLIBC).tar.bz2 \
+    $(DOWNLOAD_URL)/$(TOOLCHAIN_GLIBC).tar.bz2?download=\#/$(TOOLCHAIN_GLIBC).tar.bz2 \
     $(DOWNLOAD_URL)/$(KERNEL).tar.gz?download=\#/$(KERNEL).tar.gz \
     $(DOWNLOAD_URL)/$(LIBPCAP).tar.gz?download=\#/$(LIBPCAP).tar.gz \
     $(DOWNLOAD_URL)/$(TCPDUMP).tar.gz?download=\#/$(TCPDUMP).tar.gz \
@@ -114,15 +143,23 @@ all: download toolchain packages staging build
 
 download: $(DOWNLOAD_DIR) $(patsubst %,$(DOWNLOAD_DIR)/%,$(notdir $(URLS)))
 
-$(TOOLCHAIN_DIR)/buildroot.config: $(TOOLCHAIN_DIR)
-	@tar -xf $(DOWNLOAD_DIR)/armv5-eabi--uclibc--stable-2020.08-1.tar.bz2 -C $(TOOLCHAIN_DIR) --strip-components=1
+$(TOOLCHAIN_UCLIBC_DIR)/buildroot.config: $(TOOLCHAIN_UCLIBC_DIR)
+	@tar -xf $(DOWNLOAD_DIR)/$(TOOLCHAIN_UCLIBC).tar.bz2 -C $(TOOLCHAIN_UCLIBC_DIR) --strip-components=1
 	@touch $@
 	
-toolchain: $(TOOLCHAIN_DIR)/buildroot.config
+$(TOOLCHAIN_GLIBC_DIR)/buildroot.config: $(TOOLCHAIN_GLIBC_DIR)
+	@tar -xf $(DOWNLOAD_DIR)/$(TOOLCHAIN_GLIBC).tar.bz2 -C $(TOOLCHAIN_GLIBC_DIR) --strip-components=1
+	@touch $@
+	
+toolchain-uclibc: $(TOOLCHAIN_UCLIBC_DIR)/buildroot.config
+
+toolchain-glibc: $(TOOLCHAIN_GLIBC_DIR)/buildroot.config
+
+toolchain: toolchain-uclibc toolchain-glibc
 
 $(PACKAGES_DIR)/cacert.pem: $(PACKAGES_DIR)
 	@for file in $(DOWNLOAD_DIR)/*; do \
-	  if [ "$$file" != "$(DOWNLOAD_DIR)/armv5-eabi--uclibc--stable-2020.08-1.tar.bz2" -a "$$file" != "$(DOWNLOAD_DIR)/cacert.pem" ]; then \
+	  if [ "$$file" != "$(DOWNLOAD_DIR)/$(TOOLCHAIN_UCLIBC).tar.bz2" -a "$$file" != "$(DOWNLOAD_DIR)/$(TOOLCHAIN_GLIBC.tar.bz2" -a "$$file" != "$(DOWNLOAD_DIR)/cacert.pem" ]; then \
 	  	cd $(PACKAGES_DIR); \
 	  	unzip -o $$file 2>/dev/null || tar -xvf $$file -C $(PACKAGES_DIR) || echo "Skipping $$file"; \
 	  fi; \
@@ -134,7 +171,10 @@ packages: $(PACKAGES_DIR)/cacert.pem
 $(DOWNLOAD_DIR):
 	@mkdir -p $@
 
-$(TOOLCHAIN_DIR):
+$(TOOLCHAIN_UCLIBC_DIR):
+	@mkdir -p $@
+
+$(TOOLCHAIN_GLIBC_DIR):
 	@mkdir -p $@
 
 $(PACKAGES_DIR):
@@ -545,13 +585,17 @@ ffmpeg-clean:
 	@make -C $(PACKAGES_DIR)/$(FFMPEG) clean distclean
 
 $(PACKAGES_DIR)/$(LIBEXECINFO)/libexecinfo.so:
-	@make -C $(PACKAGES_DIR)/$(LIBEXECINFO) -j$(nproc)
+	@make -C $(PACKAGES_DIR)/$(LIBEXECINFO) -j$(nproc) libexecinfo.so
+	@touch $@
+
+$(PACKAGES_DIR)/$(LIBEXECINFO)/libexecinfo.a:
+	@make -C $(PACKAGES_DIR)/$(LIBEXECINFO) -j$(nproc) libexecinfo.a
 	@touch $@
 	
-$(STAGING_DIR)/$(SDROOT)/lib/libexecinfo.so: $(PACKAGES_DIR)/$(LIBEXECINFO)/libexecinfo.so
+$(STAGING_DIR)/$(SDROOT)/lib/libexecinfo.so: $(PACKAGES_DIR)/$(LIBEXECINFO)/libexecinfo.so $(PACKAGES_DIR)/$(LIBEXECINFO)/libexecinfo.a
 	@make -C $(PACKAGES_DIR)/$(LIBEXECINFO) install PREFIX=$(SDROOT) DESTDIR=$(STAGING_DIR)
 	@touch $@
-	
+		
 libexecinfo: $(STAGING_DIR)/$(SDROOT)/lib/libexecinfo.so
 
 libexecinfo-clean:
@@ -593,10 +637,10 @@ $(PACKAGES_DIR)/$(RADARE2)/mk/arm-buildroot-linux-uclibcgnueabi-gcc.mk:
 	@touch $@
 
 $(PACKAGES_DIR)/$(RADARE2)/plugins.cfg: $(PACKAGES_DIR)/$(RADARE2)/mk/arm-buildroot-linux-uclibcgnueabi-gcc.mk
-	@cd $(PACKAGES_DIR)/$(RADARE2); ./configure --host=$(HOST) --with-compiler=arm-buildroot-linux-uclibcgnueabi-gcc \
+	@cd $(PACKAGES_DIR)/$(RADARE2); ./configure --host=$(HOST) --with-compiler=arm-buildroot-linux-uclibcgnueabi-gcc --disable-plugins --disable-shared \
 	--prefix=$(SDROOT) --includedir=$(SDROOT)/usr/include --datadir=$(SDROOT)/usr/share --with-static-themes --with-ssl CROSS_ROOT=$(TOOLCHAIN_PATH)/bin \
-	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/sysroot/usr/include" \
-	LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/usr/lib -lssl -lz -lexecinfo -latomic"
+	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/sysroot/usr/include --static" \
+	LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/usr/lib -lssl -lz -lexecinfo -latomic --static"
 	@touch $@
 
 $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h: $(PACKAGES_DIR)/$(RADARE2)/plugins.cfg
@@ -606,7 +650,7 @@ $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h: $(PACKAGES_DIR)/$(RADARE2)/plugi
 $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2: $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h
 	@cp $(STAGING_DIR)/$(SDROOT)/include/execinfo.h $(PACKAGES_DIR)/$(RADARE2)/libr/include
 	@make -C $(PACKAGES_DIR)/$(RADARE2) -j$(nproc) CROSS_ROOT=$(TOOLCHAIN_PATH)/bin \
-	CPPFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/sysroot/usr/include -L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/usr/lib -lexecinfo -latomic" 
+	CPPFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/sysroot/usr/include -L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/lib -L$(STAGING_DIR)/$(SDROOT)/sysroot/usr/lib -lexecinfo -latomic --static" 
 	
 $(STAGING_DIR)/$(SDROOT)/bin/radare2: $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2
 	@make -C $(PACKAGES_DIR)/$(RADARE2) install DESTDIR=$(STAGING_DIR) CROSS_ROOT=$(TOOLCHAIN_PATH)/bin
@@ -821,8 +865,13 @@ packages-clean:
 download-clean:
 	@rm -rf $(DOWNLOAD_DIR)
 
-toolchain-clean:
-	@rm -rf $(TOOLCHAIN_DIR)
+toolchain-uclibc-clean:
+	@rm -rf $(TOOLCHAIN_UCLIBC_DIR)
+
+toolchain-glibc-clean:
+	@rm -rf $(TOOLCHAIN_GLIBC_DIR)
+
+toolchain-clean: toolchain-uclibc-clean toolchain-glibc-clean
 
 mrproper: staging-clean packages-clean toolchain-clean build-clean
 	@rm -f $(ROOT_DIR)/LSCamoflash-*.tar.gz || true

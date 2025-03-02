@@ -11,6 +11,10 @@ This project includes various third-party software packages, each with its own l
   License: GNU General Public License (GPLv2)
   Source: https://toolchains.bootlin.com
 
+- **Bootlin Toolchain (glibc)**  
+  License: GNU General Public License (GPLv2)
+  Source: https://toolchains.bootlin.com
+
 ## Kernel
 - **Linux Kernel (4.4.192)**  
   Lizenz: GNU General Public License (GPL)  
