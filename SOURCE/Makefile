@@ -69,6 +69,7 @@ LIBEXECINFO := libexecinfo-1.1-rc1
 RADARE2 := radare2-5.9.8
 GLIBC := glibc-2.32
 KERNEL := linux-4.4.192
+TOOLCHAIN := armv5-eabi--uclibc--stable-2020.08-1
 
 # Kernel version
 KERNEL_VERSION := 4.4.192V2.1
@@ -78,7 +79,7 @@ export TOOLCHAIN_PATH PKG_CONFIG_PATH PATH C CC GCC CXX CPP AR RANLIB CROSS_PREF
 
 # Liste der zu ladenden Pakete
 URLS := \
-    https://toolchains.bootlin.com/downloads/releases/toolchains/armv5-eabi/tarballs/armv5-eabi--uclibc--stable-2020.08-1.tar.bz2 \
+    $(DOWNLOAD_URL)/$(TOOLCHAIN).tar.bz2?download=\#/$(TOOLCHAIN).tar.bz2 \
     https://www.kernel.org/pub/linux/kernel/v4.x/$(KERNEL).tar.gz \
     $(DOWNLOAD_URL)/$(LIBPCAP).tar.gz?download=\#/$(LIBPCAP).tar.gz \
     $(DOWNLOAD_URL)/$(TCPDUMP).tar.gz?download=\#/$(TCPDUMP).tar.gz \
