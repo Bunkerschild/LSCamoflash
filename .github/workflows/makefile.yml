@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Installiere Build-Tools
-        run: sudo apt update && sudo apt install -y build-essential flex bison gsoap binutils make automake autoconf
+        run: sudo apt update && sudo apt install -y build-essential flex bison gsoap binutils make automake autoconf autoconf-archive
 
       - name: Starte Build
         run: |

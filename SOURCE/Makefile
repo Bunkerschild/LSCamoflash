@@ -62,6 +62,14 @@ NM := $(TOOLCHAIN_PATH)/bin/$(HOST)-nm
 LD := $(TOOLCHAIN_PATH)/bin/$(HOST)-ld
 RANLIB := $(TOOLCHAIN_PATH)/bin/$(HOST)-ranlib
 STRIP := $(TOOLCHAIN_PATH)/bin/$(HOST)-strip
+AUTOCONF := $(TOOLCHAIN_PATH)/bin/autoconf
+AUTOHEADER := $(TOOLCHAIN_PATH)/bin/autoheader
+AUTOM4TE := $(TOOLCHAIN_PATH)/bin/autom4te
+AUTORECONF := $(TOOLCHAIN_PATH)/bin/autoreconf
+ACLOCAL := $(TOOLCHAIN_PATH)/bin/aclocal
+AUTOSCAN := $(TOOLCHAIN_PATH)/bin/autoscan
+AUTOUPDATE := $(TOOLCHAIN_PATH)/bin/autoupdate
+IFNAMES := $(TOOLCHAIN_PATH)/bin/ifnames
 CROSS_PREFIX := $(HOST)
 
 # Definiere Paketversionen
@@ -104,7 +112,7 @@ endif
 KERNEL_VERSION := 4.4.192V2.1
 
 # Exportiere die Variablen für alle Ziele
-export TOOLCHAIN_PATH PKG_CONFIG_PATH PATH C CC GCC CXX CPP AR RANLIB CROSS_PREFIX
+export TOOLCHAIN_PATH PKG_CONFIG_PATH PATH C CC GCC CXX CPP AR RANLIB AUTOCONF AUTOHEADER AUTOM4TE AUTORECONF CROSS_PREFIX
 
 # Liste der zu ladenden Pakete
 URLS := \
@@ -150,6 +158,13 @@ $(TOOLCHAIN_UCLIBC_DIR)/buildroot.config: $(TOOLCHAIN_UCLIBC_DIR)
 	
 $(TOOLCHAIN_GLIBC_DIR)/buildroot.config: $(TOOLCHAIN_GLIBC_DIR)
 	@tar -xf $(DOWNLOAD_DIR)/$(TOOLCHAIN_GLIBC).tar.bz2 -C $(TOOLCHAIN_GLIBC_DIR) --strip-components=1
+	@cp /usr/bin/autom4te $(AUTOM4TE)
+	@cp /usr/bin/aclocal $(ACLOCAL)
+	@cp /usr/bin/autoheader $(AUTOHEADER)
+	@cp /usr/bin/autoreconf $(AUTORECONF)
+	@cp /usr/bin/autoscan $(AUTOSCAN)
+	@cp /usr/bin/autoupdate $(AUTOUPDATE)
+	@cp /usr/bin/ifnames $(IFNAMES)
 	@touch $@
 	
 toolchain-uclibc: $(TOOLCHAIN_UCLIBC_DIR)/buildroot.config
@@ -193,15 +208,15 @@ $(DOWNLOAD_DIR)/%:
 	@wget -c -O $@ $(filter %$(@F),$(URLS))
 	
 $(PACKAGES_DIR)/$(LIBPCAP)/config.status:
-	@cd $(PACKAGES_DIR)/$(LIBPCAP); ./configure --host=$(HOST) --disable-shared CC=$(CC) --prefix=$(SDROOT) --sysconfdir=$(SDROOT)/etc/config --datarootdir=$(SDROOT)/usr/share
+	@cd $(PACKAGES_DIR)/$(LIBPCAP); ./configure --host=$(HOST) CC=$(CC) --prefix=$(SDROOT) --sysconfdir=$(SDROOT)/etc/config --datarootdir=$(SDROOT)/usr/share
 	
 $(PACKAGES_DIR)/$(LIBPCAP)/libpcap.a: $(PACKAGES_DIR)/$(LIBPCAP)/config.status
 	@make -C $(PACKAGES_DIR)/$(LIBPCAP) -j$(nproc)
 
-$(STAGING_DIR)/$(SDROOT)/lib/libpcap.a: $(PACKAGES_DIR)/$(LIBPCAP)/libpcap.a
+$(STAGING_DIR)/$(SDROOT)/lib/libpcap.so: $(PACKAGES_DIR)/$(LIBPCAP)/libpcap.a
 	@make -C $(PACKAGES_DIR)/$(LIBPCAP) install DESTDIR=$(STAGING_DIR)
 
-libpcap: $(STAGING_DIR)/$(SDROOT)/lib/libpcap.a
+libpcap: $(STAGING_DIR)/$(SDROOT)/lib/libpcap.so
 
 libpcap-clean:
 	@make -C $(PACKAGES_DIR)/$(LIBPCAP) clean distclean
@@ -210,11 +225,14 @@ $(PACKAGES_DIR)/$(TCPDUMP)/config.status: $(PACKAGES_DIR)/$(LIBPCAP)/libpcap.a
 	@cd $(PACKAGES_DIR)/$(TCPDUMP); ./configure --host=$(HOST) CC=$(CC) --prefix=$(SDROOT) --sysconfdir=$(SDROOT)/etc/config --datarootdir=$(SDROOT)/usr/share
 	
 $(PACKAGES_DIR)/$(TCPDUMP)/tcpdump: $(PACKAGES_DIR)/$(TCPDUMP)/config.status
-	@make -C $(PACKAGES_DIR)/$(TCPDUMP) -j$(nproc) LDFLAGS="--static"
+	@make -C $(PACKAGES_DIR)/$(TCPDUMP) -j$(nproc)
+	@touch $@
 	
 $(STAGING_DIR)/$(SDROOT)/bin/tcpdump: $(PACKAGES_DIR)/$(TCPDUMP)/tcpdump
 	@make -C $(PACKAGES_DIR)/$(TCPDUMP) install DESTDIR=$(STAGING_DIR)
+	@rm $(STAGING_DIR)/$(SDROOT)/bin/tcpdump.4.99.4 || true
 	@$(STRIP) $(STAGING_DIR)/$(SDROOT)/bin/tcpdump
+	@touch $@
 
 tcpdump: $(STAGING_DIR)/$(SDROOT)/bin/tcpdump
 
@@ -222,7 +240,7 @@ tcpdump-clean:
 	@make -C $(PACKAGES_DIR)/$(TCPDUMP) clean distclean
 
 $(PACKAGES_DIR)/$(OPENSSL)/configdata.pm:
-	@cd $(PACKAGES_DIR)/$(OPENSSL); ./Configure linux-generic32 no-shared no-dso no-tests no-threads no-zlib no-async no-comp --prefix=$(SDROOT) --openssldir=$(SDROOT)/etc/config/ssl -static CC=$(CC) AR=$(AR) RANLIB=$(RANLIB)
+	@cd $(PACKAGES_DIR)/$(OPENSSL); ./Configure linux-generic32 no-shared no-dso no-tests no-threads no-zlib no-async no-comp --prefix=$(SDROOT) --openssldir=$(SDROOT)/etc/config/ssl CC=$(CC) AR=$(AR) RANLIB=$(RANLIB)
 	
 $(PACKAGES_DIR)/$(OPENSSL)/apps/openssl: $(PACKAGES_DIR)/$(OPENSSL)/configdata.pm
 	@make -C $(PACKAGES_DIR)/$(OPENSSL) -j$(nproc)
@@ -239,13 +257,13 @@ openssl-clean:
 $(PACKAGES_DIR)/$(ZLIB)/configure.log:
 	@cd $(PACKAGES_DIR)/$(ZLIB); ./configure --prefix=$(SDROOT)
 	
-$(PACKAGES_DIR)/$(ZLIB)/libz.a: $(PACKAGES_DIR)/$(ZLIB)/configure.log
+$(PACKAGES_DIR)/$(ZLIB)/libz.so: $(PACKAGES_DIR)/$(ZLIB)/configure.log
 	@make -C $(PACKAGES_DIR)/$(ZLIB) -j$(nproc)
 	
-$(STAGING_DIR)/$(SDROOT)/lib/libz.a: $(PACKAGES_DIR)/$(ZLIB)/libz.a
+$(STAGING_DIR)/$(SDROOT)/lib/libz.so: $(PACKAGES_DIR)/$(ZLIB)/libz.so
 	@make -C $(PACKAGES_DIR)/$(ZLIB) install DESTDIR=$(STAGING_DIR)
 	
-zlib: $(STAGING_DIR)/$(SDROOT)/lib/libz.a
+zlib: $(STAGING_DIR)/$(SDROOT)/lib/libz.so
 
 zlib-clean:
 	@make -C $(PACKAGES_DIR)/$(ZLIB) clean distclean
@@ -296,7 +314,7 @@ sqlite3-clean:
 	@make -C $(PACKAGES_DIR)/$(SQLITE3) clean distclean
 
 $(PACKAGES_DIR)/$(SQLCIPHER)/config.status:
-	@cd $(PACKAGES_DIR)/$(SQLCIPHER); ./configure --host=$(HOST) --prefix=$(SDROOT) --sysconfdir=$(SDROOT)/etc/config --datarootdir=$(SDROOT)/usr/share --with-sysroot=$(STAGING_DIR)/$(SDROOT) CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL" LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib --static -lssl -lcrypto"
+	@cd $(PACKAGES_DIR)/$(SQLCIPHER); ./configure --host=$(HOST) --prefix=$(SDROOT) --sysconfdir=$(SDROOT)/etc/config --datarootdir=$(SDROOT)/usr/share --with-sysroot=$(STAGING_DIR)/$(SDROOT) CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL" LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -lssl -lcrypto"
 
 $(PACKAGES_DIR)/$(SQLCIPHER)/sqlcipher: $(PACKAGES_DIR)/$(SQLCIPHER)/config.status
 	@make -C $(PACKAGES_DIR)/$(SQLCIPHER) -j$(nproc)
@@ -325,21 +343,23 @@ msmtp: $(STAGING_DIR)/$(SDROOT)/bin/msmtp
 msmtp-clean:
 	@make -C $(PACKAGES_DIR)/$(MSMTP) clean distclean
 
-$(PACKAGES_DIR)/miniupnp-$(MINIUPNPC)/miniupnpc/build/upnpc-static:
+$(PACKAGES_DIR)/miniupnp-$(MINIUPNPC)/miniupnpc/build/upnpc-shared:
 	@INSTALLPREFIX=$(SDROOT) make -C $(PACKAGES_DIR)/miniupnp-$(MINIUPNPC)/miniupnpc -j$(nproc) 
 	
-$(STAGING_DIR)/$(SDROOT)/bin/upnpc-static: $(PACKAGES_DIR)/miniupnp-$(MINIUPNPC)/miniupnpc/build/upnpc-static
-	@make -C $(PACKAGES_DIR)/miniupnp-$(MINIUPNPC)/miniupnpc install-static DESTDIR=$(STAGING_DIR)/$(SDROOT) INSTALLDIRINC=$(STAGING_DIR)/$(SDROOT)/include INSTALLDIRLIB=$(STAGING_DIR)/$(SDROOT)/lib INSTALLDIRBIN=$(STAGING_DIR)/$(SDROOT)/bin
-	@cp $(PACKAGES_DIR)/miniupnp-$(MINIUPNPC)/miniupnpc/build/upnpc-static $(STAGING_DIR)/$(SDROOT)/bin
-	@$(STRIP) $(STAGING_DIR)/$(SDROOT)/bin/upnpc-static
-	
-miniupnpc: $(STAGING_DIR)/$(SDROOT)/bin/upnpc-static
+$(STAGING_DIR)/$(SDROOT)/bin/upnpc: $(PACKAGES_DIR)/miniupnp-$(MINIUPNPC)/miniupnpc/build/upnpc-shared
+	@make -C $(PACKAGES_DIR)/miniupnp-$(MINIUPNPC)/miniupnpc install DESTDIR=$(STAGING_DIR)/$(SDROOT) INSTALLDIRINC=$(STAGING_DIR)/$(SDROOT)/include INSTALLDIRLIB=$(STAGING_DIR)/$(SDROOT)/lib INSTALLDIRBIN=$(STAGING_DIR)/$(SDROOT)/bin
+	@cp $(PACKAGES_DIR)/miniupnp-$(MINIUPNPC)/miniupnpc/build/upnpc-shared $(STAGING_DIR)/$(SDROOT)/bin/upnpc
+	@cp $(PACKAGES_DIR)/miniupnp-$(MINIUPNPC)/miniupnpc/build/upnp-listdevices-shared $(STAGING_DIR)/$(SDROOT)/bin/upnp-listdevices
+	@$(STRIP) $(STAGING_DIR)/$(SDROOT)/bin/upnpc
+	@$(STRIP) $(STAGING_DIR)/$(SDROOT)/bin/upnp-listdevices
+		
+miniupnpc: $(STAGING_DIR)/$(SDROOT)/bin/upnpc
 
 miniupnpc-clean:
 	@make -C $(PACKAGES_DIR)/$(MINIUPNPC) clean
 
 $(PACKAGES_DIR)/$(CURL)/config.status:
-	@cd $(PACKAGES_DIR)/$(CURL); ./configure --host=$(HOST) --prefix=$(SDROOT) --sysconfdir=$(SDROOT)/etc/config --datarootdir=$(SDROOT)/usr/share --disable-shared --enable-static --with-ssl=$(STAGING_DIR)/$(SDROOT) --with-zlib --disable-ldap --enable-rtsp --disable-dict --enable-file --enable-telnet --enable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-gopher --enable-ftp --enable-hsts --enable-headers-api --enable-websockets --with-ca-path=$(SDROOT)/etc/config/ssl --with-ca-bundle=$(SDROOT)/etc/config/ssl/ca-bundle --with-nghttp2 --enable-mqtt --enable-unix-sockets --enable-cookies --enable-socketpair --enable-http-auth --enable-bearer-auth --enable-digest-auth --enable-negotiate-auth --enable-verbose --disable-docs --enable-dnsshuffle --enable-doh --enable-mime --enable-bindlocal --enable-form-api --enable-dateparse --enable-netrc --enable-progress-meter --enable-get-easy-options --disable-manual LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib --static -lssl -lcrypto" CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include"
+	@cd $(PACKAGES_DIR)/$(CURL); ./configure --host=$(HOST) --prefix=$(SDROOT) --sysconfdir=$(SDROOT)/etc/config --datarootdir=$(SDROOT)/usr/share --with-ssl=$(STAGING_DIR)/$(SDROOT) --with-zlib --disable-ldap --enable-rtsp --disable-dict --enable-file --enable-telnet --enable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-gopher --enable-ftp --enable-hsts --enable-headers-api --enable-websockets --with-ca-path=$(SDROOT)/etc/config/ssl --with-ca-bundle=$(SDROOT)/etc/config/ssl/ca-bundle --with-nghttp2 --enable-mqtt --enable-unix-sockets --enable-cookies --enable-socketpair --enable-http-auth --enable-bearer-auth --enable-digest-auth --enable-negotiate-auth --enable-verbose --disable-docs --enable-dnsshuffle --enable-doh --enable-mime --enable-bindlocal --enable-form-api --enable-dateparse --enable-netrc --enable-progress-meter --enable-get-easy-options --disable-manual LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -lssl -lcrypto" CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include"
 
 $(PACKAGES_DIR)/$(CURL)/src/curl: $(PACKAGES_DIR)/$(CURL)/config.status
 	@make -C $(PACKAGES_DIR)/$(CURL) -j$(nproc)
@@ -381,21 +401,21 @@ $(PACKAGES_DIR)/$(CJSON)/build/Makefile: $(PACKAGES_DIR)/$(CJSON)/CMakeLists.txt
 	@mkdir -p $(PACKAGES_DIR)/$(CJSON)/build
 	@cd $(PACKAGES_DIR)/$(CJSON)/build; cmake -DCMAKE_PREFIX_PATH=/ ..
 
-$(PACKAGES_DIR)/$(CJSON)/build/libcjson.a: $(PACKAGES_DIR)/$(CJSON)/build/Makefile
+$(PACKAGES_DIR)/$(CJSON)/build/libcjson.so: $(PACKAGES_DIR)/$(CJSON)/build/Makefile
 	@make -C $(PACKAGES_DIR)/$(CJSON)/build -j$(nproc)
 	@touch $@
 
-$(STAGING_DIR)/$(SDROOT)/usr/local/lib/libcjson.a: $(PACKAGES_DIR)/$(CJSON)/build/libcjson.a
+$(STAGING_DIR)/$(SDROOT)/usr/local/lib/libcjson.so: $(PACKAGES_DIR)/$(CJSON)/build/libcjson.so
 	@make -C $(PACKAGES_DIR)/$(CJSON)/build install DESTDIR=$(STAGING_DIR)/$(SDROOT)
 	@touch $@
 
-cjson: $(STAGING_DIR)/$(SDROOT)/usr/local/lib/libcjson.a
+cjson: $(STAGING_DIR)/$(SDROOT)/usr/local/lib/libcjson.so
 
 cjson-clean:
 	@rm -rf $(PACKAGES_DIR)/$(CJSON)/build
 	@rm $(PACKAGES_DIR)/$(CJSON)/cjson-config
 
-$(PACKAGES_DIR)/$(MOSQUITTO)/config.mk.patch: $(STAGING_DIR)/$(SDROOT)/bin/openssl $(STAGING_DIR)/$(SDROOT)/lib/libz.a
+$(PACKAGES_DIR)/$(MOSQUITTO)/config.mk.patch: $(STAGING_DIR)/$(SDROOT)/bin/openssl $(STAGING_DIR)/$(SDROOT)/lib/libz.so
 	@cp $(SRC_DIR)/patches/$(MOSQUITTO)/config.mk $(PACKAGES_DIR)/$(MOSQUITTO)/config.mk
 	@touch $@
 
@@ -421,16 +441,16 @@ mosquitto-clean:
 	@rm $(PACKAGES_DIR)/$(MOSQUITTO)/mosquitto-config
 
 $(PACKAGES_DIR)/$(GSOAP)/config.status:
-	@cd $(PACKAGES_DIR)/$(GSOAP); ac_cv_func_malloc_0_nonnull=yes ./configure --host=$(HOST) --prefix=$(SDROOT) --sysconfdir=$(SDROOT)/etc/config --datarootdir=$(SDROOT)/usr/share --disable-shared --enable-static --with-ssl=$(STAGING_DIR)/$(SDROOT) --with-zlib=$(STAGING_DIR)/$(SDROOT) --with-openssl=$(STAGING_DIR)/$(SDROOT) LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib --static -lssl -lcrypto" CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include"
+	@cd $(PACKAGES_DIR)/$(GSOAP); ac_cv_func_malloc_0_nonnull=yes ./configure --host=$(HOST) --prefix=$(SDROOT) --sysconfdir=$(SDROOT)/etc/config --datarootdir=$(SDROOT)/usr/share --with-zlib=$(STAGING_DIR)/$(SDROOT) --with-openssl=$(STAGING_DIR)/$(SDROOT) LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -lssl -lcrypto" CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include"
 	@echo -e "all:\n\ninstall:\n" > $(PACKAGES_DIR)/$(GSOAP)/gsoap/wsdl/Makefile
 
-$(PACKAGES_DIR)/$(GSOAP)/gsoap/libgsoap.a: $(PACKAGES_DIR)/$(GSOAP)/config.status
+$(PACKAGES_DIR)/$(GSOAP)/gsoap/libgsoap.so: $(PACKAGES_DIR)/$(GSOAP)/config.status
 	@make -C $(PACKAGES_DIR)/$(GSOAP) -j$(nproc)
 	
-$(STAGING_DIR)/$(SDROOT)/lib/libgsoap.a: $(PACKAGES_DIR)/$(GSOAP)/gsoap/libgsoap.a
+$(STAGING_DIR)/$(SDROOT)/lib/libgsoap.so: $(PACKAGES_DIR)/$(GSOAP)/gsoap/libgsoap.so
 	@make -C $(PACKAGES_DIR)/$(GSOAP) install DESTDIR=$(STAGING_DIR)
 		
-gsoap: $(STAGING_DIR)/$(SDROOT)/lib/libgsoap.a
+gsoap: $(STAGING_DIR)/$(SDROOT)/lib/libgsoap.so
 
 gsoap-clean:
 	@make -C $(PACKAGES_DIR)/$(GSOAP) clean distclean
@@ -456,109 +476,97 @@ onvif-clean:
 
 $(PACKAGES_DIR)/$(LIBGPG_ERROR)/Makefile:
 	@ln -sf $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/syscfg/lock-obj-pub.arm-unknown-linux-gnueabi.h $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/syscfg/lock-obj-pub.linux-uclibcgnueabi.h
-	@cd $(PACKAGES_DIR)/$(LIBGPG_ERROR); ./configure --prefix=$(SDROOT) --enable-static --with-gnu-ld --host=$(HOST) --disable-nls \
+	@cd $(PACKAGES_DIR)/$(LIBGPG_ERROR); ./configure --prefix=$(SDROOT) --with-gnu-ld --host=$(HOST) --disable-nls \
 	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/usr/include" LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib"
 	
-$(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/libgpg-error.la: $(PACKAGES_DIR)/$(LIBGPG_ERROR)/Makefile
+$(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/libgpg-error.so: $(PACKAGES_DIR)/$(LIBGPG_ERROR)/Makefile
 	@make -C $(PACKAGES_DIR)/$(LIBGPG_ERROR) -j$(nproc)
 	
-$(STAGING_DIR)/$(SDROOT)/lib/libgpg-error.la: $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/libgpg-error.la
+$(STAGING_DIR)/$(SDROOT)/lib/libgpg-error.so: $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/libgpg-error.so
 	@cp $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/gpg-error-config $(STAGING_DIR)/$(SDROOT)/bin
 	@sed -i -e "s|prefix=$(SDROOT)|prefix=$(STAGING_DIR)/$(SDROOT)|g" $(STAGING_DIR)/$(SDROOT)/bin/gpg-error-config
 	@make -C $(PACKAGES_DIR)/$(LIBGPG_ERROR) install DESTDIR=$(STAGING_DIR)
 	
-libgpg-error: $(STAGING_DIR)/$(SDROOT)/lib/libgpg-error.la
+libgpg-error: $(STAGING_DIR)/$(SDROOT)/lib/libgpg-error.so
 
 libgpg-error-clean:
 	@make -C $(PACKAGES_DIR)/$(LIBGPG_ERROR) clean distclean
 
 $(PACKAGES_DIR)/$(LIBGCRYPT)/Makefile:
-	@cd $(PACKAGES_DIR)/$(LIBGCRYPT); ./configure --prefix=$(SDROOT) --enable-static --enable-cxx --with-gnu-ld --host=$(HOST) --disable-asm \
+	@cd $(PACKAGES_DIR)/$(LIBGCRYPT); ./configure --prefix=$(SDROOT) --enable-cxx --with-gnu-ld --host=$(HOST) --disable-asm \
 	 --disable-jent-support --disable-padlock-support --disable-aesni-support --disable-shaext-support --disable-pclmul-support --disable-sse41-support \
 	 --disable-drng-support --disable-avx-support --disable-avx2-support --disable-avx512-support --disable-gfni-support --disable-sve-support --disable-sve2-support --disable-ppc-crypto-support \
- 	 --disable-doc --disable-optimization --disable-amd64-as-feature-detection --disable-instrumentation-munging --disable-O-flag-munging --enable-static \
+ 	 --disable-doc --disable-optimization --disable-amd64-as-feature-detection --disable-instrumentation-munging --disable-O-flag-munging \
 	 --with-libgpg-error-prefix=$(STAGING_DIR)/$(SDROOT) CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/usr/include" LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -lgpg-error"
 	
-$(PACKAGES_DIR)/$(LIBGCRYPT)/src/libgcrypt.la: $(PACKAGES_DIR)/$(LIBGCRYPT)/Makefile
+$(PACKAGES_DIR)/$(LIBGCRYPT)/src/libgcrypt.so: $(PACKAGES_DIR)/$(LIBGCRYPT)/Makefile
 	@make -C $(PACKAGES_DIR)/$(LIBGCRYPT) -j$(nproc)
 	
-$(STAGING_DIR)/$(SDROOT)/lib/libgcrypt.la: $(PACKAGES_DIR)/$(LIBGCRYPT)/src/libgcrypt.la
+$(STAGING_DIR)/$(SDROOT)/lib/libgcrypt.so: $(PACKAGES_DIR)/$(LIBGCRYPT)/src/libgcrypt.so
 	@make -C $(PACKAGES_DIR)/$(LIBGCRYPT) install DESTDIR=$(STAGING_DIR)
 	
-libgcrypt: $(STAGING_DIR)/$(SDROOT)/lib/libgcrypt.la
+libgcrypt: $(STAGING_DIR)/$(SDROOT)/lib/libgcrypt.so
 
 libgcrypt-clean:
 	@make -C $(PACKAGES_DIR)/$(LIBGCRYPT) clean distclean
 
 $(PACKAGES_DIR)/$(GMP)/Makefile:
-	@cd $(PACKAGES_DIR)/$(GMP); ./configure --prefix=$(SDROOT) --enable-static --enable-cxx --with-gnu-ld --host=$(HOST)
+	@cd $(PACKAGES_DIR)/$(GMP); ./configure --prefix=$(SDROOT) --enable-cxx --with-gnu-ld --host=$(HOST)
 	
-$(PACKAGES_DIR)/$(GMP)/libgmp.la: $(PACKAGES_DIR)/$(GMP)/Makefile
+$(PACKAGES_DIR)/$(GMP)/libgmp.so: $(PACKAGES_DIR)/$(GMP)/Makefile
 	@make -C $(PACKAGES_DIR)/$(GMP) -j$(nproc)
 	
-$(STAGING_DIR)/$(SDROOT)/lib/libgmp.la: $(PACKAGES_DIR)/$(GMP)/libgmp.la
+$(STAGING_DIR)/$(SDROOT)/lib/libgmp.so: $(PACKAGES_DIR)/$(GMP)/libgmp.so
 	@make -C $(PACKAGES_DIR)/$(GMP) install DESTDIR=$(STAGING_DIR)
 	
-gmp: $(STAGING_DIR)/$(SDROOT)/lib/libgmp.la
+gmp: $(STAGING_DIR)/$(SDROOT)/lib/libgmp.so
 
 gmp-clean:
 	@make -C $(PACKAGES_DIR)/$(GMP) clean distclean
 
-$(PACKAGES_DIR)/$(LIBILBC)/build-shared/Makefile:
-	@mkdir -p $(PACKAGES_DIR)/$(LIBILBC)/build-shared
-	@cd $(PACKAGES_DIR)/$(LIBILBC)/build-shared; cmake .. -DBUILD_SHARED_LIBS=on -DCMAKE_INSTALL_PREFIX=$(STAGING_DIR)/$(SDROOT)
+$(PACKAGES_DIR)/$(LIBILBC)/build/Makefile:
+	@mkdir -p $(PACKAGES_DIR)/$(LIBILBC)/build
+	@cd $(PACKAGES_DIR)/$(LIBILBC)/build; cmake .. -DBUILD_SHARED_LIBS=on -DCMAKE_INSTALL_PREFIX=$(STAGING_DIR)/$(SDROOT)
 		
-$(PACKAGES_DIR)/$(LIBILBC)/build-static/Makefile:
-	@mkdir -p $(PACKAGES_DIR)/$(LIBILBC)/build-static
-	@cd $(PACKAGES_DIR)/$(LIBILBC)/build-static; cmake .. -DBUILD_SHARED_LIBS=off -DCMAKE_INSTALL_PREFIX=$(STAGING_DIR)/$(SDROOT)
-		
-$(PACKAGES_DIR)/$(LIBILBC)/build-shared/libilbc.so: $(PACKAGES_DIR)/$(LIBILBC)/build-shared/Makefile
-	@make -C $(PACKAGES_DIR)/$(LIBILBC)/build-shared -j$(nproc)
+$(PACKAGES_DIR)/$(LIBILBC)/build/libilbc.so: $(PACKAGES_DIR)/$(LIBILBC)/build/Makefile
+	@make -C $(PACKAGES_DIR)/$(LIBILBC)/build -j$(nproc)
 	
-$(PACKAGES_DIR)/$(LIBILBC)/build-static/libilbc.a: $(PACKAGES_DIR)/$(LIBILBC)/build-static/Makefile
-	@make -C $(PACKAGES_DIR)/$(LIBILBC)/build-static -j$(nproc)
-		
-$(STAGING_DIR)/$(SDROOT)/lib/libilbc.so: $(PACKAGES_DIR)/$(LIBILBC)/build-shared/libilbc.so
-	@make -C $(PACKAGES_DIR)/$(LIBILBC)/build-shared install
+$(STAGING_DIR)/$(SDROOT)/lib/libilbc.so: $(PACKAGES_DIR)/$(LIBILBC)/build/libilbc.so
+	@make -C $(PACKAGES_DIR)/$(LIBILBC)/build install
 	@touch $@
-	
-$(STAGING_DIR)/$(SDROOT)/lib/libilbc.a: $(PACKAGES_DIR)/$(LIBILBC)/build-static/libilbc.a
-	@make -C $(PACKAGES_DIR)/$(LIBILBC)/build-static install
-	@touch $@
-		
-libilbc: $(STAGING_DIR)/$(SDROOT)/lib/libilbc.a $(STAGING_DIR)/$(SDROOT)/lib/libilbc.so
+			
+libilbc: $(STAGING_DIR)/$(SDROOT)/lib/libilbc.so
 
 libilbc-clean:
-	@rm -rf $(PACKAGES_DIR)/$(LIBILBC)/build-shared
-	@rm -rf $(PACKAGES_DIR)/$(LIBILBC)/build-static
+	@rm -rf $(PACKAGES_DIR)/$(LIBILBC)/build
 
 $(PACKAGES_DIR)/$(OPENJPEG)/build/Makefile:
 	@mkdir -p $(PACKAGES_DIR)/$(OPENJPEG)/build
 	@cd $(PACKAGES_DIR)/$(OPENJPEG)/build; cmake .. -DCMAKE_INSTALL_PREFIX=$(STAGING_DIR)/$(SDROOT)
 	
-$(PACKAGES_DIR)/$(OPENJPEG)/libopenjp2.a: $(PACKAGES_DIR)/$(OPENJPEG)/build/Makefile
+$(PACKAGES_DIR)/$(OPENJPEG)/libopenjp2.so: $(PACKAGES_DIR)/$(OPENJPEG)/build/Makefile
 	@make -C $(PACKAGES_DIR)/$(OPENJPEG)/build -j$(nproc)
 	@touch $@
 	
-$(STAGING_DIR)/$(SDROOT)/lib/libopenjp2.a: $(PACKAGES_DIR)/$(OPENJPEG)/libopenjp2.a
+$(STAGING_DIR)/$(SDROOT)/lib/libopenjp2.so: $(PACKAGES_DIR)/$(OPENJPEG)/libopenjp2.so
 	@make -C $(PACKAGES_DIR)/$(OPENJPEG)/build install
 	@touch $@
 	
-openjpeg: $(STAGING_DIR)/$(SDROOT)/lib/libopenjp2.a
+openjpeg: $(STAGING_DIR)/$(SDROOT)/lib/libopenjp2.so
 
 openjpeg-clean:
 	@make -C $(PACKAGES_DIR)/$(OPENJPEG) clean distclean
 
 $(PACKAGES_DIR)/$(OPUS)/Makefile:
-	@cd $(PACKAGES_DIR)/$(OPUS); ./configure --prefix=$(SDROOT) --enable-static --with-gnu-ld --host=$(HOST)
+	@cd $(PACKAGES_DIR)/$(OPUS); ./configure --prefix=$(SDROOT) --with-gnu-ld --host=$(HOST)
 	
-$(PACKAGES_DIR)/$(OPUS)/libopus.la: $(PACKAGES_DIR)/$(OPUS)/Makefile
+$(PACKAGES_DIR)/$(OPUS)/libopus.so: $(PACKAGES_DIR)/$(OPUS)/Makefile
 	@make -C $(PACKAGES_DIR)/$(OPUS) -j$(nproc)
 	
-$(STAGING_DIR)/$(SDROOT)/lib/libopus.la: $(PACKAGES_DIR)/$(OPUS)/libopus.la
+$(STAGING_DIR)/$(SDROOT)/lib/libopus.so: $(PACKAGES_DIR)/$(OPUS)/libopus.so
 	@make -C $(PACKAGES_DIR)/$(OPUS) install DESTDIR=$(STAGING_DIR)
 	
-opus: $(STAGING_DIR)/$(SDROOT)/lib/libopus.la
+opus: $(STAGING_DIR)/$(SDROOT)/lib/libopus.so
 
 opus-clean:
 	@make -C $(PACKAGES_DIR)/$(OPUS) clean distclean
@@ -566,7 +574,7 @@ opus-clean:
 $(PACKAGES_DIR)/$(FFMPEG)/ffbuild/config.mak:
 	@cp $(SRC_DIR)/patches/$(FFMPEG)/configure $(PACKAGES_DIR)/$(FFMPEG)/configure
 	@cd $(PACKAGES_DIR)/$(FFMPEG); ./configure --prefix=$(SDROOT) --arch=arm --cross-prefix=$(HOST)- --target-os=linux \
-	--extra-cflags="-Dstatic_assert=_Static_assert -I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/include/opus -I$(STAGING_DIR)/$(SDROOT)/include/openjpeg-2.5" \
+	--extra-cflags="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/include/opus -I$(STAGING_DIR)/$(SDROOT)/include/openjpeg-2.5" \
 	--extra-ldflags="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -lgmp -lgcrypt -lgpg-error -lilbc -lopenjp2 -lopus" \
 	--disable-static --enable-shared --enable-cross-compile --stdc=c11 --disable-doc --enable-zlib --enable-gmp --enable-gcrypt --enable-gpl --enable-version3 --enable-libilbc --enable-libopus --disable-encoders --disable-decoders --disable-protocols \
 	--enable-decoder=adpcm_g722 --enable-decoder=adpcm_g726 --enable-decoder=adpcm_g7261e --enable-decoder=aac --enable-decoder=aac_latm --enable-decoder=aac_mediacodec --enable-decoder=ac3 --enable-decoder=ac3_at --enable-decoder=ac3_fixed --enable-decoder=flv --enable-decoder=flac --enable-decoder=g729 --enable-decoder=gif --enable-decoder=h261 --enable-decoder=h263 --enable-decoder=h263_v4l2m2m --enable-decoder=h263i --enable-decoder=h263p --enable-decoder=h264 --enable-decoder=h264_cuvid --enable-decoder=h264_mediacodec --enable-decoder=h264_v4l2m2m --enable-decoder=hevc --enable-decoder=hevc_cuvid --enable-decoder=hevc_mediacodec --enable-decoder=hevc_v4l2m2m --enable-decoder=ilbc --enable-decoder=ilbc_at --enable-decoder=mjpeg --enable-decoder=mjpeg_cuvid --enable-decoder=mjpegb --enable-decoder=mp1 --enable-decoder=mp1_at --enable-decoder=mp1float --enable-decoder=mp2 --enable-decoder=mp2_at --enable-decoder=mp2float --enable-decoder=mp3 --enable-decoder=mp3_at --enable-decoder=mp3_mediacodec --enable-decoder=mp3adu --enable-decoder=mp3adufloat --enable-decoder=mp3float --enable-decoder=mp3on4 --enable-decoder=mp3on4float --enable-decoder=mpeg1_cuvid --enable-decoder=mpeg1_v4l2m2m --enable-decoder=mpeg1video --enable-decoder=mpeg2_cuvid --enable-decoder=mpeg2_mediacodec --enable-decoder=mpeg2_v4l2m2m --enable-decoder=mpeg2video --enable-decoder=mpeg4 --enable-decoder=mpeg4_cuvid --enable-decoder=mpeg4_mediacodec --enable-decoder=mpeg4_v4l2m2m --enable-decoder=mpegvideo --enable-decoder=pcm_alaw --enable-decoder=pcm_alaw_at --enable-decoder=pcm_mulaw --enable-decoder=pcm_mulaw_at --enable-decoder=speex --enable-decoder=text --enable-decoder=vp7 --enable-decoder=vp8 --enable-decoder=vp8_cuvid --enable-decoder=vp8_mediacodec --enable-decoder=vp8_v4l2m2m --enable-decoder=vp9 --enable-decoder=vp9_cuvid --enable-decoder=vp9_mediacodec --enable-decoder=vp9_v4l2m2m --enable-decoder=webp --enable-decoder=wmav1 --enable-decoder=wmav2 --enable-decoder=yuv4 --enable-decoder=zlib \
@@ -589,11 +597,7 @@ $(PACKAGES_DIR)/$(LIBEXECINFO)/libexecinfo.so:
 	@make -C $(PACKAGES_DIR)/$(LIBEXECINFO) -j$(nproc) libexecinfo.so
 	@touch $@
 
-$(PACKAGES_DIR)/$(LIBEXECINFO)/libexecinfo.a:
-	@make -C $(PACKAGES_DIR)/$(LIBEXECINFO) -j$(nproc) libexecinfo.a
-	@touch $@
-	
-$(STAGING_DIR)/$(SDROOT)/lib/libexecinfo.so: $(PACKAGES_DIR)/$(LIBEXECINFO)/libexecinfo.so $(PACKAGES_DIR)/$(LIBEXECINFO)/libexecinfo.a
+$(STAGING_DIR)/$(SDROOT)/lib/libexecinfo.so: $(PACKAGES_DIR)/$(LIBEXECINFO)/libexecinfo.so
 	@make -C $(PACKAGES_DIR)/$(LIBEXECINFO) install PREFIX=$(SDROOT) DESTDIR=$(STAGING_DIR)
 	@touch $@
 		
@@ -771,11 +775,8 @@ $(BUILD_HACK)/bin/strace-log-merge:
 $(BUILD_HACK)/bin/tcpdump:
 	@cp $(STAGE_HACK)/bin/tcpdump $@
 
-$(BUILD_HACK)/bin/tcpdump-static:
-	@cp $(STAGE_HACK)/bin/tcpdump.4.99.4 $@
-
 $(BUILD_HACK)/bin/upnpc:
-	@cp $(STAGE_HACK)/bin/upnpc-static $@
+	@cp $(STAGE_HACK)/bin/upnpc $@
 	
 $(BUILD_HACK)/sbin/onvif_srvd:
 	@cp $(SRC_DIR)/contrib/binaries/onvif_srvd $@
@@ -853,7 +854,7 @@ $(BUILD_DIR)/LICENSE.md:
 
 build: $(BUILD_DIR)/install.ps1 $(BUILD_HACK)/bin/radare2 $(BUILD_HACK)/bin/r2agent $(BUILD_HACK)/bin/r2r $(BUILD_HACK)/bin/rasign2 $(BUILD_HACK)/bin/rax2 $(BUILD_HACK)/bin/ragg2 $(BUILD_HACK)/bin/rarun2 $(BUILD_HACK)/bin/rabin2 \
        $(BUILD_HACK)/bin/radiff2 $(BUILD_HACK)/bin/ravc2 $(BUILD_HACK)/bin/rahash2 $(BUILD_HACK)/bin/rafind2 $(BUILD_HACK)/bin/r2pm $(BUILD_HACK)/bin/rasm2 $(BUILD_HACK)/bin/ffmpeg $(BUILD_HACK)/bin/ffprobe $(BUILD_HACK)/bin/opj_dump \
-       $(BUILD_HACK)/bin/opj_compress $(BUILD_HACK)/bin/opj_decompress $(BUILD_HACK)/sbin/onvif_srvd $(BUILD_HACK)/bin/upnpc $(BUILD_HACK)/bin/tcpdump-static $(BUILD_HACK)/bin/tcpdump $(BUILD_HACK)/bin/strace-log-merge \
+       $(BUILD_HACK)/bin/opj_compress $(BUILD_HACK)/bin/opj_decompress $(BUILD_HACK)/sbin/onvif_srvd $(BUILD_HACK)/bin/upnpc $(BUILD_HACK)/bin/tcpdump $(BUILD_HACK)/bin/strace-log-merge \
        $(BUILD_HACK)/bin/strace $(BUILD_HACK)/bin/sqlite3 $(BUILD_HACK)/bin/sqlcipher $(BUILD_HACK)/bin/pcap-config $(BUILD_HACK)/bin/openssl $(BUILD_HACK)/sbin/msmtpd $(BUILD_HACK)/bin/msmtp $(BUILD_HACK)/bin/joe \
        $(BUILD_HACK)/bin/curl-config $(BUILD_HACK)/bin/curl $(BUILD_HACK)/bin/busybox $(BUILD_HACK)/bin/mosquitto_rr $(BUILD_HACK)/bin/mosquitto_pub $(BUILD_HACK)/bin/mosquitto_sub $(BUILD_HACK)/bin/mosquitto_passwd \
        $(BUILD_HACK)/sbin/mosquitto $(BUILD_HACK)/etc/version.txt $(BUILD_DIR)/LICENSE.md
