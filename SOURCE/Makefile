@@ -14,6 +14,7 @@ WITH_LIBGPG_ERROR := 0
 WITH_LIBGCRYPT := 0
 WITH_GMP := 0
 WITH_PHP := 0
+WITH_PYTHON := 0
 ifeq ($(WITH_RADARE2), 1)
 	RADARE2_BUILD = radare2
 	RADARE2_CLEAN = radare2-clean
@@ -98,11 +99,16 @@ endif
 ifeq ($(WITH_PHP), 1)
 	PHP_BUILD = php
 	PHP_CLEAN = php-clean
-	WITH_LIBGCRYPT = 1
-	WITH_GMP = 1
 else
 	PHP_BUILD = without-php
 	PHP_CLEAN = without-php-clean
+endif
+ifeq ($(WITH_PYTHON), 1)
+	PYTHON_BUILD = python
+	PYTHON_CLEAN = python-clean
+else
+	PYTHON_BUILD = without-python
+	PYTHON_CLEAN = without-python-clean
 endif
 
 # Zu verwendende LIBC (uclibc => default, glibc => not working currently, musl => not tested)
@@ -115,6 +121,7 @@ TOOLCHAIN_BASE_DIR := $(ROOT_DIR)/toolchain
 TOOLCHAIN_UCLIBC_DIR := $(TOOLCHAIN_BASE_DIR)/uclibc
 TOOLCHAIN_GLIBC_DIR := $(TOOLCHAIN_BASE_DIR)/glibc
 TOOLCHAIN_MUSL_DIR := $(TOOLCHAIN_BASE_DIR)/musl
+TOOLCHAIN_HOST_DIR := /usr
 ifeq ($(USE_LIBC), glibc)
 	TOOLCHAIN_DIR := $(TOOLCHAIN_GLIBC_DIR)
 else ifeq ($(USE_LIBC), uclibc)
@@ -125,6 +132,7 @@ endif
 PACKAGES_DIR := $(ROOT_DIR)/packages
 STAGING_DIR := $(ROOT_DIR)/staging
 BUILD_DIR := $(ROOT_DIR)/build
+HOST_DIR := $(ROOT_DIR)/host
 SRC_DIR := $(ROOT_DIR)/src
 
 # Hack paths
@@ -147,6 +155,7 @@ HOST_GLIBC := arm-buildroot-linux-gnueabi
 TOOLCHAIN_UCLIBC_PATH := $(TOOLCHAIN_UCLIBC_DIR)
 TOOLCHAIN_GLIBC_PATH := $(TOOLCHAIN_GLIBC_DIR)
 TOOLCHAIN_MUSL_PATH := $(TOOLCHAIN_MUSL_DIR)
+TOOLCHAIN_HOST_PATH := $(TOOLCHAIN_HOST_DIR)
 ifeq ($(USE_LIBC), glibc)
 	TOOLCHAIN_PATH := $(TOOLCHAIN_GLIBC_PATH)
 else ifeq ($(USE_LIBC), uclibc)
@@ -197,7 +206,7 @@ AUTOSCAN_MUSL := $(TOOLCHAIN_MUSL_PATH)/bin/autoscan
 AUTOUPDATE_MUSL := $(TOOLCHAIN_MUSL_PATH)/bin/autoupdate
 ACLOCAL_MUSL := $(TOOLCHAIN_MUSL_PATH)/bin/aclocal
 IFNAMES_MUSL := $(TOOLCHAIN_MUSL_PATH)/bin/ifnames
-FORCE_TOOLCHAIN_GLIBC = PKG_CONFIG_PATH=$(TOOLCHAIN_GLIBC_PATH)/lib/pkgconfig:$(TOOLCHAIN_GLIBC_PATH)/share/pkgconfig PATH=$(TOOLCHAIN_GLIBC_PATH)/bin:$(PATH) TOOLCHAIN_PATH=$(TOOLCHAIN_GLIBC_PATH) C=$(C_GLIBC) CC=$(CC_GLIBC) GCC=$(GCC_GLIBC) CXX=$(CXX_GLIBC) CPP=$(CPP_GLIBC) AR=$(AR_GLIBC) NM=$(NM_GLIBC) LD=$(LD_GLIBC) RANLIB=$(RANLIB_GLIBC) STRIP=$(STRIP_GLIBC) AUTOCONF=$(AUTOCONF_GLIBC) AUTOHEADER=$(AUTOHEADER_GLIBC) AUTOM4TE=$(AUTOM4TE_GLIBC) AUTORECONF=$(AUTORECONF_GLIBC) AUTOSCAN=$(AUTOSCAN_GLIBC) AUTOUPDATE=$(AUTOUPDATE_GLIBC) ACLOCAL=$(ACLOCAL_GLIBC) IFNAMES=$(IFNAMES_GLIBC) HOST=$(HOST_GLIBC) CROSS_PREFIX=$(HOST_GLIBC)
+FORCE_TOOLCHAIN_MUSL = PKG_CONFIG_PATH=$(TOOLCHAIN_MUSL_PATH)/lib/pkgconfig:$(TOOLCHAIN_MUSL_PATH)/share/pkgconfig PATH=$(TOOLCHAIN_MUSL_PATH)/bin:$(PATH) TOOLCHAIN_PATH=$(TOOLCHAIN_MUSL_PATH) C=$(C_MUSL) CC=$(CC_MUSL) GCC=$(GCC_MUSL) CXX=$(CXX_MUSL) CPP=$(CPP_MUSL) AR=$(AR_MUSL) NM=$(NM_MUSL) LD=$(LD_MUSL) RANLIB=$(RANLIB_MUSL) STRIP=$(STRIP_MUSL) AUTOCONF=$(AUTOCONF_MUSL) AUTOHEADER=$(AUTOHEADER_MUSL) AUTOM4TE=$(AUTOM4TE_MUSL) AUTORECONF=$(AUTORECONF_MUSL) AUTOSCAN=$(AUTOSCAN_MUSL) AUTOUPDATE=$(AUTOUPDATE_MUSL) ACLOCAL=$(ACLOCAL_MUSL) IFNAMES=$(IFNAMES_MUSL) HOST=$(HOST_MUSL) CROSS_PREFIX=$(HOST_MUSL)
 
 # GLIBC toolchain
 C_GLIBC := $(TOOLCHAIN_GLIBC_PATH)/bin/$(HOST_GLIBC)-gcc
@@ -218,7 +227,28 @@ AUTOSCAN_GLIBC := $(TOOLCHAIN_GLIBC_PATH)/bin/autoscan
 AUTOUPDATE_GLIBC := $(TOOLCHAIN_GLIBC_PATH)/bin/autoupdate
 ACLOCAL_GLIBC := $(TOOLCHAIN_GLIBC_PATH)/bin/aclocal
 IFNAMES_GLIBC := $(TOOLCHAIN_GLIBC_PATH)/bin/ifnames
-FORCE_TOOLCHAIN_MUSL = PKG_CONFIG_PATH=$(TOOLCHAIN_MUSL_PATH)/lib/pkgconfig:$(TOOLCHAIN_MUSL_PATH)/share/pkgconfig PATH=$(TOOLCHAIN_MUSL_PATH)/bin:$(PATH) TOOLCHAIN_PATH=$(TOOLCHAIN_MUSL_PATH) C=$(C_MUSL) CC=$(CC_MUSL) GCC=$(GCC_MUSL) CXX=$(CXX_MUSL) CPP=$(CPP_MUSL) AR=$(AR_MUSL) NM=$(NM_MUSL) LD=$(LD_MUSL) RANLIB=$(RANLIB_MUSL) STRIP=$(STRIP_MUSL) AUTOCONF=$(AUTOCONF_MUSL) AUTOHEADER=$(AUTOHEADER_MUSL) AUTOM4TE=$(AUTOM4TE_MUSL) AUTORECONF=$(AUTORECONF_MUSL) AUTOSCAN=$(AUTOSCAN_MUSL) AUTOUPDATE=$(AUTOUPDATE_MUSL) ACLOCAL=$(ACLOCAL_MUSL) IFNAMES=$(IFNAMES_MUSL) HOST=$(HOST_MUSL) CROSS_PREFIX=$(HOST_MUSL)
+FORCE_TOOLCHAIN_GLIBC = PKG_CONFIG_PATH=$(TOOLCHAIN_GLIBC_PATH)/lib/pkgconfig:$(TOOLCHAIN_GLIBC_PATH)/share/pkgconfig PATH=$(TOOLCHAIN_GLIBC_PATH)/bin:$(PATH) TOOLCHAIN_PATH=$(TOOLCHAIN_GLIBC_PATH) C=$(C_GLIBC) CC=$(CC_GLIBC) GCC=$(GCC_GLIBC) CXX=$(CXX_GLIBC) CPP=$(CPP_GLIBC) AR=$(AR_GLIBC) NM=$(NM_GLIBC) LD=$(LD_GLIBC) RANLIB=$(RANLIB_GLIBC) STRIP=$(STRIP_GLIBC) AUTOCONF=$(AUTOCONF_GLIBC) AUTOHEADER=$(AUTOHEADER_GLIBC) AUTOM4TE=$(AUTOM4TE_GLIBC) AUTORECONF=$(AUTORECONF_GLIBC) AUTOSCAN=$(AUTOSCAN_GLIBC) AUTOUPDATE=$(AUTOUPDATE_GLIBC) ACLOCAL=$(ACLOCAL_GLIBC) IFNAMES=$(IFNAMES_GLIBC) HOST=$(HOST_GLIBC) CROSS_PREFIX=$(HOST_GLIBC)
+
+# HOST toolchain
+C_HOST := $(TOOLCHAIN_HOST_PATH)/bin/$(HOST_HOST)-gcc
+CC_HOST := $(TOOLCHAIN_HOST_PATH)/bin/$(HOST_HOST)-gcc
+GCC_HOST := $(TOOLCHAIN_HOST_PATH)/bin/$(HOST_HOST)-g++
+CXX_HOST := $(TOOLCHAIN_HOST_PATH)/bin/$(HOST_HOST)-g++
+CPP_HOST := $(TOOLCHAIN_HOST_PATH)/bin/$(HOST_HOST)-cpp
+AR_HOST := $(TOOLCHAIN_HOST_PATH)/bin/$(HOST_HOST)-ar
+NM_HOST := $(TOOLCHAIN_HOST_PATH)/bin/$(HOST_HOST)-nm
+LD_HOST := $(TOOLCHAIN_HOST_PATH)/bin/$(HOST_HOST)-ld
+RANLIB_HOST := $(TOOLCHAIN_HOST_PATH)/bin/$(HOST_HOST)-ranlib
+STRIP_HOST := $(TOOLCHAIN_HOST_PATH)/bin/$(HOST_HOST)-strip
+AUTOCONF_HOST := $(TOOLCHAIN_HOST_PATH)/bin/autoconf
+AUTOHEADER_HOST := $(TOOLCHAIN_HOST_PATH)/bin/autoheader
+AUTOM4TE_HOST := $(TOOLCHAIN_HOST_PATH)/bin/autom4te
+AUTORECONF_HOST := $(TOOLCHAIN_HOST_PATH)/bin/autoreconf
+AUTOSCAN_HOST := $(TOOLCHAIN_HOST_PATH)/bin/autoscan
+AUTOUPDATE_HOST := $(TOOLCHAIN_HOST_PATH)/bin/autoupdate
+ACLOCAL_HOST := $(TOOLCHAIN_HOST_PATH)/bin/aclocal
+IFNAMES_HOST := $(TOOLCHAIN_HOST_PATH)/bin/ifnames
+FORCE_TOOLCHAIN_HOST = PKG_CONFIG_PATH=$(TOOLCHAIN_HOST_PATH)/lib/pkgconfig:$(TOOLCHAIN_HOST_PATH)/share/pkgconfig PATH=$(TOOLCHAIN_HOST_PATH)/bin:$(PATH) TOOLCHAIN_PATH=$(TOOLCHAIN_HOST_PATH) C=$(C_HOST) CC=$(CC_HOST) GCC=$(GCC_HOST) CXX=$(CXX_HOST) CPP=$(CPP_HOST) AR=$(AR_HOST) NM=$(NM_HOST) LD=$(LD_HOST) RANLIB=$(RANLIB_HOST) STRIP=$(STRIP_HOST) AUTOCONF=$(AUTOCONF_HOST) AUTOHEADER=$(AUTOHEADER_HOST) AUTOM4TE=$(AUTOM4TE_HOST) AUTORECONF=$(AUTORECONF_HOST) AUTOSCAN=$(AUTOSCAN_HOST) AUTOUPDATE=$(AUTOUPDATE_HOST) ACLOCAL=$(ACLOCAL_HOST) IFNAMES=$(IFNAMES_HOST) HOST=$(HOST_HOST) CROSS_PREFIX=$(HOST_HOST)
 
 # Definiere die Cross-Compiler Variablen
 ifeq ($(USE_LIBC), glibc)
@@ -320,6 +350,7 @@ LIBEXECINFO := libexecinfo-1.1-rc2
 RADARE2 := radare2-5.9.8
 GLIBC := glibc-2.32
 PHP := php-8.4.4
+PYTHON := Python-3.13.2
 KERNEL := linux-4.4.192
 TOOLCHAIN_UCLIBC := armv5-eabi--uclibc--stable-$(TOOLCHAIN_VERSION)
 TOOLCHAIN_GLIBC := armv5-eabi--glibc--stable-$(TOOLCHAIN_VERSION)
@@ -368,10 +399,11 @@ URLS := \
     $(DOWNLOAD_URL)/$(LIBEXECINFO).tar.gz?download=\#/$(LIBEXECINFO).tar.gz \
     $(DOWNLOAD_URL)/$(GLIBC).tar.gz?download=\#/$(GLIBC).tar.gz \
     $(DOWNLOAD_URL)/$(PHP).tar.gz?download=\#/$(PHP).tar.gz \
+    $(DOWNLOAD_URL)/$(PYTHON).tar.gz?download=\#/$(PYTHON).tar.gz \
     $(DOWNLOAD_URL)/$(MINIUPNPC).tar.gz?download=\#/$(MINIUPNPC).tar.gz
 
 # Ziele definieren
-all: download toolchain packages staging build
+all: download toolchain packages staging host build
 
 download: $(DOWNLOAD_DIR) $(patsubst %,$(DOWNLOAD_DIR)/%,$(notdir $(URLS)))
 
@@ -451,6 +483,9 @@ $(STAGING_DIR):
 
 $(BUILD_DIR):
 	@make update-version-revision
+	@mkdir -p $@
+	
+$(HOST_DIR):
 	@mkdir -p $@
 
 $(DOWNLOAD_DIR)/%:
@@ -914,6 +949,41 @@ php: $(STAGING_DIR)/$(SDROOT)/bin/php
 php-clean:
 	@make $(PACKAGES_DIR)/$(PHP) clean
 	
+$(PACKAGES_DIR)/$(PYTHON)/config.status.host:
+	@cd $(PACKAGES_DIR)/$(PYTHON); $(FORCE_TOOLCHAIN_HOST) ./configure --prefix=$(HOST_DIR)
+	@touch $@
+
+$(PACKAGES_DIR)/$(PYTHON)/python.host: $(PACKAGES_DIR)/$(PYTHON)/config.status.host
+	@$(FORCE_TOOLCHAIN_HOST) make -C $(PACKAGES_DIR)/$(PYTHON) -j$(nproc)
+	@touch $@
+	
+$(HOST_DIR)/bin/python: $(PACKAGES_DIR)/$(PYTHON)/python.host
+	@$(FORCE_TOOLCHAIN_HOST) make -C $(PACKAGES_DIR)/$(PYTHON) install PREFIX=$(HOST_DIR) DESTDIR=$(HOST_DIR)
+	@touch $@
+
+$(PACKAGES_DIR)/$(PYTHON)/python.host.clean:		
+	@$(FORCE_TOOLCHAIN_HOST) make $(PACKAGES_DIR)/$(PYTHON) clean
+	@touch $@
+	
+$(PACKAGES_DIR)/$(PYTHON)/config.status: $(HOST_DIR)/bin/python $(PACKAGES_DIR)/$(PYTHON)/python.host.clean
+	@cd $(PACKAGES_DIR)/$(PYTHON); PKG_CONFIG_PATH=$(STAGING_DIR)/$(SDROOT)/lib/pkgconfig:$(TOOLCHAIN_PATH)/lib/pkgconfig:$(TOOLCHAIN_PATH)/share/pkgconfig ./configure \
+	--prefix=$(SDROOT) --host=$(HOST) --build=arm --datarootdir=$(SDROOT)/usr/share --with-openssl=$(STAGING_DIR)/$(SDROOT)/include/openssl --with-build-python=$(HOST_DIR)/bin/python3.13 \
+	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include --sysroot=$(TOOLCHAIN_PATH)/$(HOST)/sysroot -L$(STAGING_DIR)/$(SDROOT)/lib"
+	@touch $@
+
+$(PACKAGES_DIR)/$(PYTHON)/python: $(PACKAGES_DIR)/$(PYTHON)/config.status
+	@make -C $(PACKAGES_DIR)/$(PYTHON) -j$(nproc)
+	@touch $@
+	
+$(STAGING_DIR)/$(SDROOT)/bin/python: $(PACKAGES_DIR)/$(PYTHON)/python
+	@make -C $(PACKAGES_DIR)/$(PYTHON) install PREFIX=$(SDROOT) DESTDIR=$(STAGING_DIR)
+	@touch $@
+	
+python: $(STAGING_DIR)/$(SDROOT)/bin/python
+
+python-clean:
+	@make $(PACKAGES_DIR)/$(PYTHON) clean
+	
 # Force radare2 to use uclibc
 $(PACKAGES_DIR)/$(RADARE2)/mk/$(HOST_UCLIBC)-gcc.mk:
 	@cp $(SRC_DIR)/patches/$(RADARE2)/$(HOST_UCLIBC)-gcc.mk $(PACKAGES_DIR)/$(RADARE2)/mk
@@ -975,7 +1045,9 @@ $(STAGING_DIR)/$(SDROOT)/lib/libuClibc-1.0.34.so:
 	@cp -f $(STAGING_DIR)/$(SDROOT)/lib/libgcc_s.so.1 $(STAGING_DIR)/$(SDROOT)/lib/libgcc_s.so
 	@touch $@
 	
-staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif $(OPUS_BUILD) $(OPENJPEG_BUILD) $(LIBILBC_BUILD) $(LIBGPG_ERROR_BUILD) $(GMP_BUILD) $(LIBGCRYPT_BUILD) $(FFMPEG_BUILD) $(LIBEXECINFO_BUILD) $(PHP_BUILD) $(KERNEL_BUILD) $(GLIBC_BUILD) $(RADARE2_BUILD) $(GLIBC_BUILD) $(STAGING_DIR)/$(SDROOT)/lib/libuClibc-1.0.34.so
+staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif $(OPUS_BUILD) $(OPENJPEG_BUILD) $(LIBILBC_BUILD) $(LIBGPG_ERROR_BUILD) $(GMP_BUILD) $(LIBGCRYPT_BUILD) $(FFMPEG_BUILD) $(LIBEXECINFO_BUILD) $(PHP_BUILD) $(PYTHON_BUILD) $(KERNEL_BUILD) $(GLIBC_BUILD) $(RADARE2_BUILD) $(GLIBC_BUILD) $(STAGING_DIR)/$(SDROOT)/lib/libuClibc-1.0.34.so
+
+host: $(HOST_DIR)
 
 $(BUILD_DIR)/install.ps1: $(BUILD_DIR)
 	@cp -aL $(SRC_DIR)/sdcard/* $(BUILD_DIR) >/dev/null 2>&1 || true
@@ -1163,6 +1235,9 @@ build-clean:
 staging-clean:
 	@rm -rf $(STAGING_DIR)
 	
+host-clean:
+	@rm -rf $(HOST_DIR)
+	
 packages-clean:
 	@rm -rf $(PACKAGES_DIR)
 
@@ -1178,13 +1253,13 @@ toolchain-glibc-clean:
 toolchain-clean: toolchain-uclibc-clean toolchain-glibc-clean
 	@rm -rf $(TOOLCHAIN_BASE_DIR)
 
-mrproper: staging-clean packages-clean toolchain-clean build-clean
+mrproper: staging-clean packages-clean toolchain-clean host-clean build-clean
 	@rm -f $(ROOT_DIR)/LSCamoflash-*.tar.gz || true
 	@rm -f $(ROOT_DIR)/update-*.tgz || true
 
 mrproper-full: download-clean mrproper
 	
-clean: $(RADARE2_CLEAN) $(GLIBC_CLEAN) $(KERNEL_CLEAN) $(PHP_CLEAN) $(LIBEXECINFO_CLEAN) $(FFMPEG_CLEAN) $(OPUS_CLEAN) $(OPENJPEG_CLEAN) $(LIBILBC_CLEAN) $(LIBGPG_ERROR_CLEAN) $(GMP_CLEAN) $(LIBGCRYPT_CLEAN) onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
+clean: $(RADARE2_CLEAN) $(GLIBC_CLEAN) $(KERNEL_CLEAN) $(PYTHON_CLEAN) $(PHP_CLEAN) $(LIBEXECINFO_CLEAN) $(FFMPEG_CLEAN) $(OPUS_CLEAN) $(OPENJPEG_CLEAN) $(LIBILBC_CLEAN) $(LIBGPG_ERROR_CLEAN) $(GMP_CLEAN) $(LIBGCRYPT_CLEAN) onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
 
 update-version-major:
 	@$(SRC_DIR)/bin/update-version.sh --major
@@ -1198,11 +1273,11 @@ update-version-revision:
 version:
 	@cat $(ROOT_DIR)/version.txt
 
-LSCamoflash-$(VERSION)-$(USE_LIBC).tar.gz: download toolchain packages staging build
+LSCamoflash-$(VERSION)-$(USE_LIBC).tar.gz: download toolchain packages staging host build
 	@tar -C $(BUILD_DIR) -cvzf $@ .
 	@touch $@
 	
-update-$(VERSION)-$(USE_LIBC).tgz: download toolchain packages staging build
+update-$(VERSION)-$(USE_LIBC).tgz: download toolchain packages staging host build
 	@tar -C $(BUILD_DIR) -cvzf $@ --exclude=mmcblk0p2/HACK/etc --exclude=mmcblk0p2/HACK/var/spool/cron/crontabs/root mmcblk0p1 mmcblk0p2
 	@touch $@
 	
@@ -1211,13 +1286,13 @@ release: LSCamoflash-$(VERSION)-$(USE_LIBC).tar.gz
 update: update-$(VERSION)-$(USE_LIBC).tgz
 
 build-test-glibc:
-	@make USE_LIBC=glibc mrproper download toolchain packages staging
+	@make USE_LIBC=glibc mrproper download toolchain packages staging host
 
 build-test-uclibc:
-	@make USE_LIBC=uclibc mrproper download toolchain packages staging
+	@make USE_LIBC=uclibc mrproper download toolchain packages staging host
 
 build-test-musl:
-	@make USE_LIBC=musl mrproper download toolchain packages staging
+	@make USE_LIBC=musl mrproper download toolchain packages staging host
 
 without-radare2:
 
@@ -1266,6 +1341,10 @@ without-opus-clean:
 without-php:
 
 without-php-clean:
+
+without-python:
+
+without-python-clean:
 
 all-optional:
 	@make all WITH_RADARE2=1 WITH_FFMPEG=1 WITH_KERNEL=1 WITH_PHP=1
