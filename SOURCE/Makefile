@@ -860,6 +860,7 @@ $(BUILD_DIR)/install.ps1: $(BUILD_DIR)
 	@find $(BUILD_HACK)/lib -name "*.a" -exec rm {} \;
 	@find $(BUILD_HACK)/lib -name "*.la" -exec rm {} \;
 	@find $(BUILD_HACK)/lib -name "*.pc" -exec rm {} \;
+	@find $(BUILD_HACK)/lib -name "*.py" -exec rm {} \;
 	@find $(BUILD_HACK)/lib -name "*.cmake" -exec rm {} \;
 	@rm -rf $(BUILD_HACK)/usr/share/locale
 	@rm -rf $(BUILD_HACK)/lib/modules/$(KERNEL_VERSION)/build
