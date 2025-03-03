@@ -474,13 +474,13 @@ tcpdump-clean:
 	@make -C $(PACKAGES_DIR)/$(TCPDUMP) clean distclean
 
 $(PACKAGES_DIR)/$(OPENSSL)/configdata.pm:
-	@cd $(PACKAGES_DIR)/$(OPENSSL); ./Configure linux-generic32 no-docs no-man3 no-shared no-dso no-tests no-threads no-zlib no-async no-comp --prefix=$(SDROOT) --openssldir=$(SDROOT)/etc/config/ssl CC=$(CC) AR=$(AR) RANLIB=$(RANLIB)
+	@cd $(PACKAGES_DIR)/$(OPENSSL); ./Configure linux-generic32 no-shared no-dso no-tests no-threads no-zlib no-async no-comp --prefix=$(SDROOT) --openssldir=$(SDROOT)/etc/config/ssl CC=$(CC) AR=$(AR) RANLIB=$(RANLIB)
 	
 $(PACKAGES_DIR)/$(OPENSSL)/apps/openssl: $(PACKAGES_DIR)/$(OPENSSL)/configdata.pm
-	@make -C $(PACKAGES_DIR)/$(OPENSSL) -j$(nproc)
+	@make -C $(PACKAGES_DIR)/$(OPENSSL) -j$(nproc) build_sw
 	
 $(STAGING_DIR)/$(SDROOT)/bin/openssl: $(PACKAGES_DIR)/$(OPENSSL)/apps/openssl
-	@make -C $(PACKAGES_DIR)/$(OPENSSL) install DESTDIR=$(STAGING_DIR)
+	@make -C $(PACKAGES_DIR)/$(OPENSSL) install_sw install_ssldirs DESTDIR=$(STAGING_DIR)
 	@$(STRIP) $(STAGING_DIR)/$(SDROOT)/bin/openssl
 	
 openssl: $(STAGING_DIR)/$(SDROOT)/bin/openssl
@@ -938,7 +938,7 @@ $(STAGING_DIR)/$(SDROOT)/lib/libuClibc-1.0.34.so:
 	@cp -f $(STAGING_DIR)/$(SDROOT)/lib/libgcc_s.so.1 $(STAGING_DIR)/$(SDROOT)/lib/libgcc_s.so
 	@touch $@
 	
-staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif $(OPUS_BUILD) $(OPENJPEG_BUILD) $(LIBILBC_BUILD) $(LIBGPG_ERROR_BUILD) $(GMP_BUILD) $(LIBGCRYPT_BUILD) $(FFMPEG_BUILD) $(LIBEXECINFO_BUILD) $(KERNEL_BUILD) $(GLIBC_BUILD) $(RADARE2_BUILD) $(WITH_GLIBC) $(STAGING_DIR)/$(SDROOT)/lib/libuClibc-1.0.34.so
+staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif $(OPUS_BUILD) $(OPENJPEG_BUILD) $(LIBILBC_BUILD) $(LIBGPG_ERROR_BUILD) $(GMP_BUILD) $(LIBGCRYPT_BUILD) $(FFMPEG_BUILD) $(LIBEXECINFO_BUILD) $(KERNEL_BUILD) $(GLIBC_BUILD) $(RADARE2_BUILD) $(GLIBC_BUILD) $(STAGING_DIR)/$(SDROOT)/lib/libuClibc-1.0.34.so
 
 $(BUILD_DIR)/install.ps1: $(BUILD_DIR)
 	@cp -aL $(SRC_DIR)/sdcard/* $(BUILD_DIR) >/dev/null 2>&1 || true
