@@ -950,7 +950,7 @@ php-clean:
 	@make $(PACKAGES_DIR)/$(PHP) clean
 	
 $(PACKAGES_DIR)/$(PYTHON)/config.status.host:
-	@cd $(PACKAGES_DIR)/$(PYTHON); $(FORCE_TOOLCHAIN_HOST) ./configure --prefix=/ --no-warn-script-location
+	@cd $(PACKAGES_DIR)/$(PYTHON); $(FORCE_TOOLCHAIN_HOST) ./configure --prefix=/
 	@touch $@
 
 $(PACKAGES_DIR)/$(PYTHON)/python.host: $(PACKAGES_DIR)/$(PYTHON)/config.status.host
@@ -968,7 +968,7 @@ $(PACKAGES_DIR)/$(PYTHON)/python.host.clean:
 $(PACKAGES_DIR)/$(PYTHON)/config.status: $(HOST_DIR)/bin/python3 $(PACKAGES_DIR)/$(PYTHON)/python.host.clean
 	@cd $(PACKAGES_DIR)/$(PYTHON); PKG_CONFIG_PATH=$(STAGING_DIR)/$(SDROOT)/lib/pkgconfig:$(TOOLCHAIN_PATH)/lib/pkgconfig:$(TOOLCHAIN_PATH)/share/pkgconfig ac_cv_file__dev_ptmx=no ac_cv_file__dev_ptc=no \
 	./configure --disable-ipv6 --prefix=$(SDROOT) --host=$(HOST) --build=arm --datarootdir=$(SDROOT)/usr/share --with-openssl=$(STAGING_DIR)/$(SDROOT)/include/openssl --with-build-python=$(HOST_DIR)/bin/python3.13 \
-	--no-warn-script-location CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include --sysroot=$(TOOLCHAIN_PATH)/$(HOST)/sysroot -L$(STAGING_DIR)/$(SDROOT)/lib"
+	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include --sysroot=$(TOOLCHAIN_PATH)/$(HOST)/sysroot -L$(STAGING_DIR)/$(SDROOT)/lib"
 	@touch $@
 
 $(PACKAGES_DIR)/$(PYTHON)/python: $(PACKAGES_DIR)/$(PYTHON)/config.status
