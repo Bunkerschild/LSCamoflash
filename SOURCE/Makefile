@@ -2,10 +2,101 @@
 PROJECT_URL := https://github.com/Bunkerschild/LSCamoflash
 DOWNLOAD_URL := $(PROJECT_URL)/raw/refs/heads/main/SOURCE/download/
 
-# Zu verwendende LIBC
+# Optional packages
+WITH_RADARE2 := 0
+WITH_GLIBC := 0
+WITH_FFMPEG := 0
+WITH_KERNEL := 0
+WITH_OPUS := 0
+WITH_OPENJPEG := 0
+WITH_LIBILBC := 0
+WITH_LIBGPG_ERROR := 0
+WITH_LIBGCRYPT := 0
+WITH_GMP := 0
+ifeq ($(WITH_RADARE2), 1)
+	RADARE2_BUILD = radare2
+	RADARE2_CLEAN = radare2-clean
+	LIBEXECINFO_BUILD = libexecinfo
+	LIBEXECINFO_CLEAN = libexecinfo-clean
+	WITH_GLIBC = 1
+else
+	RADARE2_BUILD = without-radare2
+	RADARE2_CLEAN= = without-radare2-clean
+	LIBEXECINFO_BUILD = without-libexecinfo
+	LIBEXECINFO_CLEAN = without-libexecinfo-clean
+endif
+ifeq ($(WITH_GLIBC), 1)
+	GLIBC_BUILD = glibc
+	GLIBC_CLEAN = glibc-clean
+else
+	GLIBC_BUILD = without-glibc
+	GLIBC_CLEAN = without-glibc-clean
+endif
+ifeq ($(WITH_FFMPEG), 1)
+	FFMPEG_BUILD = ffmpeg
+	FFMPEG_CLEAN = ffmpeg-clean
+	WITH_OPUS = 1
+	WITH_OPENJPEG = 1
+	WITH_LIBILBC = 1
+	WITH_LIBGPG_ERROR = 1
+	WITH_LIBGCRYPT = 1
+	WITH_GMP = 1
+else
+	FFMPEG_BUILD = without-ffmpeg
+	FFMPEG_CLEAN = without-ffmpeg-clean
+endif
+ifeq ($(WITH_KERNEL), 1)
+	KERNEL_BUILD = kernel
+	KERNEL_CLEAN = kernel-clean
+else
+	KERNEL_BUILD = without-kernel
+	KERNEL_CLEAN = without-kernel-clean
+endif
+ifeq ($(WITH_OPUS), 1)
+	OPUS_BUILD = opus
+	OPUS_CLEAN = opus-clean
+else
+	OPUS_BUILD = without-opus
+	OPUS_CLEAN = without-opus-clean
+endif
+ifeq ($(WITH_OPENJPEG), 1)
+	OPENJPEG_BUILD = openjpeg
+	OPENJPEG_CLEAN = openjpeg-clean
+else
+	OPENJPEG_BUILD = without-openjpeg
+	OPENJPEG_CLEAN = without-openjpeg-clean
+endif
+ifeq ($(WITH_LIBILBC), 1)
+	LIBILBC_BUILD = libilbc
+	LIBILBC_CLEAN = libilbc-clean
+else
+	LIBILBC_BUILD = without-libilbc
+	LIBILBC_CLEAN = without-libilbc-clean
+endif
+ifeq ($(WITH_LIBGPG_ERROR), 1)
+	LIBGPG_ERROR_BUILD = libgpg-error
+	LIBGPG_ERROR_CLEAN = libgpg-error-clean
+else
+	LIBGPG_ERROR_BUILD = without-libgpg-error
+	LIBGPG_ERROR_CLEAN = without-libgpg-error-clean
+endif
+ifeq ($(WITH_LIBGCRYPT), 1)
+	LIBGCRYPT_BUILD = libgcrypt
+	LIBGCRYPT_CLEAN = libgcrypt-clean
+else
+	LIBGCRYPT_BUILD = without-libgcrypt
+	LIBGCRYPT_CLEAN = without-libgcrypt-clean
+endif
+ifeq ($(WITH_GMP), 1)
+	GMP_BUILD = gmp
+	GMP_CLEAN = gmp-clean
+else
+	GMP_BUILD = without-gmp
+	GMP_CLEAN = without-gmp-clean
+endif
+
+# Zu verwendende LIBC (uclibc => default, glibc => not working currently, musl => not tested)
 USE_LIBC ?= uclibc
-#USE_LIBC ?= glibc
-#USE_LIBC ?= musl
 
 # Definiere Pfade
 ROOT_DIR := $(shell pwd)
@@ -383,7 +474,7 @@ tcpdump-clean:
 	@make -C $(PACKAGES_DIR)/$(TCPDUMP) clean distclean
 
 $(PACKAGES_DIR)/$(OPENSSL)/configdata.pm:
-	@cd $(PACKAGES_DIR)/$(OPENSSL); ./Configure linux-generic32 no-shared no-dso no-tests no-threads no-zlib no-async no-comp --prefix=$(SDROOT) --openssldir=$(SDROOT)/etc/config/ssl CC=$(CC) AR=$(AR) RANLIB=$(RANLIB)
+	@cd $(PACKAGES_DIR)/$(OPENSSL); ./Configure linux-generic32 no-docs no-man3 no-shared no-dso no-tests no-threads no-zlib no-async no-comp --prefix=$(SDROOT) --openssldir=$(SDROOT)/etc/config/ssl CC=$(CC) AR=$(AR) RANLIB=$(RANLIB)
 	
 $(PACKAGES_DIR)/$(OPENSSL)/apps/openssl: $(PACKAGES_DIR)/$(OPENSSL)/configdata.pm
 	@make -C $(PACKAGES_DIR)/$(OPENSSL) -j$(nproc)
@@ -847,14 +938,14 @@ $(STAGING_DIR)/$(SDROOT)/lib/libuClibc-1.0.34.so:
 	@cp -f $(STAGING_DIR)/$(SDROOT)/lib/libgcc_s.so.1 $(STAGING_DIR)/$(SDROOT)/lib/libgcc_s.so
 	@touch $@
 	
-staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif opus openjpeg libilbc libgpg-error gmp libgcrypt ffmpeg libexecinfo kernel glibc radare2 $(STAGING_DIR)/$(SDROOT)/lib/libuClibc-1.0.34.so
+staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif $(OPUS_BUILD) $(OPENJPEG_BUILD) $(LIBILBC_BUILD) $(LIBGPG_ERROR_BUILD) $(GMP_BUILD) $(LIBGCRYPT_BUILD) $(FFMPEG_BUILD) $(LIBEXECINFO_BUILD) $(KERNEL_BUILD) $(GLIBC_BUILD) $(RADARE2_BUILD) $(WITH_GLIBC) $(STAGING_DIR)/$(SDROOT)/lib/libuClibc-1.0.34.so
 
 $(BUILD_DIR)/install.ps1: $(BUILD_DIR)
-	@cp -aL $(SRC_DIR)/sdcard/* $(BUILD_DIR)
+	@cp -aL $(SRC_DIR)/sdcard/* $(BUILD_DIR) >/dev/null 2>&1 || true
 	@make -C $(SRC_DIR)/contrib/motor DESTDIR=$(BUILD_DIR)/mmcblk0p2/HACK install
-	@cp -aL $(STAGE_HACK)/lib/* $(BUILD_HACK)/lib
-	@cp -aL $(STAGE_HACK)/usr/lib/* $(BUILD_HACK)/lib
-	@cp -aL $(STAGE_HACK)/usr/local/lib/* $(BUILD_HACK)/lib
+	@cp -aL $(STAGE_HACK)/lib/* $(BUILD_HACK)/lib >/dev/null 2>&1 || true
+	@cp -aL $(STAGE_HACK)/usr/lib/* $(BUILD_HACK)/lib >/dev/null 2>&1 || true
+	@cp -aL $(STAGE_HACK)/usr/local/lib/* $(BUILD_HACK)/lib >/dev/null 2>&1 || true
 	@find $(BUILD_HACK)/lib -name "*.c" -exec rm {} \;
 	@find $(BUILD_HACK)/lib -name "*.o" -exec rm {} \;
 	@find $(BUILD_HACK)/lib -name "*.a" -exec rm {} \;
@@ -862,144 +953,144 @@ $(BUILD_DIR)/install.ps1: $(BUILD_DIR)
 	@find $(BUILD_HACK)/lib -name "*.pc" -exec rm {} \;
 	@find $(BUILD_HACK)/lib -name "*.py" -exec rm {} \;
 	@find $(BUILD_HACK)/lib -name "*.cmake" -exec rm {} \;
-	@rm -rf $(BUILD_HACK)/usr/share/locale
-	@rm -rf $(BUILD_HACK)/lib/modules/$(KERNEL_VERSION)/build
-	@rm -rf $(BUILD_HACK)/lib/modules/$(KERNEL_VERSION)/source
+	@rm -rf $(BUILD_HACK)/usr/share/locale >/dev/null 2>&1 || true
+	@rm -rf $(BUILD_HACK)/lib/modules/$(KERNEL_VERSION)/build >/dev/null 2>&1 || true
+	@rm -rf $(BUILD_HACK)/lib/modules/$(KERNEL_VERSION)/source >/dev/null 2>&1 || true
 	@touch $@
 	
 $(BUILD_HACK)/sbin/mosquitto:
-	@cp -a $(STAGE_HACK)/etc/mosquitto $(BUILD_HACK)/etc/config
-	@cp $(STAGE_HACK)/usr/sbin/mosquitto $@
+	@cp -a $(STAGE_HACK)/etc/mosquitto $(BUILD_HACK)/etc/config >/dev/null 2>&1 || true
+	@cp $(STAGE_HACK)/usr/sbin/mosquitto $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/mosquitto_passwd:
-	@cp $(STAGE_HACK)/usr/bin/mosquitto_passwd $@
+	@cp $(STAGE_HACK)/usr/bin/mosquitto_passwd $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/mosquitto_sub:
-	@cp $(STAGE_HACK)/usr/bin/mosquitto_sub $@
+	@cp $(STAGE_HACK)/usr/bin/mosquitto_sub $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/mosquitto_pub:
-	@cp $(STAGE_HACK)/usr/bin/mosquitto_pub $@
+	@cp $(STAGE_HACK)/usr/bin/mosquitto_pub $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/mosquitto_rr:
-	@cp $(STAGE_HACK)/usr/bin/mosquitto_rr $@
+	@cp $(STAGE_HACK)/usr/bin/mosquitto_rr $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/busybox:
-	@cp $(STAGE_HACK)/bin/busybox $@
+	@cp $(STAGE_HACK)/bin/busybox $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/curl:
-	@cp -a $(STATE_HACK)/usr/share/aclocal $(BUILD_HACK)/usr/share
-	@cp $(STAGE_HACK)/bin/curl $@
+	@cp -a $(STATE_HACK)/usr/share/aclocal $(BUILD_HACK)/usr/share >/dev/null 2>&1 || true
+	@cp $(STAGE_HACK)/bin/curl $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/curl-config:
-	@cp $(STAGE_HACK)/bin/curl-config $@
+	@cp $(STAGE_HACK)/bin/curl-config $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/joe:
-	@cp -aL $(STAGE_HACK)/etc/config/joe $(BUILD_HACK)/etc/config
-	@cp -aL $(STATE_HACK)/usr/share/joe $(BUILD_HACK)/usr/share
-	@cp $(STAGE_HACK)/bin/joe $(BUILD_HACK)/bin/rjoe
-	@cp $(STAGE_HACK)/bin/joe $(BUILD_HACK)/bin/jmacs
-	@cp $(STAGE_HACK)/bin/joe $(BUILD_HACK)/bin/jpico
-	@cp $(STAGE_HACK)/bin/joe $(BUILD_HACK)/bin/jstar
-	@cp $(STAGE_HACK)/bin/joe $@
+	@cp -aL $(STAGE_HACK)/etc/config/joe $(BUILD_HACK)/etc/config >/dev/null 2>&1 || true
+	@cp -aL $(STATE_HACK)/usr/share/joe $(BUILD_HACK)/usr/share >/dev/null 2>&1 || true
+	@cp $(STAGE_HACK)/bin/joe $(BUILD_HACK)/bin/rjoe >/dev/null 2>&1 || true
+	@cp $(STAGE_HACK)/bin/joe $(BUILD_HACK)/bin/jmacs >/dev/null 2>&1 || true
+	@cp $(STAGE_HACK)/bin/joe $(BUILD_HACK)/bin/jpico >/dev/null 2>&1 || true
+	@cp $(STAGE_HACK)/bin/joe $(BUILD_HACK)/bin/jstar >/dev/null 2>&1 || true
+	@cp $(STAGE_HACK)/bin/joe $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/msmtp:
-	@cp $(STAGE_HACK)/bin/msmtp $@
+	@cp $(STAGE_HACK)/bin/msmtp $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/sbin/msmtpd:
-	@cp $(STAGE_HACK)/bin/msmtpd $@
+	@cp $(STAGE_HACK)/bin/msmtpd $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/openssl:
-	@cp -aL $(STAGE_HACK)/etc/config/ssl $(BUILD_HACK)/etc/config
-	@cp $(STAGE_HACK)/bin/openssl $@
+	@cp -aL $(STAGE_HACK)/etc/config/ssl $(BUILD_HACK)/etc/config >/dev/null 2>&1 || true
+	@cp $(STAGE_HACK)/bin/openssl $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/pcap-config:
-	@cp $(STAGE_HACK)/bin/pcap-config $@
+	@cp $(STAGE_HACK)/bin/pcap-config $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/sqlcipher:
-	@cp $(STAGE_HACK)/bin/sqlcipher $@
+	@cp $(STAGE_HACK)/bin/sqlcipher $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/sqlite3:
-	@cp $(STAGE_HACK)/bin/sqlite3 $@
+	@cp $(STAGE_HACK)/bin/sqlite3 $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/strace:
-	@cp $(STAGE_HACK)/bin/strace $@
+	@cp $(STAGE_HACK)/bin/strace $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/strace-log-merge:
-	@cp $(STAGE_HACK)/bin/strace-log-merge $@
+	@cp $(STAGE_HACK)/bin/strace-log-merge $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/tcpdump:
-	@cp $(STAGE_HACK)/bin/tcpdump $@
+	@cp $(STAGE_HACK)/bin/tcpdump $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/upnpc:
-	@cp $(STAGE_HACK)/bin/upnpc $@
+	@cp $(STAGE_HACK)/bin/upnpc $@ >/dev/null 2>&1 || true
 	
 $(BUILD_HACK)/sbin/onvif_srvd:
-	@cp $(SRC_DIR)/contrib/binaries/onvif_srvd $@
+	@cp $(SRC_DIR)/contrib/binaries/onvif_srvd $@ >/dev/null 2>&1 || true
 	@chmod +x $@
 	@touch $@
 	
 $(BUILD_HACK)/bin/ffprobe:
-	@cp $(STAGE_HACK)/bin/ffprobe $@
+	@cp $(STAGE_HACK)/bin/ffprobe $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/ffmpeg:
-	@cp $(STAGE_HACK)/bin/ffmpeg $@
+	@cp $(STAGE_HACK)/bin/ffmpeg $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/opj_dump:
-	@cp $(STAGE_HACK)/bin/opj_dump $@
+	@cp $(STAGE_HACK)/bin/opj_dump $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/opj_compress:
-	@cp $(STAGE_HACK)/bin/opj_compress $@
+	@cp $(STAGE_HACK)/bin/opj_compress $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/opj_decompress:
-	@cp $(STAGE_HACK)/bin/opj_decompress $@
+	@cp $(STAGE_HACK)/bin/opj_decompress $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/radare2:
-	@cp -aL $(STATE_HACK)/usr/share/radare2 $(BUILD_HACK)/usr/share
-	@cp $(STAGE_HACK)/bin/radare2 $(BUILD_HACK)/bin/r2
-	@cp $(STAGE_HACK)/bin/radare2 $(BUILD_HACK)/bin/r2p
-	@cp $(STAGE_HACK)/bin/radare2 $@
+	@cp -aL $(STATE_HACK)/usr/share/radare2 $(BUILD_HACK)/usr/share >/dev/null 2>&1 || true
+	@cp $(STAGE_HACK)/bin/radare2 $(BUILD_HACK)/bin/r2 >/dev/null 2>&1 || true
+	@cp $(STAGE_HACK)/bin/radare2 $(BUILD_HACK)/bin/r2p >/dev/null 2>&1 || true
+	@cp $(STAGE_HACK)/bin/radare2 $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/r2agent:
-	@cp $(STAGE_HACK)/bin/r2agent $@
+	@cp $(STAGE_HACK)/bin/r2agent $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/r2r:
-	@cp $(STAGE_HACK)/bin/r2r $@
+	@cp $(STAGE_HACK)/bin/r2r $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/rasign2:
-	@cp $(STAGE_HACK)/bin/rasign2 $@
+	@cp $(STAGE_HACK)/bin/rasign2 $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/rax2:
-	@cp $(STAGE_HACK)/bin/rax2 $@
+	@cp $(STAGE_HACK)/bin/rax2 $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/ragg2:
-	@cp $(STAGE_HACK)/bin/ragg2 $@
+	@cp $(STAGE_HACK)/bin/ragg2 $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/rarun2:
-	@cp $(STAGE_HACK)/bin/rarun2 $@
+	@cp $(STAGE_HACK)/bin/rarun2 $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/rabin2:
-	@cp $(STAGE_HACK)/bin/rabin2 $@
+	@cp $(STAGE_HACK)/bin/rabin2 $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/radiff2:
-	@cp $(STAGE_HACK)/bin/radiff2 $@
+	@cp $(STAGE_HACK)/bin/radiff2 $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/ravc2:
-	@cp $(STAGE_HACK)/bin/ravc2 $@
+	@cp $(STAGE_HACK)/bin/ravc2 $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/rahash2:
-	@cp $(STAGE_HACK)/bin/rahash2 $@
+	@cp $(STAGE_HACK)/bin/rahash2 $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/rafind2:
-	@cp $(STAGE_HACK)/bin/rafind2 $@
+	@cp $(STAGE_HACK)/bin/rafind2 $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/r2pm:
-	@cp $(STAGE_HACK)/bin/r2pm $@
+	@cp $(STAGE_HACK)/bin/r2pm $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/rasm2:
-	@cp $(STAGE_HACK)/bin/rasm2 $@
+	@cp $(STAGE_HACK)/bin/rasm2 $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/etc/version.txt:
-	@cp $(ROOT_DIR)/version.txt $@
+	@cp $(ROOT_DIR)/version.txt $@ >/dev/null 2>&1 || true
 	@touch $@
 	
 $(BUILD_DIR)/LICENSE.md:
@@ -1041,7 +1132,7 @@ mrproper: staging-clean packages-clean toolchain-clean build-clean
 
 mrproper-full: download-clean mrproper
 	
-clean: radare2-clean glibc-clean kernel-clean libexecinfo-clean ffmpeg-clean opus-clean openjpeg-clean libilbc-clean libgpg-error-clean gmp-clean libgcrypt-clean onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
+clean: $(RADARE2_CLEAN) $(GLIBC_CLEAN) $(KERNEL_CLEAN) $(LIBEXECINFO_CLEAN) $(FFMPEG_CLEAN) $(OPUS_CLEAN) $(OPENJPEG_CLEAN) $(LIBILBC_CLEAN) $(LIBGPG_ERROR_CLEAN) $(GMP_CLEAN) $(LIBGCRYPT_CLEAN) onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
 
 update-version-major:
 	@$(SRC_DIR)/bin/update-version.sh --major
@@ -1075,6 +1166,50 @@ build-test-uclibc:
 
 build-test-musl:
 	@make USE_LIBC=musl mrproper-full download toolchain packages staging mrproper
+	
+without-radare2:
+
+without-radare2-clean:
+
+without-glibc:
+
+without-glibc-clean:
+
+without-ffmpeg:
+
+without-ffmpeg-clean:
+
+without-libexecinfo:
+
+without-libexecinfo-clean:
+
+without-kernel:
+
+without-kernel-clean:
+
+without-gmp:
+
+without-gmp-clean:
+
+without-libgcrypt:
+
+without-libgcrypt-clean:
+
+without-libgpg-error:
+
+without-libgpg-error-clean:
+
+without-libilbc:
+
+without-libilbc-clean:
+
+without-openjpeg:
+
+without-openjpeg-clean:
+
+without-opus:
+
+without-opus-clean:
 
 install: all
 	@cd $(BUILD_DIR); sh install.sh
