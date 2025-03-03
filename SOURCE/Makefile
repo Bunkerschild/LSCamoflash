@@ -399,7 +399,7 @@ URLS := \
     $(DOWNLOAD_URL)/$(LIBEXECINFO).tar.gz?download=\#/$(LIBEXECINFO).tar.gz \
     $(DOWNLOAD_URL)/$(GLIBC).tar.gz?download=\#/$(GLIBC).tar.gz \
     $(DOWNLOAD_URL)/$(PHP).tar.gz?download=\#/$(PHP).tar.gz \
-    $(DOWNLOAD_URL)/$(PYTHON).tar.gz?download=\#/$(PYTHON).tar.gz \
+    $(DOWNLOAD_URL)/$(PYTHON).tar.xz?download=\#/$(PYTHON).tar.xz \
     $(DOWNLOAD_URL)/$(MINIUPNPC).tar.gz?download=\#/$(MINIUPNPC).tar.gz
 
 # Ziele definieren
