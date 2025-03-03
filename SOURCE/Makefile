@@ -493,6 +493,8 @@ $(STAGING_DIR)/$(SDROOT)/bin/upnpc: $(PACKAGES_DIR)/miniupnp-$(MINIUPNPC)/miniup
 	@make -C $(PACKAGES_DIR)/miniupnp-$(MINIUPNPC)/miniupnpc install DESTDIR=$(STAGING_DIR)/$(SDROOT) INSTALLDIRINC=$(STAGING_DIR)/$(SDROOT)/include INSTALLDIRLIB=$(STAGING_DIR)/$(SDROOT)/lib INSTALLDIRBIN=$(STAGING_DIR)/$(SDROOT)/bin
 	@cp $(PACKAGES_DIR)/miniupnp-$(MINIUPNPC)/miniupnpc/build/upnpc-shared $(STAGING_DIR)/$(SDROOT)/bin/upnpc
 	@cp $(PACKAGES_DIR)/miniupnp-$(MINIUPNPC)/miniupnpc/build/upnp-listdevices-shared $(STAGING_DIR)/$(SDROOT)/bin/upnp-listdevices
+	@cp $(PACKAGES_DIR)/miniupnp-$(MINIUPNPC)/miniupnpc/build/libminiupnpc.so $(STAGING_DIR)/$(SDROOT)/lib/libminiupnpc.so.19
+	@ln -sf $(STAGING_DIR)/$(SDROOT)/lib/libminiupnpc.so.19 $(STAGING_DIR)/$(SDROOT)/lib/libminiupnpc.so
 	@$(STRIP) $(STAGING_DIR)/$(SDROOT)/bin/upnpc
 	@$(STRIP) $(STAGING_DIR)/$(SDROOT)/bin/upnp-listdevices
 		
@@ -839,8 +841,10 @@ glibc-clean:
 	@rm -rf $(PACKAGES_DIR)/$(GLIBC)/build
 	
 $(STAGING_DIR)/$(SDROOT)/lib/libuClibc-1.0.34.so:
-	@cp -a $(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/lib/* $(STAGING_DIR)/$(SDROOT)/lib/
-	@cp -a $(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/usr/lib/* $(STAGING_DIR)/$(SDROOT)/lib/
+	@cp -aL $(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/lib/* $(STAGING_DIR)/$(SDROOT)/lib/
+	@cp -aL $(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/usr/lib/* $(STAGING_DIR)/$(SDROOT)/lib/
+	@cp -f $(STAGING_DIR)/$(SDROOT)/lib/libc.so.1 $(STAGING_DIR)/$(SDROOT)/lib/libc.so
+	@cp -f $(STAGING_DIR)/$(SDROOT)/lib/libgcc_s.so.1 $(STAGING_DIR)/$(SDROOT)/lib/libgcc_s.so
 	@touch $@
 	
 staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif opus openjpeg libilbc libgpg-error gmp libgcrypt ffmpeg libexecinfo kernel glibc radare2 $(STAGING_DIR)/$(SDROOT)/lib/libuClibc-1.0.34.so
