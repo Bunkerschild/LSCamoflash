@@ -950,22 +950,22 @@ php-clean:
 	@make $(PACKAGES_DIR)/$(PHP) clean
 	
 $(PACKAGES_DIR)/$(PYTHON)/config.status.host:
-	@cd $(PACKAGES_DIR)/$(PYTHON); $(FORCE_TOOLCHAIN_HOST) ./configure --prefix=$(HOST_DIR)
+	@cd $(PACKAGES_DIR)/$(PYTHON); $(FORCE_TOOLCHAIN_HOST) ./configure --prefix=/
 	@touch $@
 
 $(PACKAGES_DIR)/$(PYTHON)/python.host: $(PACKAGES_DIR)/$(PYTHON)/config.status.host
 	@$(FORCE_TOOLCHAIN_HOST) make -C $(PACKAGES_DIR)/$(PYTHON) -j$(nproc)
 	@touch $@
 	
-$(HOST_DIR)/bin/python: $(PACKAGES_DIR)/$(PYTHON)/python.host
-	@$(FORCE_TOOLCHAIN_HOST) make -C $(PACKAGES_DIR)/$(PYTHON) install PREFIX=$(HOST_DIR) DESTDIR=$(HOST_DIR)
+$(HOST_DIR)/bin/python3: $(PACKAGES_DIR)/$(PYTHON)/python.host
+	@$(FORCE_TOOLCHAIN_HOST) make -C $(PACKAGES_DIR)/$(PYTHON) install DESTDIR=$(HOST_DIR)
 	@touch $@
 
 $(PACKAGES_DIR)/$(PYTHON)/python.host.clean:		
 	@$(FORCE_TOOLCHAIN_HOST) make $(PACKAGES_DIR)/$(PYTHON) clean
 	@touch $@
 	
-$(PACKAGES_DIR)/$(PYTHON)/config.status: $(HOST_DIR)/bin/python $(PACKAGES_DIR)/$(PYTHON)/python.host.clean
+$(PACKAGES_DIR)/$(PYTHON)/config.status: $(HOST_DIR)/bin/python3 $(PACKAGES_DIR)/$(PYTHON)/python.host.clean
 	@cd $(PACKAGES_DIR)/$(PYTHON); PKG_CONFIG_PATH=$(STAGING_DIR)/$(SDROOT)/lib/pkgconfig:$(TOOLCHAIN_PATH)/lib/pkgconfig:$(TOOLCHAIN_PATH)/share/pkgconfig ./configure \
 	--prefix=$(SDROOT) --host=$(HOST) --build=arm --datarootdir=$(SDROOT)/usr/share --with-openssl=$(STAGING_DIR)/$(SDROOT)/include/openssl --with-build-python=$(HOST_DIR)/bin/python3.13 \
 	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include --sysroot=$(TOOLCHAIN_PATH)/$(HOST)/sysroot -L$(STAGING_DIR)/$(SDROOT)/lib"
