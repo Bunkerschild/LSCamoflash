@@ -1357,8 +1357,8 @@ without-python:
 
 without-python-clean:
 
-all-optional:
-	@make all WITH_RADARE2=1 WITH_FFMPEG=1 WITH_KERNEL=1 WITH_PHP=1
+all-and-optionals:
+	@make all WITH_RADARE2=1 WITH_FFMPEG=1 WITH_KERNEL=1 WITH_PHP=1 WITH_PYTHON=1
 
 install: all
 	@cd $(BUILD_DIR); sh install.sh
