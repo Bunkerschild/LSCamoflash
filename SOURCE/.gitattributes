@@ -34,3 +34,4 @@ download/armv5-eabi--musl--stable-2020.02-2.tar.bz2 filter=lfs diff=lfs merge=lf
 download/armv5-eabi--uclibc--stable-2020.08-1.tar.bz2 filter=lfs diff=lfs merge=lfs -text
 download/armv5-eabi--glibc--stable-2020.08-1.tar.bz2 filter=lfs diff=lfs merge=lfs -text
 download/armv5-eabi--musl--stable-2020.08-1.tar.bz2 filter=lfs diff=lfs merge=lfs -text
+download/php-8.4.4.tar.gz filter=lfs diff=lfs merge=lfs -text

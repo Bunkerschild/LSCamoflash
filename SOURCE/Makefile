@@ -13,6 +13,7 @@ WITH_LIBILBC := 0
 WITH_LIBGPG_ERROR := 0
 WITH_LIBGCRYPT := 0
 WITH_GMP := 0
+WITH_PHP := 0
 ifeq ($(WITH_RADARE2), 1)
 	RADARE2_BUILD = radare2
 	RADARE2_CLEAN = radare2-clean
@@ -93,6 +94,15 @@ ifeq ($(WITH_GMP), 1)
 else
 	GMP_BUILD = without-gmp
 	GMP_CLEAN = without-gmp-clean
+endif
+ifeq ($(WITH_PHP), 1)
+	PHP_BUILD = php
+	PHP_CLEAN = php-clean
+	WITH_LIBGCRYPT = 1
+	WITH_GMP = 1
+else
+	PHP_BUILD = without-php
+	PHP_CLEAN = without-php-clean
 endif
 
 # Zu verwendende LIBC (uclibc => default, glibc => not working currently, musl => not tested)
@@ -309,6 +319,7 @@ FFMPEG := ffmpeg-7.1
 LIBEXECINFO := libexecinfo-1.1-rc2
 RADARE2 := radare2-5.9.8
 GLIBC := glibc-2.32
+PHP := php-8.4.4
 KERNEL := linux-4.4.192
 TOOLCHAIN_UCLIBC := armv5-eabi--uclibc--stable-$(TOOLCHAIN_VERSION)
 TOOLCHAIN_GLIBC := armv5-eabi--glibc--stable-$(TOOLCHAIN_VERSION)
@@ -356,6 +367,7 @@ URLS := \
     $(DOWNLOAD_URL)/$(RADARE2).tar.gz?download=\#/$(RADARE2).tar.gz \
     $(DOWNLOAD_URL)/$(LIBEXECINFO).tar.gz?download=\#/$(LIBEXECINFO).tar.gz \
     $(DOWNLOAD_URL)/$(GLIBC).tar.gz?download=\#/$(GLIBC).tar.gz \
+    $(DOWNLOAD_URL)/$(PHP).tar.gz?download=\#/$(PHP).tar.gz \
     $(DOWNLOAD_URL)/$(MINIUPNPC).tar.gz?download=\#/$(MINIUPNPC).tar.gz
 
 # Ziele definieren
@@ -881,6 +893,25 @@ kernel: $(STAGING_DIR)/$(SDROOT)/.kernelmodules $(STAGING_DIR)/$(SDROOT)/.kernel
 kernel-clean:
 	@make -C $(PACKAGES_DIR)/$(KERNEL) clean mrproper
 
+$(PACKAGES_DIR)/$(PHP)/config.status:
+	@cd $(PACKAGES_DIR)/$(PHP); ./configure --prefix=$(SDROOT) --host=$(HOST) --enable-embed=shared --enable-pcntl --enable-sockets --enable-sysvmsg --enable-sysvsem --enable-sysvshm \
+	--with-zlib --with-curl --with-gmp --with-pear --with-openssl --with-openssl-legacy-provider --with-openssl-argon2 --with-sqlite3 --disable-pdo --with-password-argon2 \
+	CFLAGS="-nostdinc -I$(STAGING_DIR)/$(SDROOT)/usr/include -O2 --sysroot=$(TOOLCHAIN_PATH)/$(HOST)/sysroot" LDFLAGS="-nostdlib"
+	@touch $@
+
+$(PACKAGES_DIR)/$(PHP)/php: $(PACKAGES_DIR)/$(PHP)/config.status
+	@make -C $(PACKAGES_DIR)/$(PHP) -j$(nproc) CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/usr/include -O2"
+	@touch $@
+	
+$(STAGING_DIR)/$(SDROOT)/bin/php: $(PACKAGES_DIR)/$(PHP)/php
+	@make -C $(PACKAGES_DIR)/$(PHP) install PREFIX=$(SDROOT) DESTDIR=$(STAGING_DIR)
+	@touch $@
+	
+php: $(STAGING_DIR)/$(SDROOT)/bin/php
+
+php-clean:
+	@make $(PACKAGES_DIR)/$(PHP) clean
+	
 # Force radare2 to use uclibc
 $(PACKAGES_DIR)/$(RADARE2)/mk/$(HOST_UCLIBC)-gcc.mk:
 	@cp $(SRC_DIR)/patches/$(RADARE2)/$(HOST_UCLIBC)-gcc.mk $(PACKAGES_DIR)/$(RADARE2)/mk
@@ -942,7 +973,7 @@ $(STAGING_DIR)/$(SDROOT)/lib/libuClibc-1.0.34.so:
 	@cp -f $(STAGING_DIR)/$(SDROOT)/lib/libgcc_s.so.1 $(STAGING_DIR)/$(SDROOT)/lib/libgcc_s.so
 	@touch $@
 	
-staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif $(OPUS_BUILD) $(OPENJPEG_BUILD) $(LIBILBC_BUILD) $(LIBGPG_ERROR_BUILD) $(GMP_BUILD) $(LIBGCRYPT_BUILD) $(FFMPEG_BUILD) $(LIBEXECINFO_BUILD) $(KERNEL_BUILD) $(GLIBC_BUILD) $(RADARE2_BUILD) $(GLIBC_BUILD) $(STAGING_DIR)/$(SDROOT)/lib/libuClibc-1.0.34.so
+staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif $(OPUS_BUILD) $(OPENJPEG_BUILD) $(LIBILBC_BUILD) $(LIBGPG_ERROR_BUILD) $(GMP_BUILD) $(LIBGCRYPT_BUILD) $(FFMPEG_BUILD) $(LIBEXECINFO_BUILD) $(PHP_BUILD) $(KERNEL_BUILD) $(GLIBC_BUILD) $(RADARE2_BUILD) $(GLIBC_BUILD) $(STAGING_DIR)/$(SDROOT)/lib/libuClibc-1.0.34.so
 
 $(BUILD_DIR)/install.ps1: $(BUILD_DIR)
 	@cp -aL $(SRC_DIR)/sdcard/* $(BUILD_DIR) >/dev/null 2>&1 || true
@@ -996,6 +1027,9 @@ $(BUILD_HACK)/bin/joe:
 	@cp $(STAGE_HACK)/bin/joe $(BUILD_HACK)/bin/jpico >/dev/null 2>&1 || true
 	@cp $(STAGE_HACK)/bin/joe $(BUILD_HACK)/bin/jstar >/dev/null 2>&1 || true
 	@cp $(STAGE_HACK)/bin/joe $@ >/dev/null 2>&1 || true
+
+$(BUILD_HACK)/bin/php:
+	@cp $(STAGE_HACK)/bin/php $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/msmtp:
 	@cp $(STAGE_HACK)/bin/msmtp $@ >/dev/null 2>&1 || true
@@ -1107,7 +1141,7 @@ build: $(BUILD_DIR)/install.ps1 $(BUILD_HACK)/bin/radare2 $(BUILD_HACK)/bin/r2ag
        $(BUILD_HACK)/bin/opj_compress $(BUILD_HACK)/bin/opj_decompress $(BUILD_HACK)/sbin/onvif_srvd $(BUILD_HACK)/bin/upnpc $(BUILD_HACK)/bin/tcpdump $(BUILD_HACK)/bin/strace-log-merge \
        $(BUILD_HACK)/bin/strace $(BUILD_HACK)/bin/sqlite3 $(BUILD_HACK)/bin/sqlcipher $(BUILD_HACK)/bin/pcap-config $(BUILD_HACK)/bin/openssl $(BUILD_HACK)/sbin/msmtpd $(BUILD_HACK)/bin/msmtp $(BUILD_HACK)/bin/joe \
        $(BUILD_HACK)/bin/curl-config $(BUILD_HACK)/bin/curl $(BUILD_HACK)/bin/busybox $(BUILD_HACK)/bin/mosquitto_rr $(BUILD_HACK)/bin/mosquitto_pub $(BUILD_HACK)/bin/mosquitto_sub $(BUILD_HACK)/bin/mosquitto_passwd \
-       $(BUILD_HACK)/sbin/mosquitto $(BUILD_HACK)/etc/version.txt $(BUILD_DIR)/LICENSE.md
+       $(BUILD_HACK)/sbin/mosquitto $(BUILD_HACK)/bin/php $(BUILD_HACK)/etc/version.txt $(BUILD_DIR)/LICENSE.md
 	
 build-clean:
 	@rm -rf $(BUILD_DIR)
@@ -1136,7 +1170,7 @@ mrproper: staging-clean packages-clean toolchain-clean build-clean
 
 mrproper-full: download-clean mrproper
 	
-clean: $(RADARE2_CLEAN) $(GLIBC_CLEAN) $(KERNEL_CLEAN) $(LIBEXECINFO_CLEAN) $(FFMPEG_CLEAN) $(OPUS_CLEAN) $(OPENJPEG_CLEAN) $(LIBILBC_CLEAN) $(LIBGPG_ERROR_CLEAN) $(GMP_CLEAN) $(LIBGCRYPT_CLEAN) onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
+clean: $(RADARE2_CLEAN) $(GLIBC_CLEAN) $(KERNEL_CLEAN) $(PHP_CLEAN) $(LIBEXECINFO_CLEAN) $(FFMPEG_CLEAN) $(OPUS_CLEAN) $(OPENJPEG_CLEAN) $(LIBILBC_CLEAN) $(LIBGPG_ERROR_CLEAN) $(GMP_CLEAN) $(LIBGCRYPT_CLEAN) onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
 
 update-version-major:
 	@$(SRC_DIR)/bin/update-version.sh --major
@@ -1215,8 +1249,12 @@ without-opus:
 
 without-opus-clean:
 
+without-php:
+
+without-php-clean:
+
 all-optional:
-	@make all WITH_RADARE2=1 WITH_FFMPEG=1 WITH_KERNEL=1
+	@make all WITH_RADARE2=1 WITH_FFMPEG=1 WITH_KERNEL=1 WITH_PHP=1
 
 install: all
 	@cd $(BUILD_DIR); sh install.sh
