@@ -32,7 +32,7 @@ jobs:
       - name: Starte Build-Test mit gclibc
         run: |
           cd SOURCE
-          make build-test-gclibc
+          make build-test-glibc
           
       - name: Starte Build-Test mit musl
         run: |
