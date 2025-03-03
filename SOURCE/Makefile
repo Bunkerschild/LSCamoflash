@@ -966,13 +966,13 @@ $(PACKAGES_DIR)/$(PYTHON)/python.host.clean:
 	@touch $@
 	
 $(PACKAGES_DIR)/$(PYTHON)/config.status: $(HOST_DIR)/bin/python3 $(PACKAGES_DIR)/$(PYTHON)/python.host.clean
-	@cd $(PACKAGES_DIR)/$(PYTHON); PKG_CONFIG_PATH=$(STAGING_DIR)/$(SDROOT)/lib/pkgconfig:$(TOOLCHAIN_PATH)/lib/pkgconfig:$(TOOLCHAIN_PATH)/share/pkgconfig ./configure --disable-ipv6 \
-	--prefix=$(SDROOT) --host=$(HOST) --build=arm --datarootdir=$(SDROOT)/usr/share --with-openssl=$(STAGING_DIR)/$(SDROOT)/include/openssl --with-build-python=$(HOST_DIR)/bin/python3.13 \
-	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include --sysroot=$(TOOLCHAIN_PATH)/$(HOST)/sysroot -L$(STAGING_DIR)/$(SDROOT)/lib"
+	@cd $(PACKAGES_DIR)/$(PYTHON); PKG_CONFIG_PATH=$(STAGING_DIR)/$(SDROOT)/lib/pkgconfig:$(TOOLCHAIN_PATH)/lib/pkgconfig:$(TOOLCHAIN_PATH)/share/pkgconfig ac_cv_file__dev_ptmx=no ac_cv_file__dev_ptc=no \
+	./configure --disable-ipv6 --prefix=$(SDROOT) --host=$(HOST) --build=arm --datarootdir=$(SDROOT)/usr/share --with-openssl=$(STAGING_DIR)/$(SDROOT)/include/openssl --with-build-python=$(HOST_DIR)/bin/python3.13 \
+	--no-warn-script-location CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include --sysroot=$(TOOLCHAIN_PATH)/$(HOST)/sysroot -L$(STAGING_DIR)/$(SDROOT)/lib"
 	@touch $@
 
 $(PACKAGES_DIR)/$(PYTHON)/python: $(PACKAGES_DIR)/$(PYTHON)/config.status
-	@make -C $(PACKAGES_DIR)/$(PYTHON) -j$(nproc)
+	@make -C $(PACKAGES_DIR)/$(PYTHON) -j$(nproc) LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(STAGING_DIR)/$(SDROOT)/usr/local/lib"
 	@touch $@
 	
 $(STAGING_DIR)/$(SDROOT)/bin/python: $(PACKAGES_DIR)/$(PYTHON)/python
