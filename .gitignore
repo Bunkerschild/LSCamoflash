@@ -51,6 +51,7 @@ SOURCE/packages
 SOURCE/staging
 SOURCE/toolchain
 SOURCE/build
+SOURCE/host
 SOURCE/.unpack
 
 # Generated files
