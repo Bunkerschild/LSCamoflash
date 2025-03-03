@@ -164,7 +164,7 @@ else ifeq ($(USE_LIBC), musl)
 	TOOLCHAIN_PATH := $(TOOLCHAIN_MUSL_PATH)
 endif
 PKG_CONFIG_PATH := $(TOOLCHAIN_PATH)/lib/pkgconfig:$(TOOLCHAIN_PATH)/share/pkgconfig
-PATH := $(TOOLCHAIN_PATH)/bin:$(TOOLCHAIN_UCLIBC_PATH)/bin:$(TOOLCHAIN_GLIBC_PATH)/bin:$(TOOLCHAIN_MUSL_PATH)/bin:$(PATH)
+PATH := $(HOST_DIR)/bin:$(TOOLCHAIN_PATH)/bin:$(TOOLCHAIN_UCLIBC_PATH)/bin:$(TOOLCHAIN_GLIBC_PATH)/bin:$(TOOLCHAIN_MUSL_PATH)/bin:$(PATH)
 
 # GLIBC toolchain
 C_UCLIBC := $(TOOLCHAIN_UCLIBC_PATH)/bin/$(HOST_UCLIBC)-gcc
@@ -950,7 +950,7 @@ php-clean:
 	@make $(PACKAGES_DIR)/$(PHP) clean
 	
 $(PACKAGES_DIR)/$(PYTHON)/config.status.host:
-	@cd $(PACKAGES_DIR)/$(PYTHON); $(FORCE_TOOLCHAIN_HOST) ./configure --prefix=/
+	@cd $(PACKAGES_DIR)/$(PYTHON); $(FORCE_TOOLCHAIN_HOST) ./configure --prefix=/ --no-warn-script-location
 	@touch $@
 
 $(PACKAGES_DIR)/$(PYTHON)/python.host: $(PACKAGES_DIR)/$(PYTHON)/config.status.host
@@ -962,11 +962,11 @@ $(HOST_DIR)/bin/python3: $(PACKAGES_DIR)/$(PYTHON)/python.host
 	@touch $@
 
 $(PACKAGES_DIR)/$(PYTHON)/python.host.clean:		
-	@$(FORCE_TOOLCHAIN_HOST) make $(PACKAGES_DIR)/$(PYTHON) clean
+	@$(FORCE_TOOLCHAIN_HOST) make -C $(PACKAGES_DIR)/$(PYTHON) clean
 	@touch $@
 	
 $(PACKAGES_DIR)/$(PYTHON)/config.status: $(HOST_DIR)/bin/python3 $(PACKAGES_DIR)/$(PYTHON)/python.host.clean
-	@cd $(PACKAGES_DIR)/$(PYTHON); PKG_CONFIG_PATH=$(STAGING_DIR)/$(SDROOT)/lib/pkgconfig:$(TOOLCHAIN_PATH)/lib/pkgconfig:$(TOOLCHAIN_PATH)/share/pkgconfig ./configure \
+	@cd $(PACKAGES_DIR)/$(PYTHON); PKG_CONFIG_PATH=$(STAGING_DIR)/$(SDROOT)/lib/pkgconfig:$(TOOLCHAIN_PATH)/lib/pkgconfig:$(TOOLCHAIN_PATH)/share/pkgconfig ./configure --disable-ipv6 \
 	--prefix=$(SDROOT) --host=$(HOST) --build=arm --datarootdir=$(SDROOT)/usr/share --with-openssl=$(STAGING_DIR)/$(SDROOT)/include/openssl --with-build-python=$(HOST_DIR)/bin/python3.13 \
 	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include --sysroot=$(TOOLCHAIN_PATH)/$(HOST)/sysroot -L$(STAGING_DIR)/$(SDROOT)/lib"
 	@touch $@
