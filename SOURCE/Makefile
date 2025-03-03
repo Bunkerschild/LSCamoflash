@@ -1060,7 +1060,6 @@ $(BUILD_DIR)/install.ps1: $(BUILD_DIR)
 	@find $(BUILD_HACK)/lib -name "*.a" -exec rm {} \;
 	@find $(BUILD_HACK)/lib -name "*.la" -exec rm {} \;
 	@find $(BUILD_HACK)/lib -name "*.pc" -exec rm {} \;
-	@find $(BUILD_HACK)/lib -name "*.py" -exec rm {} \;
 	@find $(BUILD_HACK)/lib -name "*.cmake" -exec rm {} \;
 	@rm -rf $(BUILD_HACK)/usr/share/locale >/dev/null 2>&1 || true
 	@rm -rf $(BUILD_HACK)/lib/modules/$(KERNEL_VERSION)/build >/dev/null 2>&1 || true
@@ -1102,14 +1101,25 @@ $(BUILD_HACK)/bin/joe:
 	@cp $(STAGE_HACK)/bin/joe $(BUILD_HACK)/bin/jstar >/dev/null 2>&1 || true
 	@cp $(STAGE_HACK)/bin/joe $@ >/dev/null 2>&1 || true
 
+$(BUILD_HACK)/bin/python:
+	@cp $(STAGE_HACK)/bin/python3.13 $(BUILD_HACK)/bin >/dev/null 2>&1 || true
+	@cp $(STAGE_HACK)/bin/python3.13 $@ >/dev/null 2>&1 || true
+
+$(BUILD_HACK)/bin/idle:
+	@cp $(STAGE_HACK)/bin/idle3.13 $@ >/dev/null 2>&1 || true
+
+$(BUILD_HACK)/bin/pydoc:
+	@cp $(STAGE_HACK)/bin/pydoc3.13 $@ >/dev/null 2>&1 || true
+
+$(BUILD_HACK)/bin/pip:
+	@cp -aL $(STAGING_DIR)/$(HOST_DIR)/lib/python3.13/site-packages/* $(BUILD_HACK)/lib/python3.13/site-packages/ >/dev/null 2>&1 || true
+	@cp $(STAGING_DIR)/$(HOST_DIR)/bin/pip3.13 $@ >/dev/null 2>&1 || true
+
 $(BUILD_HACK)/bin/php:
 	@cp $(STAGE_HACK)/bin/php $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/php-cgi:
 	@cp $(STAGE_HACK)/bin/php-cgi $@ >/dev/null 2>&1 || true
-
-$(BUILD_HACK)/bin/php-config:
-	@cp $(STAGE_HACK)/bin/php-config $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/phpdbg:
 	@cp $(STAGE_HACK)/bin/phpdbg $@ >/dev/null 2>&1 || true
@@ -1227,7 +1237,8 @@ build: $(BUILD_DIR)/install.ps1 $(BUILD_HACK)/bin/radare2 $(BUILD_HACK)/bin/r2ag
        $(BUILD_HACK)/bin/opj_compress $(BUILD_HACK)/bin/opj_decompress $(BUILD_HACK)/sbin/onvif_srvd $(BUILD_HACK)/bin/upnpc $(BUILD_HACK)/bin/tcpdump $(BUILD_HACK)/bin/strace-log-merge \
        $(BUILD_HACK)/bin/strace $(BUILD_HACK)/bin/sqlite3 $(BUILD_HACK)/bin/sqlcipher $(BUILD_HACK)/bin/pcap-config $(BUILD_HACK)/bin/openssl $(BUILD_HACK)/sbin/msmtpd $(BUILD_HACK)/bin/msmtp $(BUILD_HACK)/bin/joe \
        $(BUILD_HACK)/bin/curl-config $(BUILD_HACK)/bin/curl $(BUILD_HACK)/bin/busybox $(BUILD_HACK)/bin/mosquitto_rr $(BUILD_HACK)/bin/mosquitto_pub $(BUILD_HACK)/bin/mosquitto_sub $(BUILD_HACK)/bin/mosquitto_passwd \
-       $(BUILD_HACK)/sbin/mosquitto $(BUILD_HACK)/bin/php $(BUILD_HACK)/bin/php-cgi $(BUILD_HACK)/bin/php-config $(BUILD_HACK)/bin/phpdbg $(BUILD_HACK)/bin/phpize $(BUILD_HACK)/etc/version.txt $(BUILD_DIR)/LICENSE.md
+       $(BUILD_HACK)/sbin/mosquitto $(BUILD_HACK)/bin/php $(BUILD_HACK)/bin/php-cgi $(BUILD_HACK)/bin/phpdbg $(BUILD_HACK)/bin/phpize $(BUILD_HACK)/bin/python $(BUILD_HACK)/bin/pydoc \
+       $(BUILD_HACK)/bin/idle $(BUILD_HACK)/bin/pip $(BUILD_HACK)/etc/version.txt $(BUILD_DIR)/LICENSE.md
 	
 build-clean:
 	@rm -rf $(BUILD_DIR)
