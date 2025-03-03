@@ -894,13 +894,15 @@ kernel-clean:
 	@make -C $(PACKAGES_DIR)/$(KERNEL) clean mrproper
 
 $(PACKAGES_DIR)/$(PHP)/config.status:
-	@cd $(PACKAGES_DIR)/$(PHP); ./configure --prefix=$(SDROOT) --host=$(HOST) --enable-embed=shared --enable-pcntl --enable-sockets --enable-sysvmsg --enable-sysvsem --enable-sysvshm \
-	--with-zlib --with-curl --with-gmp --with-pear --with-openssl --with-openssl-legacy-provider --with-openssl-argon2 --with-sqlite3 --disable-pdo --with-password-argon2 \
-	CFLAGS="-nostdinc -I$(STAGING_DIR)/$(SDROOT)/usr/include -O2 --sysroot=$(TOOLCHAIN_PATH)/$(HOST)/sysroot" LDFLAGS="-nostdlib"
+	@cd $(PACKAGES_DIR)/$(PHP); PKG_CONFIG_PATH=$(STAGING_DIR)/$(SDROOT)/lib/pkgconfig:$(TOOLCHAIN_PATH)/lib/pkgconfig:$(TOOLCHAIN_PATH)/share/pkgconfig ./configure --prefix=$(SDROOT) --host=$(HOST) \
+	--datarootdir=$(SDROOT)/usr/share --disable-all --enable-sockets --enable-sysvmsg --enable-sysvsem --enable-sysvshm \
+	--with-zlib=$(STAGING_DIR)/$(SDROOT)/include --with-openssl=$(STAGING_DIR)/$(SDROOT)/include/openssl \
+	--with-openssl-legacy-provider --with-sqlite3=$(STAGING_DIR)/$(SDROOT)/include --disable-pdo --with-curl=$(STAGING_DIR)/$(SDROOT)/include/curl \
+	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include --sysroot=$(TOOLCHAIN_PATH)/$(HOST)/sysroot -L$(STAGING_DIR)/$(SDROOT)/lib"
 	@touch $@
 
 $(PACKAGES_DIR)/$(PHP)/php: $(PACKAGES_DIR)/$(PHP)/config.status
-	@make -C $(PACKAGES_DIR)/$(PHP) -j$(nproc) CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/usr/include -O2"
+	@make -C $(PACKAGES_DIR)/$(PHP) -j$(nproc)
 	@touch $@
 	
 $(STAGING_DIR)/$(SDROOT)/bin/php: $(PACKAGES_DIR)/$(PHP)/php
@@ -1021,7 +1023,7 @@ $(BUILD_HACK)/bin/curl-config:
 
 $(BUILD_HACK)/bin/joe:
 	@cp -aL $(STAGE_HACK)/etc/config/joe $(BUILD_HACK)/etc/config >/dev/null 2>&1 || true
-	@cp -aL $(STATE_HACK)/usr/share/joe $(BUILD_HACK)/usr/share >/dev/null 2>&1 || true
+	@cp -aL $(STAGE_HACK)/usr/share/joe $(BUILD_HACK)/usr/share >/dev/null 2>&1 || true
 	@cp $(STAGE_HACK)/bin/joe $(BUILD_HACK)/bin/rjoe >/dev/null 2>&1 || true
 	@cp $(STAGE_HACK)/bin/joe $(BUILD_HACK)/bin/jmacs >/dev/null 2>&1 || true
 	@cp $(STAGE_HACK)/bin/joe $(BUILD_HACK)/bin/jpico >/dev/null 2>&1 || true
@@ -1030,6 +1032,18 @@ $(BUILD_HACK)/bin/joe:
 
 $(BUILD_HACK)/bin/php:
 	@cp $(STAGE_HACK)/bin/php $@ >/dev/null 2>&1 || true
+
+$(BUILD_HACK)/bin/php-cgi:
+	@cp $(STAGE_HACK)/bin/php-cgi $@ >/dev/null 2>&1 || true
+
+$(BUILD_HACK)/bin/php-config:
+	@cp $(STAGE_HACK)/bin/php-config $@ >/dev/null 2>&1 || true
+
+$(BUILD_HACK)/bin/phpdbg:
+	@cp $(STAGE_HACK)/bin/phpdbg $@ >/dev/null 2>&1 || true
+
+$(BUILD_HACK)/bin/phpize:
+	@cp $(STAGE_HACK)/bin/phpize $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/msmtp:
 	@cp $(STAGE_HACK)/bin/msmtp $@ >/dev/null 2>&1 || true
@@ -1141,7 +1155,7 @@ build: $(BUILD_DIR)/install.ps1 $(BUILD_HACK)/bin/radare2 $(BUILD_HACK)/bin/r2ag
        $(BUILD_HACK)/bin/opj_compress $(BUILD_HACK)/bin/opj_decompress $(BUILD_HACK)/sbin/onvif_srvd $(BUILD_HACK)/bin/upnpc $(BUILD_HACK)/bin/tcpdump $(BUILD_HACK)/bin/strace-log-merge \
        $(BUILD_HACK)/bin/strace $(BUILD_HACK)/bin/sqlite3 $(BUILD_HACK)/bin/sqlcipher $(BUILD_HACK)/bin/pcap-config $(BUILD_HACK)/bin/openssl $(BUILD_HACK)/sbin/msmtpd $(BUILD_HACK)/bin/msmtp $(BUILD_HACK)/bin/joe \
        $(BUILD_HACK)/bin/curl-config $(BUILD_HACK)/bin/curl $(BUILD_HACK)/bin/busybox $(BUILD_HACK)/bin/mosquitto_rr $(BUILD_HACK)/bin/mosquitto_pub $(BUILD_HACK)/bin/mosquitto_sub $(BUILD_HACK)/bin/mosquitto_passwd \
-       $(BUILD_HACK)/sbin/mosquitto $(BUILD_HACK)/bin/php $(BUILD_HACK)/etc/version.txt $(BUILD_DIR)/LICENSE.md
+       $(BUILD_HACK)/sbin/mosquitto $(BUILD_HACK)/bin/php $(BUILD_HACK)/bin/php-cgi $(BUILD_HACK)/bin/php-config $(BUILD_HACK)/bin/phpdbg $(BUILD_HACK)/bin/phpize $(BUILD_HACK)/etc/version.txt $(BUILD_DIR)/LICENSE.md
 	
 build-clean:
 	@rm -rf $(BUILD_DIR)
