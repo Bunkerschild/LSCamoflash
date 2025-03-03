@@ -936,12 +936,12 @@ $(PACKAGES_DIR)/$(PHP)/config.status:
 	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include --sysroot=$(TOOLCHAIN_PATH)/$(HOST)/sysroot -L$(STAGING_DIR)/$(SDROOT)/lib"
 	@touch $@
 
-$(PACKAGES_DIR)/$(PHP)/php: $(PACKAGES_DIR)/$(PHP)/config.status
+$(PACKAGES_DIR)/$(PHP)/sapi/cli/php: $(PACKAGES_DIR)/$(PHP)/config.status
 	@make -C $(PACKAGES_DIR)/$(PHP) -j$(nproc)
 	@touch $@
 	
-$(STAGING_DIR)/$(SDROOT)/bin/php: $(PACKAGES_DIR)/$(PHP)/php
-	@make -C $(PACKAGES_DIR)/$(PHP) install PREFIX=$(SDROOT) DESTDIR=$(STAGING_DIR)
+$(STAGING_DIR)/$(SDROOT)/bin/php: $(PACKAGES_DIR)/$(PHP)/sapi/cli/php
+	@make -C $(PACKAGES_DIR)/$(PHP) install INSTALL_ROOT=$(STAGING_DIR)
 	@touch $@
 	
 php: $(STAGING_DIR)/$(SDROOT)/bin/php
@@ -993,7 +993,7 @@ $(PACKAGES_DIR)/$(RADARE2)/plugins.cfg: $(PACKAGES_DIR)/$(RADARE2)/mk/$(HOST_UCL
 	@cd $(PACKAGES_DIR)/$(RADARE2); $(FORCE_TOOLCHAIN_UCLIBC) ./configure --host=$(HOST_UCLIBC) --with-compiler=$(HOST_UCLIBC)-gcc \
 	--prefix=$(SDROOT) --includedir=$(SDROOT)/usr/include --datadir=$(SDROOT)/usr/share --with-static-themes --with-ssl CROSS_ROOT=$(TOOLCHAIN_UCLIBC_PATH)/bin \
 	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/usr/include" \
-	LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/lib -L$(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/usr/lib -lssl -lz -lexecinfo -latomic -luClibc-1.0.34"
+	LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/lib -L$(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/usr/lib -lssl -lz -lexecinfo -latomic"
 	@touch $@
 
 $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h: $(PACKAGES_DIR)/$(RADARE2)/plugins.cfg
@@ -1003,7 +1003,7 @@ $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h: $(PACKAGES_DIR)/$(RADARE2)/plugi
 $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2: $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h
 	@cp $(STAGING_DIR)/$(SDROOT)/include/execinfo.h $(PACKAGES_DIR)/$(RADARE2)/libr/include
 	@$(FORCE_TOOLCHAIN_UCLIBC) make -C $(PACKAGES_DIR)/$(RADARE2) -j$(nproc) CROSS_ROOT=$(TOOLCHAIN_UCLIBC_PATH)/bin \
-	CPPFLAGS="-I$(PACKAGES_DIR)/$(RADARE2)/shlr/ar -I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/usr/include -L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(TOOLCHAIN_UCLIBC_PATH)/$(HOST_GBLIC)/sysroot/lib -L$(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/usr/lib -lexecinfo -latomic -luClibc-1.0.34"
+	CPPFLAGS="-I$(PACKAGES_DIR)/$(RADARE2)/shlr/ar -I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/usr/include -L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(TOOLCHAIN_UCLIBC_PATH)/$(HOST_GBLIC)/sysroot/lib -L$(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/usr/lib -lexecinfo -latomic"
 	
 $(STAGING_DIR)/$(SDROOT)/bin/radare2: $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2
 	@make -C $(PACKAGES_DIR)/$(RADARE2) install DESTDIR=$(STAGING_DIR) CROSS_ROOT=$(TOOLCHAIN_UCLIBC_PATH)/bin
