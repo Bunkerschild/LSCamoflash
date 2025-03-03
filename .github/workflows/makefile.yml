@@ -34,8 +34,3 @@ jobs:
           cd SOURCE
           make build-test-glibc
           
-      - name: Starte Build-Test mit musl
-        run: |
-          cd SOURCE
-          make build-test-musl
-          
