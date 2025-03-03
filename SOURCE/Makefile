@@ -840,6 +840,7 @@ glibc-clean:
 	
 $(STAGING_DIR)/$(SDROOT)/lib/libuClibc-1.0.34.so:
 	@cp -a $(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/lib/* $(STAGING_DIR)/$(SDROOT)/lib/
+	@cp -a $(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/usr/lib/* $(STAGING_DIR)/$(SDROOT)/lib/
 	@touch $@
 	
 staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif opus openjpeg libilbc libgpg-error gmp libgcrypt ffmpeg libexecinfo kernel glibc radare2 $(STAGING_DIR)/$(SDROOT)/lib/libuClibc-1.0.34.so
