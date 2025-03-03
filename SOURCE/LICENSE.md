@@ -74,6 +74,10 @@ This project includes various third-party software packages, each with its own l
   Quelle: [https://www.genivia.com/products/gsoap/](https://www.genivia.com/products/gsoap/)
 
 ## Utilities
+- **php (8.4.4)**  
+  Lizenz: PHP-License Version 3.01
+  Quelle: [https://www.php.net](https://www.php.net)
+
 - **sqlite (3.45.2)**  
   Lizenz: Public Domain  
   Quelle: [https://www.sqlite.org](https://www.sqlite.org)
