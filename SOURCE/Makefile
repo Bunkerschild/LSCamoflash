@@ -784,6 +784,39 @@ kernel: $(STAGING_DIR)/$(SDROOT)/.kernelmodules $(STAGING_DIR)/$(SDROOT)/.kernel
 kernel-clean:
 	@make -C $(PACKAGES_DIR)/$(KERNEL) clean mrproper
 
+# Force radare2 to use uclibc
+$(PACKAGES_DIR)/$(RADARE2)/mk/$(HOST_UCLIBC)-gcc.mk:
+	@cp $(SRC_DIR)/patches/$(RADARE2)/$(HOST_UCLIBC)-gcc.mk $(PACKAGES_DIR)/$(RADARE2)/mk
+	@touch $@
+
+$(PACKAGES_DIR)/$(RADARE2)/plugins.cfg: $(PACKAGES_DIR)/$(RADARE2)/mk/$(HOST_UCLIBC)-gcc.mk
+	@cd $(PACKAGES_DIR)/$(RADARE2); $(FORCE_TOOLCHAIN_UCLIBC) ./configure --host=$(HOST_UCLIBC) --with-compiler=$(HOST_UCLIBC)-gcc \
+	--prefix=$(SDROOT) --includedir=$(SDROOT)/usr/include --datadir=$(SDROOT)/usr/share --with-static-themes --with-ssl CROSS_ROOT=$(TOOLCHAIN_UCLIBC_PATH)/bin \
+	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/usr/include" \
+	LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/lib -L$(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/usr/lib -lssl -lz -lexecinfo -latomic -luClibc-1.0.34"
+	@touch $@
+
+$(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h: $(PACKAGES_DIR)/$(RADARE2)/plugins.cfg
+	@cp $(SRC_DIR)/patches/$(RADARE2)/fenv.h $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h
+	@touch $@
+
+$(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2: $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h
+	@cp $(STAGING_DIR)/$(SDROOT)/include/execinfo.h $(PACKAGES_DIR)/$(RADARE2)/libr/include
+	@$(FORCE_TOOLCHAIN_UCLIBC) make -C $(PACKAGES_DIR)/$(RADARE2) -j$(nproc) CROSS_ROOT=$(TOOLCHAIN_UCLIBC_PATH)/bin \
+	CPPFLAGS="-I$(PACKAGES_DIR)/$(RADARE2)/shlr/ar -I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/usr/include -L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(TOOLCHAIN_UCLIBC_PATH)/$(HOST_GBLIC)/sysroot/lib -L$(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/usr/lib -lexecinfo -latomic -luClibc-1.0.34"
+	
+$(STAGING_DIR)/$(SDROOT)/bin/radare2: $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2
+	@make -C $(PACKAGES_DIR)/$(RADARE2) install DESTDIR=$(STAGING_DIR) CROSS_ROOT=$(TOOLCHAIN_UCLIBC_PATH)/bin
+	@rm $(STAGING_DIR)/$(SDROOT)/lib/radare2/5.9.8/5.9.8 || true
+	@rm $(STAGING_DIR)/$(SDROOT)/lib/radare2/last/5.9.8 || true
+	@touch $@
+	
+radare2: $(STAGING_DIR)/$(SDROOT)/bin/radare2
+
+radare2-clean:
+	@make -C $(PACKAGES_DIR)/$(RADARE2) mrproper || true
+	@rm $(STAGING_DIR)/$(SDROOT)/bin/radare2 || true
+
 $(PACKAGES_DIR)/$(GLIBC)/build/config.status: $(STAGING_DIR)/$(SDROOT)/.kernelheaders
 	@mkdir $(PACKAGES_DIR)/$(GLIBC)/build || true
 	@cd $(PACKAGES_DIR)/$(GLIBC)/build; ../configure --prefix=$(SDROOT) --host=$(HOST) --disable-timezone-tools --enable-kernel=4.4.192 \
@@ -800,45 +833,16 @@ $(STAGING_DIR)/$(SDROOT)/lib/libc.a: $(PACKAGES_DIR)/$(GLIBC)/build/libc.a
 	@make -C $(PACKAGES_DIR)/$(GLIBC)/build install PREFIX=$(SDROOT) DESTDIR=$(STAGING_DIR)
 	@touch $@
 	
-# Force radare2 to use glibc
-$(PACKAGES_DIR)/$(RADARE2)/mk/$(HOST_GLIBC)-gcc.mk:
-	@cp $(SRC_DIR)/patches/$(RADARE2)/$(HOST_GLIBC)-gcc.mk $(PACKAGES_DIR)/$(RADARE2)/mk
-	@touch $@
-
-$(PACKAGES_DIR)/$(RADARE2)/plugins.cfg: $(PACKAGES_DIR)/$(RADARE2)/mk/$(HOST_GLIBC)-gcc.mk
-	@cd $(PACKAGES_DIR)/$(RADARE2); $(FORCE_TOOLCHAIN_GLIBC) ./configure --host=$(HOST_GLIBC) --with-compiler=$(HOST_GLIBC)-gcc \
-	--prefix=$(SDROOT) --includedir=$(SDROOT)/usr/include --datadir=$(SDROOT)/usr/share --with-static-themes --with-ssl CROSS_ROOT=$(TOOLCHAIN_GLIBC_PATH)/bin \
-	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(TOOLCHAIN_GLIBC_PATH)/$(HOST_GLIBC)/sysroot/usr/include" \
-	LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(TOOLCHAIN_GLIBC_PATH)/$(HOST_GLIBC)/sysroot/lib -L$(TOOLCHAIN_GLIBC_PATH)/$(HOST_GLIBC)/sysroot/usr/lib -lssl -lz -lexecinfo -latomic -lc"
-	@touch $@
-
-$(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h: $(PACKAGES_DIR)/$(RADARE2)/plugins.cfg
-	@cp $(SRC_DIR)/patches/$(RADARE2)/fenv.h $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h
-	@touch $@
-
-$(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2: $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h
-	@cp $(STAGING_DIR)/$(SDROOT)/include/execinfo.h $(PACKAGES_DIR)/$(RADARE2)/libr/include
-	@$(FORCE_TOOLCHAIN_GLIBC) make -C $(PACKAGES_DIR)/$(RADARE2) -j$(nproc) CROSS_ROOT=$(TOOLCHAIN_GLIBC_PATH)/bin \
-	CPPFLAGS="-I$(PACKAGES_DIR)/$(RADARE2)/shlr/ar -I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(TOOLCHAIN_GLIBC_PATH)/$(HOST_GLIBC)/sysroot/usr/include -L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(TOOLCHAIN_GLIBC_PATH)/$(HOST_GBLIC)/sysroot/lib -L$(TOOLCHAIN_GLIBC_PATH)/$(HOST_GLIBC)/sysroot/usr/lib -lexecinfo -latomic -lc"
-	
-$(STAGING_DIR)/$(SDROOT)/bin/radare2: $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2
-	@make -C $(PACKAGES_DIR)/$(RADARE2) install DESTDIR=$(STAGING_DIR) CROSS_ROOT=$(TOOLCHAIN_GLIBC_PATH)/bin
-	@rm $(STAGING_DIR)/$(SDROOT)/lib/radare2/5.9.8/5.9.8 || true
-	@rm $(STAGING_DIR)/$(SDROOT)/lib/radare2/last/5.9.8 || true
-	@touch $@
-	
-radare2: $(STAGING_DIR)/$(SDROOT)/bin/radare2
-
-radare2-clean:
-	@make -C $(PACKAGES_DIR)/$(RADARE2) mrproper || true
-	@rm $(STAGING_DIR)/$(SDROOT)/bin/radare2 || true
-
 glibc: $(STAGING_DIR)/$(SDROOT)/lib/libc.a
 
 glibc-clean:
 	@rm -rf $(PACKAGES_DIR)/$(GLIBC)/build
 	
-staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif opus openjpeg libilbc libgpg-error gmp libgcrypt ffmpeg libexecinfo kernel glibc radare2
+$(STAGING_DIR)/$(SDROOT)/lib/libuClibc-1.0.34.so:
+	@cp -a $(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/lib/* $(STAGING_DIR)/$(SDROOT)/lib/
+	@touch $@
+	
+staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif opus openjpeg libilbc libgpg-error gmp libgcrypt ffmpeg libexecinfo kernel glibc radare2 $(STAGING_DIR)/$(SDROOT)/lib/libuClibc-1.0.34.so
 
 $(BUILD_DIR)/install.ps1: $(BUILD_DIR)
 	@cp -aL $(SRC_DIR)/sdcard/* $(BUILD_DIR)
