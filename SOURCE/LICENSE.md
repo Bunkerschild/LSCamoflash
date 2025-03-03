@@ -78,6 +78,10 @@ This project includes various third-party software packages, each with its own l
   Lizenz: PHP-License Version 3.01
   Quelle: [https://www.php.net](https://www.php.net)
 
+- **python (3.13.2)**  
+  Lizenz: Python Software Foundation License
+  Quelle: [https://www.python.org](https://www.python.org)
+
 - **sqlite (3.45.2)**  
   Lizenz: Public Domain  
   Quelle: [https://www.sqlite.org](https://www.sqlite.org)
