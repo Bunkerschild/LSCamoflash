@@ -364,6 +364,7 @@ all: download toolchain packages staging build
 download: $(DOWNLOAD_DIR) $(patsubst %,$(DOWNLOAD_DIR)/%,$(notdir $(URLS)))
 
 $(TOOLCHAIN_UCLIBC_DIR)/buildroot.config: $(TOOLCHAIN_UCLIBC_DIR)
+	@echo "Extracting toolchain $(TOOLCHAIN_UCLIBC)"
 	@tar -xf $(DOWNLOAD_DIR)/$(TOOLCHAIN_UCLIBC).tar.bz2 -C $(TOOLCHAIN_UCLIBC_DIR) --strip-components=1
 	@cp /usr/bin/autom4te $(AUTOM4TE_UCLIBC)
 	@cp /usr/bin/aclocal $(ACLOCAL_UCLIBC)
@@ -375,6 +376,7 @@ $(TOOLCHAIN_UCLIBC_DIR)/buildroot.config: $(TOOLCHAIN_UCLIBC_DIR)
 	@touch $@
 	
 $(TOOLCHAIN_GLIBC_DIR)/buildroot.config: $(TOOLCHAIN_GLIBC_DIR)
+	@echo "Extracting toolchain $(TOOLCHAIN_GLIBC)"
 	@tar -xf $(DOWNLOAD_DIR)/$(TOOLCHAIN_GLIBC).tar.bz2 -C $(TOOLCHAIN_GLIBC_DIR) --strip-components=1
 	@cp /usr/bin/autom4te $(AUTOM4TE_GLIBC)
 	@cp /usr/bin/aclocal $(ACLOCAL_GLIBC)
@@ -386,6 +388,7 @@ $(TOOLCHAIN_GLIBC_DIR)/buildroot.config: $(TOOLCHAIN_GLIBC_DIR)
 	@touch $@
 	
 $(TOOLCHAIN_MUSL_DIR)/buildroot.config: $(TOOLCHAIN_MUSL_DIR)
+	@echo "Extracting toolchain $(TOOLCHAIN_MUSL)"
 	@tar -xf $(DOWNLOAD_DIR)/$(TOOLCHAIN_MUSL).tar.bz2 -C $(TOOLCHAIN_MUSL_DIR) --strip-components=1
 	@cp /usr/bin/autom4te $(AUTOM4TE_MUSL)
 	@cp /usr/bin/aclocal $(ACLOCAL_MUSL)
@@ -408,7 +411,8 @@ $(PACKAGES_DIR)/cacert.pem: $(PACKAGES_DIR)
 	@for file in $(DOWNLOAD_DIR)/*; do \
 	  if [ "$$file" != "$(DOWNLOAD_DIR)/$(TOOLCHAIN_UCLIBC).tar.bz2" -a "$$file" != "$(DOWNLOAD_DIR)/$(TOOLCHAIN_GLIBC).tar.bz2" -a "$$file" != "$(DOWNLOAD_DIR)/$(TOOLCHAIN_MUSL).tar.bz2" -a "$$file" != "$(DOWNLOAD_DIR)/cacert.pem" ]; then \
 	  	cd $(PACKAGES_DIR); \
-	  	unzip -o $$file 2>/dev/null || tar -xvf $$file -C $(PACKAGES_DIR) || echo "Skipping $$file"; \
+	  	echo  "Extracting package $$file"; \
+	  	unzip -oqq $$file 2>/dev/null || tar -xf $$file -C $(PACKAGES_DIR) || echo "skipped"; \
 	  fi; \
 	done
 	@touch $@
@@ -1159,14 +1163,14 @@ release: LSCamoflash-$(VERSION)-$(USE_LIBC).tar.gz
 update: update-$(VERSION)-$(USE_LIBC).tgz
 
 build-test-glibc:
-	@make USE_LIBC=glibc mrproper-full download toolchain packages staging mrproper
+	@make USE_LIBC=glibc mrproper download toolchain packages staging
 
 build-test-uclibc:
-	@make USE_LIBC=uclibc mrproper-full download toolchain packages staging mrproper
+	@make USE_LIBC=uclibc mrproper download toolchain packages staging
 
 build-test-musl:
-	@make USE_LIBC=musl mrproper-full download toolchain packages staging mrproper
-	
+	@make USE_LIBC=musl mrproper download toolchain packages staging
+
 without-radare2:
 
 without-radare2-clean:
@@ -1210,6 +1214,9 @@ without-openjpeg-clean:
 without-opus:
 
 without-opus-clean:
+
+all-optional:
+	@make all WITH_RADARE2=1 WITH_FFMPEG=1 WITH_KERNEL=1
 
 install: all
 	@cd $(BUILD_DIR); sh install.sh
