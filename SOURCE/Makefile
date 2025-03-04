@@ -1180,7 +1180,8 @@ $(BUILD_HACK)/bin/opj_decompress:
 	@cp $(STAGE_HACK)/bin/opj_decompress $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/radare2:
-	@cp -aL $(STATE_HACK)/usr/share/radare2 $(BUILD_HACK)/usr/share >/dev/null 2>&1 || true
+	@mkdir -p $(BUILD_HACK)/share/radare2/5.9.8 >/dev/null 2>&1 || true
+	@cp -aL $(STATE_HACK)/usr/share/radare2/5.9.4/* $(BUILD_HACK)/share/radare2/5.9.8/ >/dev/null 2>&1 || true
 	@cp $(STAGE_HACK)/bin/radare2 $(BUILD_HACK)/bin/r2 >/dev/null 2>&1 || true
 	@cp $(STAGE_HACK)/bin/radare2 $(BUILD_HACK)/bin/r2p >/dev/null 2>&1 || true
 	@cp $(STAGE_HACK)/bin/radare2 $@ >/dev/null 2>&1 || true
