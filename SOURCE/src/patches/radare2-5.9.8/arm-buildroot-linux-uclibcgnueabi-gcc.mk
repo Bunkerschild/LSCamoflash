@@ -2,6 +2,7 @@ ARCH=arm
 CROSS_ROOT := toolchain/uclibc/bin
 CROSS_TRIPLET=arm-buildroot-linux-uclibcgnueabi
 CROSS=${CROSS_ROOT}/${CROSS_TRIPLET}-
+XTRA_LDFLAGS :=
 
 CC=${CROSS}gcc
 USERCC=${CROSS}gcc
@@ -14,7 +15,7 @@ ONELIB=0
 OSTYPE=gnulinux
 PICFLAGS=-fPIC -fpic
 CFLAGS+=${PICFLAGS}
-LDFLAGS+=-ldl -pthread -lutil
+LDFLAGS+=-ldl -pthread -lutil $(XTRA_LDFLAGS)
 CC_LIB=${CC} -shared -o
 CFLAGS_INCLUDE=-I
 LDFLAGS_LINK=-l

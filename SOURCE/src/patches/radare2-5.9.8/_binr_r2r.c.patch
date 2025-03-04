@@ -1,0 +1,11 @@
+--- r2r.c.old	2024-11-19 12:38:30.000000000 +0100
++++ r2r.c	2025-03-04 01:15:43.364215172 +0100
+@@ -448,7 +448,7 @@
+ 		R_LOG_ERROR ("Subprocess init failed");
+ 		return -1;
+ 	}
+-	atexit (r2r_subprocess_fini);
++	__aeabi_atexit (r2r_subprocess_fini);
+ 
+ 	char *have_options = r_sys_getenv ("ASAN_OPTIONS");
+ 	if (have_options) {

@@ -990,25 +990,22 @@ $(PACKAGES_DIR)/$(RADARE2)/mk/$(HOST_UCLIBC)-gcc.mk:
 	@touch $@
 
 $(PACKAGES_DIR)/$(RADARE2)/plugins.cfg: $(PACKAGES_DIR)/$(RADARE2)/mk/$(HOST_UCLIBC)-gcc.mk
-	@cd $(PACKAGES_DIR)/$(RADARE2); $(FORCE_TOOLCHAIN_UCLIBC) ./configure --host=$(HOST_UCLIBC) --with-compiler=$(HOST_UCLIBC)-gcc \
-	--prefix=$(SDROOT) --includedir=$(SDROOT)/usr/include --datadir=$(SDROOT)/usr/share --with-static-themes --with-ssl CROSS_ROOT=$(TOOLCHAIN_UCLIBC_PATH)/bin \
-	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/usr/include" \
-	LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/lib -L$(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/usr/lib -lssl -lz -lexecinfo -latomic"
+	@cd $(PACKAGES_DIR)/$(RADARE2); $(FORCE_TOOLCHAIN_UCLIBC) ./configure --host=$(HOST_UCLIBC) --with-compiler=$(HOST_UCLIBC)-gcc --with-capstone-next \
+	--prefix=$(SDROOT) --includedir=$(SDROOT)/usr/include --datadir=$(SDROOT)/usr/share --with-static-themes --with-ssl CROSS_ROOT=$(TOOLCHAIN_UCLIBC_PATH)/bin
 	@touch $@
 
 $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h: $(PACKAGES_DIR)/$(RADARE2)/plugins.cfg
+	@cd $(PACKAGES_DIR)/$(RADARE2)/binr/r2r; patch < $(SRC_DIR)/patches/$(RADARE2)/_binr_r2r.c.patch
 	@cp $(SRC_DIR)/patches/$(RADARE2)/fenv.h $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h
 	@touch $@
 
 $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2: $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h
 	@cp $(STAGING_DIR)/$(SDROOT)/include/execinfo.h $(PACKAGES_DIR)/$(RADARE2)/libr/include
 	@$(FORCE_TOOLCHAIN_UCLIBC) make -C $(PACKAGES_DIR)/$(RADARE2) -j$(nproc) CROSS_ROOT=$(TOOLCHAIN_UCLIBC_PATH)/bin \
-	CPPFLAGS="-I$(PACKAGES_DIR)/$(RADARE2)/shlr/ar -I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/include/openssl -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/usr/include -L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -L$(TOOLCHAIN_UCLIBC_PATH)/$(HOST_GBLIC)/sysroot/lib -L$(TOOLCHAIN_UCLIBC_PATH)/$(HOST_UCLIBC)/sysroot/usr/lib -lexecinfo -latomic"
+	XTRA_LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -lexecinfo -latomic"
 	
 $(STAGING_DIR)/$(SDROOT)/bin/radare2: $(PACKAGES_DIR)/$(RADARE2)/binr/radare2/radare2
 	@make -C $(PACKAGES_DIR)/$(RADARE2) install DESTDIR=$(STAGING_DIR) CROSS_ROOT=$(TOOLCHAIN_UCLIBC_PATH)/bin
-	@rm $(STAGING_DIR)/$(SDROOT)/lib/radare2/5.9.8/5.9.8 || true
-	@rm $(STAGING_DIR)/$(SDROOT)/lib/radare2/last/5.9.8 || true
 	@touch $@
 	
 radare2: $(STAGING_DIR)/$(SDROOT)/bin/radare2
