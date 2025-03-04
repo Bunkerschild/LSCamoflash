@@ -994,8 +994,8 @@ $(PACKAGES_DIR)/$(RADARE2)/mk/$(HOST_UCLIBC)-gcc.mk:
 	@touch $@
 
 $(PACKAGES_DIR)/$(RADARE2)/plugins.cfg: $(PACKAGES_DIR)/$(RADARE2)/mk/$(HOST_UCLIBC)-gcc.mk
-	@cd $(PACKAGES_DIR)/$(RADARE2); $(FORCE_TOOLCHAIN_UCLIBC) ./configure --host=$(HOST_UCLIBC) --with-compiler=$(HOST_UCLIBC)-gcc --with-capstone-next \
-	--prefix=$(SDROOT) --includedir=$(SDROOT)/usr/include --datadir=$(SDROOT)/usr/share --with-static-themes --with-ssl CROSS_ROOT=$(TOOLCHAIN_UCLIBC_PATH)/bin
+	@cd $(PACKAGES_DIR)/$(RADARE2); $(FORCE_TOOLCHAIN_UCLIBC) ./configure --host=$(HOST_UCLIBC) --with-compiler=$(HOST_UCLIBC)-gcc --with-capstone-next --without-gperf \
+	--prefix=$(SDROOT) --etcdir=$(SDROOT)/etc/config --includedir=$(SDROOT)/usr/include --datadir=$(SDROOT)/usr/share --with-ssl CROSS_ROOT=$(TOOLCHAIN_UCLIBC_PATH)/bin
 	@touch $@
 
 $(PACKAGES_DIR)/$(RADARE2)/libr/include/fenv.h: $(PACKAGES_DIR)/$(RADARE2)/plugins.cfg
@@ -1298,10 +1298,10 @@ release: LSCamoflash-$(VERSION)-$(USE_LIBC).tar.gz
 update: update-$(VERSION)-$(USE_LIBC).tgz
 
 build-test-glibc:
-	@make USE_LIBC=glibc mrproper download toolchain packages staging host
+	@make USE_LIBC=glibc WITH_GLIBC=1 WITH_FFMPEG=1 WITH_KERNEL=1 WITH_PHP=1 WITH_PYTHON=1 mrproper download toolchain packages staging host
 
 build-test-uclibc:
-	@make USE_LIBC=uclibc mrproper download toolchain packages staging host
+	@make USE_LIBC=uclibc WITH_RADARE2=1 WITH_FFMPEG=1 WITH_KERNEL=1 WITH_PHP=1 WITH_PYTHON=1 mrproper download toolchain packages staging host
 
 build-test-musl:
 	@make USE_LIBC=musl mrproper download toolchain packages staging host
