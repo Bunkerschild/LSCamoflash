@@ -1299,10 +1299,10 @@ release: LSCamoflash-$(VERSION)-$(USE_LIBC).tar.gz
 update: update-$(VERSION)-$(USE_LIBC).tgz
 
 build-test-glibc:
-	@make USE_LIBC=glibc WITH_GLIBC=1 WITH_FFMPEG=1 WITH_KERNEL=1 WITH_PHP=1 WITH_PYTHON=1 mrproper download toolchain packages staging host
+	@make USE_LIBC=glibc WITH_GLIBC=1 WITH_FFMPEG=1 WITH_KERNEL=1 WITH_PHP=1 mrproper download toolchain packages staging host
 
 build-test-uclibc:
-	@make USE_LIBC=uclibc WITH_RADARE2=1 WITH_FFMPEG=1 WITH_KERNEL=1 WITH_PHP=1 WITH_PYTHON=1 mrproper download toolchain packages staging host
+	@make USE_LIBC=uclibc WITH_RADARE2=1 WITH_FFMPEG=1 WITH_KERNEL=1 WITH_PHP=1 WITH_PYTHON=1mrproper download toolchain packages staging host
 
 build-test-musl:
 	@make USE_LIBC=musl mrproper download toolchain packages staging host
