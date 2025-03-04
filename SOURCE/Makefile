@@ -12,18 +12,22 @@ WITH_OPENJPEG := 0
 WITH_LIBILBC := 0
 WITH_LIBGPG_ERROR := 0
 WITH_LIBGCRYPT := 0
+WITH_LIBEXECINFO := 0
 WITH_GMP := 0
 WITH_PHP := 0
 WITH_PYTHON := 0
 ifeq ($(WITH_RADARE2), 1)
 	RADARE2_BUILD = radare2
 	RADARE2_CLEAN = radare2-clean
-	LIBEXECINFO_BUILD = libexecinfo
-	LIBEXECINFO_CLEAN = libexecinfo-clean
-	WITH_GLIBC = 1
+	WITH_LIBEXECINFO = 1
 else
 	RADARE2_BUILD = without-radare2
 	RADARE2_CLEAN= = without-radare2-clean
+endif
+ifeq ($(WITH_LIBEXECINFO), 1)
+	LIBEXECINFO_BUILD = libexecinfo
+	LIBEXECINFO_CLEAN = libexecinfo-clean
+else
 	LIBEXECINFO_BUILD = without-libexecinfo
 	LIBEXECINFO_CLEAN = without-libexecinfo-clean
 endif
@@ -1042,7 +1046,7 @@ $(STAGING_DIR)/$(SDROOT)/lib/libuClibc-1.0.34.so:
 	@cp -f $(STAGING_DIR)/$(SDROOT)/lib/libgcc_s.so.1 $(STAGING_DIR)/$(SDROOT)/lib/libgcc_s.so
 	@touch $@
 	
-staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif $(OPUS_BUILD) $(OPENJPEG_BUILD) $(LIBILBC_BUILD) $(LIBGPG_ERROR_BUILD) $(GMP_BUILD) $(LIBGCRYPT_BUILD) $(FFMPEG_BUILD) $(LIBEXECINFO_BUILD) $(PHP_BUILD) $(PYTHON_BUILD) $(KERNEL_BUILD) $(GLIBC_BUILD) $(RADARE2_BUILD) $(GLIBC_BUILD) $(STAGING_DIR)/$(SDROOT)/lib/libuClibc-1.0.34.so
+staging: $(STAGING_DIR) libpcap tcpdump openssl zlib joe strace sqlite3 sqlcipher msmtp miniupnpc curl busybox cjson mosquitto gsoap onvif $(OPUS_BUILD) $(OPENJPEG_BUILD) $(LIBILBC_BUILD) $(LIBGPG_ERROR_BUILD) $(GMP_BUILD) $(LIBGCRYPT_BUILD) $(FFMPEG_BUILD) $(LIBEXECINFO_BUILD) $(PHP_BUILD) $(PYTHON_BUILD) $(KERNEL_BUILD) $(RADARE2_BUILD) $(GLIBC_BUILD) $(STAGING_DIR)/$(SDROOT)/lib/libuClibc-1.0.34.so
 
 host: $(HOST_DIR)
 
@@ -1267,7 +1271,7 @@ mrproper: staging-clean packages-clean toolchain-clean host-clean build-clean
 
 mrproper-full: download-clean mrproper
 	
-clean: $(RADARE2_CLEAN) $(GLIBC_CLEAN) $(KERNEL_CLEAN) $(PYTHON_CLEAN) $(PHP_CLEAN) $(LIBEXECINFO_CLEAN) $(FFMPEG_CLEAN) $(OPUS_CLEAN) $(OPENJPEG_CLEAN) $(LIBILBC_CLEAN) $(LIBGPG_ERROR_CLEAN) $(GMP_CLEAN) $(LIBGCRYPT_CLEAN) onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
+clean: $(GLIBC_CLEAN) $(RADARE2_CLEAN) $(KERNEL_CLEAN) $(PYTHON_CLEAN) $(PHP_CLEAN) $(LIBEXECINFO_CLEAN) $(FFMPEG_CLEAN) $(OPUS_CLEAN) $(OPENJPEG_CLEAN) $(LIBILBC_CLEAN) $(LIBGPG_ERROR_CLEAN) $(GMP_CLEAN) $(LIBGCRYPT_CLEAN) onvif-clean gsoap-clean mosquitto-clean cjson-clean busybox-clean curl-clean miniupnpc-clean msmtp-clean sqlcipher-clean sqlite3-clean strace-clean joe-clean zlib-clean openssl-clean tcpdump-clean libpcap-clean
 
 update-version-major:
 	@$(SRC_DIR)/bin/update-version.sh --major
