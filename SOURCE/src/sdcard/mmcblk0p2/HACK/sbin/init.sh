@@ -368,7 +368,7 @@ echo "export hack_custom_conf=\"\$hack/etc/hack_custom.conf\"" >> $sys_temp/anyk
 echo "export commands_conf=\"\$hack/etc/commands.conf\"" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "export busybox_hack=\"$sd_bin/busybox\"" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "export busybox_firmware=\"$sys_bin/busybox\"" >> $sys_temp/anyka_ipc_wrapper.sh
-echo "if [ -f \"/tmp/anky_ipc.lock\" -o -f \"$setup_lock_file\" ]; then" >> $sys_temp/anky_ipc_wrapper.sh
+echo "if [ -f \"/tmp/anyka_ipc.lock\" -o -f \"$setup_lock_file\" ]; then" >> $sys_temp/anky_ipc_wrapper.sh
 echo "  sleep 60" >> $sys_temp/anky_ipc_wrapper.sh
 echo "  exit 2" >> $sys_temp/anky_ipc_wrapper.sh
 echo "else" >> $sys_temp/anky_ipc_wrapper.sh
