@@ -15,6 +15,9 @@ export commands_conf="$hack/etc/commands.conf"
 export busybox_hack="$sd_bin/busybox"
 export busybox_firmware="$sys_bin/busybox"
 
+# Setup lock0
+export setup_lock_file="/tmp/setup.lock"
+
 # Load commands variables
 [ -n "$commands_conf" ] && . $commands_conf && echo "Command variables loaded from: $commands_conf" || exit 1
 
@@ -144,6 +147,7 @@ overlay_dirs="bin sbin lib lib/modules usr/bin usr/sbin usr/share usr/lib usr/lo
 
 # Create overlay filesystem
 if [ ! -f "$sd_overlay/fs.img" ]; then
+	$touch $setup_lock_file
 	echo "Creating overlay filesystem"
 	loop_device="/dev/loop$($losetup -a | $wc -l)"
 	$dd if=/dev/zero of=$sd_overlay/fs.img bs=1k count=32768 && \
@@ -222,6 +226,10 @@ if [ ! -e $sd_backup/filesystem.lst ]; then
 	echo -n "Inventory of files, links and sockets..."
 	$find / -type f -or -type l -or -type s > $sd_backup/filesystem.lst && echo "done" || echo "failed"
 fi
+for i in 1 2 3 4 5 6 7; do
+	echo -n "Creating backup image of mtdblock$i..."
+	$dd if=/dev/mtdblock$i of=$sd_backup/mtdblock$i.img bs=1 >/dev/null 2>&1 && echo "done" || echo "failed"
+done
 
 # Check, whether anyka_ipc exists
 if [ ! -e $sd_bin/anyka_ipc ]; then
@@ -233,11 +241,12 @@ if [ -e $sd_bin/anyka_ipc ]; then
 fi
 
 # Check, whether anyka_ipc_patched exists and if there are patches
-if [ ! -e $sd_bin/anyka_ipc_patched -a -e $sd_bin/anyka_ipc ]; then
+if [ ! -e $sd_bin/anyka_ipc_patched -a -e $sd_bin/anyka_ipc -a "$use_ipc_autopatcher" = "1" ]; then
 	anyka_checksum=`$md5sum -b $sd_bin/anyka_ipc | $awk '{print $1}'`
 	patch_file=`$find $sd_patch -type f -name "$anyka_checksum.ips.gz" | $awk '{print $1}'`
 	
 	if [ "$patch_file" != "" -a -f $patch_file ]; then
+		$touch $setup_lock_file
 		$sd_sbin/apply_ips_patch.sh $patch_file $sd_bin/anyka_ipc $sd_bin/anyka_ipc_patched
 	fi
 fi
@@ -359,7 +368,7 @@ echo "export hack_custom_conf=\"\$hack/etc/hack_custom.conf\"" >> $sys_temp/anyk
 echo "export commands_conf=\"\$hack/etc/commands.conf\"" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "export busybox_hack=\"$sd_bin/busybox\"" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "export busybox_firmware=\"$sys_bin/busybox\"" >> $sys_temp/anyka_ipc_wrapper.sh
-echo "if [ -f \"/tmp/anky_ipc.lock\" ]; then" >> $sys_temp/anky_ipc_wrapper.sh
+echo "if [ -f \"/tmp/anky_ipc.lock\" -o -f \"$setup_lock_file\" ]; then" >> $sys_temp/anky_ipc_wrapper.sh
 echo "  sleep 60" >> $sys_temp/anky_ipc_wrapper.sh
 echo "  exit 2" >> $sys_temp/anky_ipc_wrapper.sh
 echo "else" >> $sys_temp/anky_ipc_wrapper.sh
@@ -458,16 +467,26 @@ fi
 [ -n "$custom_pre_init_async" -a -x "$custom_pre_init_async" ] && $custom_pre_init_async &
 [ -n "$custom_pre_init" -a -x "$custom_pre_init" ] && $custom_pre_init
 
+# Sync anything
+$sync
+
 # Run services.sh on SD card every 30 seconds
 if [ -x "$sd_sbin/services.sh" ]; then
 	# Custom scripts run once before services
 	[ -n "$custom_pre_services_once_async" -a -x "$custom_pre_services_once_async" ] && $custom_pre_services_once_async &
 	[ -n "$custom_pre_services_once" -a -x "$custom_pre_services_once" ] && $custom_pre_services_once
-	echo "Running services.sh"
-    	(while true; do if [ -f "$breakout_file" ]; then break; else $sd_sbin/services.sh; $sleep 30; fi; done ) < /dev/null >& /dev/null &
-     	while [ ! -f $sys_temp/services.run ]; do
-		$sleep 1
-        done
+	if [ -f "$setup_lock_file" ]; then
+		echo "Waiting 60 seconds to initiate reboot"
+		$rm -f $setup_lock_file >/dev/null 2>&1
+		$sleep 60
+		$reboot
+	else
+		echo "Running services.sh"
+    		(while true; do if [ -f "$breakout_file" ]; then break; else $sd_sbin/services.sh; $sleep 30; fi; done ) < /dev/null >& /dev/null &
+     		while [ ! -f $sys_temp/services.run ]; do
+			$sleep 1
+       		done
+       	fi
 	# Custom scripts run once after services
 	[ -n "$custom_post_services_once_async" -a -x "$custom_post_services_once_async" ] && $custom_post_services_once_async &
 	[ -n "$custom_post_services_once" -a -x "$custom_post_services_once" ] && $custom_post_once_services
