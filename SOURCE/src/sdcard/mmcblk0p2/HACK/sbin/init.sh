@@ -273,10 +273,24 @@ if [ -e $sd_config/_ht_hw_settings.ini ]; then
 	compare $sys_config/_ht_hw_settings.ini $sd_config/_ht_hw_settings.ini || $cp $sys_config/_ht_hw_settings.ini $sd_config 
 fi
 
-# Check, whether _ht_sw_settings.ini exists
+# Check, whether _ht_sw_settings.ini exists and add missing template data if required
 if [ ! -e $sd_config/_ht_sw_settings.ini ]; then
 	echo -n "Creating _ht_sw_settings.ini file..."
 	$cp $sys_config/_ht_sw_settings.ini $sd_config && echo "done" || echo "failed" 
+	if [ -f "$sd_config/_ht_sw_config.tmpl" ]; then
+  	  while IFS= read -r line; do
+            case "$line" in
+              int*|bool*|enum*|str*)
+                key=$(echo "$line" | $awk '{print $1}')
+                if ! $grep -q "^$key" "$sys_config/_ht_sw_settings.ini"; then
+                    echo "$line" >> "$sd_config/_ht_sw_settings.ini"
+                fi
+                ;;
+            esac
+	  done < "$sd_config/_ht_sw_config.tmpl"
+	  $sed -i '/^$/d' "$sd_config/_ht_sw_settings.ini"
+  	  compare $sd_config/_ht_sw_settings.ini $sys_config/_ht_sw_settings.ini || $cp $sd_config/_ht_sw_settings.ini $sys_config 
+	fi
 fi
 if [ -e $sd_config/_ht_sw_settings.ini ]; then
 	compare $sys_config/_ht_sw_settings.ini $sd_config/_ht_sw_settings.ini || $cp $sys_config/_ht_sw_settings.ini $sd_config 
@@ -345,6 +359,14 @@ echo "export hack_custom_conf=\"\$hack/etc/hack_custom.conf\"" >> $sys_temp/anyk
 echo "export commands_conf=\"\$hack/etc/commands.conf\"" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "export busybox_hack=\"$sd_bin/busybox\"" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "export busybox_firmware=\"$sys_bin/busybox\"" >> $sys_temp/anyka_ipc_wrapper.sh
+echo "if [ -f \"/tmp/anky_ipc.lock\" ]; then" >> $sys_temp/anky_ipc_wrapper.sh
+echo "  sleep 60" >> $sys_temp/anky_ipc_wrapper.sh
+echo "  exit 2" >> $sys_temp/anky_ipc_wrapper.sh
+echo "else" >> $sys_temp/anky_ipc_wrapper.sh
+echo "  kill -KILL `pidof anyka_ipc` >/dev/null 2>&1" >> $sys_temp/anky_ipc_wrapper.sh
+echo "  kill -KILL `pidof anyka_ipc_patched` >/dev/null 2>&1" >> $sys_temp/anky_ipc_wrapper.sh
+echo "  killall ipc_log_parser.sh >/dev/null 2>&1" >> $sys_temp/anky_ipc_wrapper.sh
+echo "fi" >> $sys_temp/anky_ipc_wrapper.sh
 echo "[ -f \"$hack_conf\" ] && . $hack_conf || exit 1" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "[ -f \"$hack_custom_conf\" ] && . $hack_custom_conf || exit 1" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "export busybox_hack=\"$sd_bin/busybox\"" >> $sys_temp/anyka_ipc_wrapper.sh
@@ -359,7 +381,7 @@ echo "anyka_ipc_bin='$sd_bin/anyka_ipc'" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "if [ -x $sd_bin/anyka_ipc_patched ]; then" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "  export LD_LIBRARY_PATH=/lib:/usr/lib:$sd_lib" >> $sys_temp/anyka_ipc_wrapper.sh
 if [ "$FORCE_STATE_LED_OFF" != "" -a "$FORCE_STATE_LED_OFF" != "0" ]; then
-	echo " sleep $FORCE_STATE_LED_OFF && state_led.sh off &" >> $sys_temp/anyka_ipc_wrapper.sh
+	echo "  sleep $FORCE_STATE_LED_OFF && state_led.sh off &" >> $sys_temp/anyka_ipc_wrapper.sh
 fi
 if [ "$FORCE_AK39_FACTORY_ON_PATCHED" = "1" ]; then
 	echo "  touch /tmp/_ak39_factory.ini" >> $sys_temp/anyka_ipc_wrapper.sh
