@@ -1160,9 +1160,7 @@ $(BUILD_HACK)/bin/upnpc:
 	@cp $(STAGE_HACK)/bin/upnpc $@ >/dev/null 2>&1 || true
 	
 $(BUILD_HACK)/sbin/onvif_srvd:
-	@cp $(SRC_DIR)/contrib/binaries/onvif_srvd $@ >/dev/null 2>&1 || true
-	@chmod +x $@
-	@touch $@
+	@cp $(STAGE_HACK)/sbin/onvif_srvd $@ >/dev/null 2>&1 || true
 	
 $(BUILD_HACK)/bin/ffprobe:
 	@cp $(STAGE_HACK)/bin/ffprobe $@ >/dev/null 2>&1 || true
