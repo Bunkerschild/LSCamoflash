@@ -20,6 +20,7 @@ all: $(TARGET)
 # Linken der finalen ausführbaren Datei
 $(TARGET): $(OBJS)
 	$(CC) $(LDFLAGS) $(OBJS) -o $(TARGET)
+	touch $(TARGET)
 
 # Aufräumen
 clean:
