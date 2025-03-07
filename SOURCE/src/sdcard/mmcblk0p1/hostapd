@@ -4,6 +4,7 @@
 export hack="/tmp/sd/HACK"
 export hack_conf="$hack/etc/hack.conf"
 export hack_custom_conf="$hack/etc/hack_custom.conf"
+export anyka_checksums_conf="$hack/etc/anyka_checksums.conf"
 export commands_conf="$hack/etc/commands.conf"
 
 # Custom scripts

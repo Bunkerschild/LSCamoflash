@@ -42,14 +42,18 @@ encoder_sub="H264"
 #	encoder_sub="H265"
 #fi
 
-camera_model=`cat $sd_config/anyka_cfg.ini | grep "^dev_name" | awk '{print $3}'`
-camera_manufacturer="LSC"
-
 ONVIF_PROFILE_0=""
 ONVIF_PROFILE_1=""
 
 #if [ "$local_rtsp_only" = "1" ]; then
-	ONVIF_PROFILE_0="--name ${hd_width}x${hd_height} --width $hd_width --height $hd_height --url rtsp://$IP_ADDR:554/main_ch --type $encoder_main"
+	HAS_RTSP=`netstat -tulpen | grep "LISTEN" | grep "^tcp" | awk '{print $4}' | grep "0.0.0.0:554"`
+	
+	if [ "$HAS_RTSP" = "" ]; then
+		sleep 10
+		exit 1
+	fi
+	
+	ONVIF_PROFILE_0="--name \"HD\" --width $hd_width --height $hd_height --url rtsp://$IP_ADDR:554/main_ch --type $encoder_main"
 #else
 #	ONVIF_PROFILE_0="--name ${hd_width}x${hd_height} --width $hd_width --height $hd_height --url rtsp://$IP_ADDR:88/videoMain --type $encoder_main"
 #
@@ -61,9 +65,13 @@ ONVIF_PROFILE_1=""
 echo $ONVIF_PROFILE_0
 echo $ONVIF_PROFILE_1
 
-exec ./onvif_srvd --no_fork --pid_file /var/run/onvif_srvd.pid --model "$camera_model" --manufacturer "$camera_manufacturer" --ifs wlan0 --port $port_onvif --scope onvif://www.onvif.org/Profile/S $ONVIF_PROFILE_0 $ONVIF_PROFILE_1 \
-        --ptz \
-        --move_left "eval $LEFT" \
-        --move_right "eval $RIGHT" \
-        --move_up "eval $UP" \
-        --move_down "eval $DOWN"
+HARDWARE_ID=`cat $sys_config/wifimac.txt`
+
+DEFAULT_OPTIONS="--no_fork --pid_file /var/run/onvif_srvd.pid --model \"$device_model\" --manufacturer \"$device_manufacturer\" --ifs wlan0 --port $port_onvif --scope onvif://www.onvif.org/Profile/S --version \"LSCamoflash $device_version\" --hardware-id \"$HARDWARE_ID\""
+PTZ_OPTIONS=""
+
+if [ "$device_ptz" = "1" ]; then
+	PTZ_OPTIONS="--ptz --move_left \"eval $LEFT\" --move_right \"eval $RIGHT\" --move_up \"eval $UP\" --move_down \"eval $DOWN\""
+fi
+
+exec ./onvif_srvd $DEFAULT_OPTIONS $ONVIF_PROFILE_0 $ONVIF_PROFILE_1 $PTZ_OPTIONS

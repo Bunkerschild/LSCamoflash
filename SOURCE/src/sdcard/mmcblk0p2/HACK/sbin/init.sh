@@ -9,6 +9,7 @@ echo -n "LSCamoflash init script is starting up at " && date
 export hack="$sd_path/HACK"
 export hack_conf="$hack/etc/hack.conf"
 export hack_custom_conf="$hack/etc/hack_custom.conf"
+export anyka_checksums_conf="$hack/etc/anyka_checksums.conf"
 export commands_conf="$hack/etc/commands.conf"
 
 # Define busyboxes
@@ -20,6 +21,9 @@ export setup_lock_file="/tmp/setup.lock"
 
 # Load commands variables
 [ -n "$commands_conf" ] && . $commands_conf && echo "Command variables loaded from: $commands_conf" || exit 1
+
+# Load anyka checksums
+[ -n "$anyka_checksums_conf" ] && . $anyka_checksums_conf && echo "Anyka checksums loaded from: $anyka_checksums_conf" || exit 1
 
 # Binding and setting up hostname config
 if [ -n "$system_hostname" ]; then
@@ -84,9 +88,9 @@ if [ "$wifi_config_override" = "1" ]; then
 		[ -n "$wifi_ip_address" -a -n "$wifi_broadcast" ] && $ifconfig wlan0 $wifi_ip_address broadcast $wifi_broadcast
 		[ -n "$wifi_ip_address" ] && $ifconfig wlan0 $wifi_ip_address netmask $wifi_netmask broadcast $wifi_broadcast
 		[ -n "$wifi_gateway" ] && $route add default gw $wifi_gateway
-		echo -n "" > /etc/config/resolv.conf
-		[ -n "$wifi_domainname" ] && echo "domainname $wifi_domainname" >> /etc/config/resolv.conf
-		[ -n "$wifi_nameserver" ] && echo "nameserver $wifi_nameserver" >> /etc/config/resolv.conf
+		echo -n "" > $sys_config/resolv.conf
+		[ -n "$wifi_domainname" ] && echo "domainname $wifi_domainname" >> $sys_config/resolv.conf
+		[ -n "$wifi_nameserver" ] && echo "nameserver $wifi_nameserver" >> $sys_config/resolv.conf
 	fi
 fi
 
@@ -96,9 +100,107 @@ breakout_file="$sys_temp/hostapd.break"
 # Loop device
 export loop_device="/dev/loop0"
 
-echo "Device name is: $system_hostname"
+# Device version
+export device_version=`$cat $sd_etc/version.txt`
+
+# Check, on which device we are on
+if [ -f "$sys_bin/anyka_ipc" ]; then	
+	case $anyka_md5 in
+        	$old_ptz_1080p_originl|$old_ptz_1080p_patched)
+        		export device_var="old_ptz_1080p"
+        		export device_manufacturer="LSC"
+        		export device_model="Old Indoor PTZ Camera 1080p"
+        		export device_deprecated=1
+        		export device_has_ptz=1
+        		export device_height=1080
+        		export device_width=1920
+        		export device_outdoor_use=0
+        		export device_supported=1
+        	;;
+	        $indoor_ptz_1080p_originl|$indoor_ptz_1080p_patched)
+        		export device_var="indoor_ptz_1080p"
+        		export device_manufacturer="LSC"
+        		export device_model="Indoor PTZ Camera 1080p"
+        		export device_deprecated=1
+        		export device_has_ptz=1
+        		export device_height=1080
+        		export device_width=1920
+        		export device_outdoor_use=0
+        		export device_supported=1
+	        ;;
+	        $indoor_ptz_1296p_originl|$indoor_ptz_1296p_patched)
+        		export device_var="indoor_ptz_1296p"
+        		export device_manufacturer="LSC"
+        		export device_model="Indoor PTZ Camera 1296p"
+        		export device_deprecated=0
+        		export device_has_ptz=1
+        		export device_height=1296
+        		export device_width=2304
+        		export device_outdoor_use=0
+        		export device_supported=1
+	        ;;
+	        $outdoor_ptz_1296p_originl|$outdoor_ptz_1296p_patched)
+        		export device_var="outdoor_ptz_1296p"
+        		export device_manufacturer="LSC"
+        		export device_model="Outdoor PTZ Camera 1296p"
+        		export device_deprecated=0
+        		export device_has_ptz=1
+        		export device_height=1296
+        		export device_width=2304
+        		export device_outdoor_use=1
+        		export device_supported=1
+	        ;;
+	        $outdoor_cam_1080p_originl|$outdoor_cam_1080p_patched)
+        		export device_var="outdoor_cam_1080p"
+        		export device_manufacturer="LSC"
+        		export device_model="Outdoor Camera 1296p"
+        		export device_deprecated=0
+        		export device_has_ptz=0
+        		export device_height=1296
+        		export device_width=2304
+        		export device_outdoor_use=1
+        		export device_supported=1
+	        ;;
+	        $outdoor_cam_1296p_originl|$outdoor_cam_1296p_patched)
+        		export device_var="outdoor_cam_1296p"
+        		export device_manufacturer="LSC"
+        		export device_model="Outdoor Camera 1080p"
+        		export device_deprecated=1
+        		export device_has_ptz=0
+        		export device_height=1080
+        		export device_width=1920
+        		export device_outdoor_use=1
+        		export device_supported=1
+	        ;;
+	        *)
+	        	echo "WARNING: Unsupported device"
+        		export device_var=""
+        		export device_manufacturer="Unknown"
+        		export device_model="Unknown Camera"
+        		export device_deprecated=0
+        		export device_has_ptz=0
+        		export device_height=`$cat $sys_config/_ht_hw_settings.ini 2>/dev/null | $grep "main_height =" | $awk '{print $3}' || echo 0`
+        		export device_width=`$cat $sys_config/_ht_hw_settings.ini 2>/dev/null | $grep "main_width =" | $awk '{print $3}' || echo 0`
+        		export device_outdoor_use=0
+        		export device_supported=0
+	        ;;
+	esac
+else
+	echo "Missing $sys_bin/anyka_ipc"
+	exit 1
+fi
+
+echo "Device hostname is: $system_hostname"
 echo "Device MAC is: $device_mac"
 echo "Device UID: $device_uid"
+echo "Device manufacturer: $device_manufacturer"
+echo "Device model: $device_model"
+echo "Device is deprecated: $device_deprecated"
+echo "Device has PTZ: $device_has_ptz"
+echo "Device resolution height: $device_height px"
+echo "Device resolution width: $device_width px"
+echo "Device can be used outdoor: $device_outdoor_use"
+echo "Device is fully supported: $device_supported"
 echo "Anyka IPC Checksum: $anyka_md5"
 
 # Compare function
@@ -248,6 +350,12 @@ if [ ! -e $sd_bin/anyka_ipc_patched -a -e $sd_bin/anyka_ipc -a "$use_ipc_autopat
 	if [ "$patch_file" != "" -a -f $patch_file ]; then
 		$touch $setup_lock_file
 		$sd_sbin/apply_ips_patch.sh $patch_file $sd_bin/anyka_ipc $sd_bin/anyka_ipc_patched
+		anyka_ipc_patched_checksum=`$md5sum $sd_bin/anyka_ipc_patched | $awk '{print $1}'`
+		patched_var="${device_var}_patched"
+		if [ -f "$sd_etc/anyka_checksums.conf" ]; then
+			$sed -i -e "s/^$patched_var=.*/$patched_var=$anyka_ipc_patched_checksum/g" "$sd_etc/anyka_checksums.conf"
+			. $sd_etc/anyka_checksums.conf
+		fi
 	fi
 fi
 

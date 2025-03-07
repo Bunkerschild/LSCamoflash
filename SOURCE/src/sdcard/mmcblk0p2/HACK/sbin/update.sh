@@ -26,6 +26,7 @@ if [ -d "$sd_update" ]; then
         [ "$mounted" = "1" ] && umount $sys_mnt >/dev/null 2>&1
  
         $rm -rf $sd_update
+        $rm -rf $sd_overlay
 	echo -n "Update installed: " >> $sd_log/update.log
 	date >> $sd_log/update.log
         $mv $sd_log/update.log $sd_log/update-last.log
