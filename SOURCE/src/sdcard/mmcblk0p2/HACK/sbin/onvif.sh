@@ -5,12 +5,12 @@
 cd $sd_sbin
 
 STEPS=15
-MOTOR_CONTROL="$sd_sbin/motor.sh"
+MOTOR_CONTROL="$sd_sbin/ptz.sh"
 
-LEFT="$MOTOR_CONTROL $STEPS left "
-RIGHT="$MOTOR_CONTROL $STEPS right"
-UP="$MOTOR_CONTROL $STEPS up"
-DOWN="$MOTOR_CONTROL $STEPS down"
+LEFT="$MOTOR_CONTROL left $STEPS"
+RIGHT="$MOTOR_CONTROL right $STEPS"
+UP="$MOTOR_CONTROL up $STEPS"
+DOWN="$MOTOR_CONTROL down $STEPS"
 
 IP_ADDR=$(ip -4 addr show wlan0 | grep inet | awk '{print $2}' | cut -d'/' -f1)
 while [[ -z $IP_ADDR ]]; do

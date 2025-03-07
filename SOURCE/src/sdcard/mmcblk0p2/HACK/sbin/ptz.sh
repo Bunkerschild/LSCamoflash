@@ -32,6 +32,7 @@ set_left_right=""
 . $root/etc/hack.conf
 . $root/etc/hack_custom.conf
 . $root/etc/commands.conf
+. $root/atc/anyka_checksums.conf
 
 anyka_pid_count=`ps awx | grep anyka_ipc | grep -v grep | wc -l`
 anyka_pid=""
@@ -54,22 +55,22 @@ anyka_bin=`cat /proc/$anyka_pid/cmdline | awk '{print $1}'`
 anyka_chk=`md5sum $anyka_bin | awk '{print $1}'`
 
 case $anyka_chk in
-	2bc721ccfcd502291f10486aa72ce8a)
+	$old_ptz_1080p_originl|$old_ptz_1080p_patched)
 		set_seek="$old_ptz_1080p_seek"
 		set_up_down="$old_ptz_1080p_up_down"
 		set_left_right="$old_ptz_1080p_left_right"
 	;;
-	8ea59723a177e1c68a798ca1a2882798)
+	$indoor_ptz_1080p_originl|$indoor_ptz_1080p_patched)
 		set_seek="$indoor_ptz_1080p_seek"
 		set_up_down="$indoor_ptz_1080p_up_down"
 		set_left_right="$indoor_ptz_1080p_left_right"
 	;;
-	86396fdb14f2e029fa169afd4b598391)
+	$indoor_ptz_1296p_originl|$indoor_ptz_1296p_patched)
 		set_seek="$indoor_ptz_1296p_seek"
 		set_up_down="$indoor_ptz_1296p_up_down"
 		set_left_right="$indoor_ptz_1296p_left_right"
 	;;
-	339313038233b6f7645197ff93dd0d88)
+	$outdoor_ptz_1296p_originl|$outdoor_ptz_1296p_patched)
 		set_seek="$outdoor_ptz_1296p_seek"
 		set_up_down="$outdoor_ptz_1296p_up_down"
 		set_left_right="$outdoor_ptz_1296p_left_right"
