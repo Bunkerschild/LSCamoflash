@@ -32,7 +32,7 @@ set_left_right=""
 . $root/etc/hack.conf
 . $root/etc/hack_custom.conf
 . $root/etc/commands.conf
-. $root/atc/anyka_checksums.conf
+. $root/etc/anyka_checksums.conf
 
 anyka_pid_count=`ps awx | grep anyka_ipc | grep -v grep | wc -l`
 anyka_pid=""
@@ -93,7 +93,7 @@ case $DIR in
 	;;
 esac
 
-if [ "$DIST" != "" ]; then
+if [ "$DIST" = "" ]; then
 	echo "Usage: $0 up|down|left|right distance"
 	exit 5
 fi
