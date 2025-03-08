@@ -1,0 +1,11 @@
+--- ./CMakeLists.txt	2025-03-08 13:58:12.633383847 +0100
++++ ./CMakeLists.txt	2025-03-08 13:57:57.081299220 +0100
+@@ -62,7 +62,7 @@
+     set(GSOAP_INSTALL_DIR "${CMAKE_SOURCE_DIR}")
+     set(GSOAP_ARCHIVE_DIR "${CMAKE_SOURCE_DIR}/SDK")
+     set(GSOAP_PATCHES     soapcpp2_lex.l.patch)
+-    set(GSOAP_CONFIGURE   --disable-c-locale)
++    set(GSOAP_CONFIGURE   --disable-c-locale  CPP=/usr/bin/cpp RANLIB=/usr/bin/ranlib CC=/usr/bin/gcc CXX=/usr/bin/g++ LD=/usr/bin/ld AS=/usr/bin/as AR=/usr/bin/ar CROSS_PREFIX="")
+     include(build_gsoap)
+ endif()
+ 

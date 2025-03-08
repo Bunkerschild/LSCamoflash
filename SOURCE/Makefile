@@ -342,7 +342,7 @@ BUSYBOX := busybox-1.36.1
 MOSQUITTO := mosquitto-2.0.20
 CJSON := cJSON-1.7.18
 GSOAP := gsoap-2.8
-ONVIF := onvif_srvd-1.1
+ONVIF := onvif_srvd-2.0
 GMP := gmp-6.3.0
 LIBGPG_ERROR := libgpg-error-1.51
 LIBGCRYPT := libgcrypt-1.11.0
@@ -746,25 +746,27 @@ gsoap: $(STAGING_DIR)/$(SDROOT)/lib/libgsoap.a
 
 gsoap-clean:
 	@make -C $(PACKAGES_DIR)/$(GSOAP) clean distclean
-
-$(PACKAGES_DIR)/$(ONVIF)/Makefile.patch:
-	@cp $(SRC_DIR)/patches/$(ONVIF)/$(USE_LIBC)-Makefile $(PACKAGES_DIR)/$(ONVIF)/Makefile
+	
+$(PACKAGES_DIR)/$(ONVIF)/CMakeLists.patch:
+	@cd $(PACKAGES_DIR)/$(ONVIF); patch -p1 < $(SRC_DIR)/patches/$(ONVIF)/CMakeLists.patch
 	@touch $@
 
-$(PACKAGES_DIR)/$(ONVIF)/onvif_srvd: $(PACKAGES_DIR)/$(ONVIF)/Makefile.patch
-	@make -C $(PACKAGES_DIR)/$(ONVIF) -j$(nproc) release
-	@touch $@
+$(PACKAGES_DIR)/$(ONVIF)/build/Makefile: $(PACKAGES_DIR)/$(ONVIF)/CMakeLists.patch
+	@mkdir -p $(PACKAGES_DIR)/$(ONVIF)/build
+	@cd $(PACKAGES_DIR)/$(ONVIF)/build; cmake ..
 
-$(STAGING_DIR)/$(SDROOT)/sbin/onvif_srvd: $(PACKAGES_DIR)/$(ONVIF)/onvif_srvd
+$(PACKAGES_DIR)/$(ONVIF)/build/onvif_srvd: $(PACKAGES_DIR)/$(ONVIF)/build/Makefile
+	@cd $(PACKAGES_DIR)/$(ONVIF)/build; make
+
+$(STAGING_DIR)/$(SDROOT)/sbin/onvif_srvd: $(PACKAGES_DIR)/$(ONVIF)/build/onvif_srvd
 	@mkdir -p $(STAGING_DIR)/$(SDROOT)/sbin/ || true
-	@cp $(PACKAGES_DIR)/$(ONVIF)/onvif_srvd $@
+	@cp $(PACKAGES_DIR)/$(ONVIF)/build/onvif_srvd $@
 	@touch $@
 
 onvif: $(STAGING_DIR)/$(SDROOT)/sbin/onvif_srvd
 
 onvif-clean:
 	@rm -rf $(PACKAGES_DIR)/$(ONVIF)/build
-	@rm $(PACKAGES_DIR)/$(ONVIF)/onvif-config
 
 $(PACKAGES_DIR)/$(LIBGPG_ERROR)/Makefile:
 	@ln -sf $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/syscfg/lock-obj-pub.arm-unknown-linux-gnueabi.h $(PACKAGES_DIR)/$(LIBGPG_ERROR)/src/syscfg/lock-obj-pub.linux-uclibcgnueabi.h

@@ -53,7 +53,7 @@ ONVIF_PROFILE_1=""
 		exit 1
 	fi
 	
-	ONVIF_PROFILE_0="--name \"HD\" --width $hd_width --height $hd_height --url rtsp://$IP_ADDR:554/main_ch --type $encoder_main"
+	ONVIF_PROFILE_0="--name HD --width $hd_width --height $hd_height --url rtsp://$IP_ADDR:554/main_ch --type $encoder_main"
 #else
 #	ONVIF_PROFILE_0="--name ${hd_width}x${hd_height} --width $hd_width --height $hd_height --url rtsp://$IP_ADDR:88/videoMain --type $encoder_main"
 #
@@ -67,11 +67,17 @@ echo $ONVIF_PROFILE_1
 
 HARDWARE_ID=`cat $sys_config/wifimac.txt`
 
-DEFAULT_OPTIONS="--no_fork --pid_file /var/run/onvif_srvd.pid --model \"$device_model\" --manufacturer \"$device_manufacturer\" --ifs wlan0 --port $port_onvif --scope onvif://www.onvif.org/Profile/S --firmware_ver \"LSCamoflash $device_version\" --hardware_id \"$HARDWARE_ID\" --serial_num \"$anyka_md5\""
-PTZ_OPTIONS=""
-
-if [ "$device_ptz" = "1" ]; then
-	PTZ_OPTIONS="--ptz --move_left \"eval $LEFT\" --move_right \"eval $RIGHT\" --move_up \"eval $UP\" --move_down \"eval $DOWN\""
+if [ "$device_has_ptz" = "1" ]; then
+	LD_LIBRARY_PATH=$sd_lib:/lib:/usr/lib $sd_sbin/onvif_srvd \
+	--no_fork --pid_file /var/run/onvif_srvd.pid --model "$device_model" --manufacturer "$device_manufacturer" --ifs wlan0 --port $port_onvif \
+	--scope onvif://www.onvif.org/Profile/S --firmware_ver "LSCamoflash $device_version" --hardware_id "$HARDWARE_ID" --serial_num "$anyka_md5" \
+	--ptz --move_left "eval $LEFT" --move_right "eval $RIGHT" --move_up "eval $UP" --move_down "eval $DOWN" \
+	$ONVIF_PROFILE_0 \
+	$ONVIF_PROFILE_1
+else
+	LD_LIBRARY_PATH=$sd_lib:/lib:/usr/lib $sd_sbin/onvif_srvd \
+	--no_fork --pid_file /var/run/onvif_srvd.pid --model "$device_model" --manufacturer "$device_manufacturer" --ifs wlan0 --port $port_onvif \
+	--scope onvif://www.onvif.org/Profile/S --firmware_ver "LSCamoflash $device_version" --hardware_id "$HARDWARE_ID" --serial_num "$anyka_md5" \
+	$ONVIF_PROFILE_0 \
+	$ONVIF_PROFILE_1
 fi
-
-exec ./onvif_srvd $DEFAULT_OPTIONS $ONVIF_PROFILE_0 $ONVIF_PROFILE_1 $PTZ_OPTIONS
