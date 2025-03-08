@@ -67,7 +67,7 @@ echo $ONVIF_PROFILE_1
 
 HARDWARE_ID=`cat $sys_config/wifimac.txt`
 
-DEFAULT_OPTIONS="--no_fork --pid_file /var/run/onvif_srvd.pid --model \"$device_model\" --manufacturer \"$device_manufacturer\" --ifs wlan0 --port $port_onvif --scope onvif://www.onvif.org/Profile/S --version \"LSCamoflash $device_version\" --hardware-id \"$HARDWARE_ID\""
+DEFAULT_OPTIONS="--no_fork --pid_file /var/run/onvif_srvd.pid --model \"$device_model\" --manufacturer \"$device_manufacturer\" --ifs wlan0 --port $port_onvif --scope onvif://www.onvif.org/Profile/S --firmware_ver \"LSCamoflash $device_version\" --hardware_id \"$HARDWARE_ID\" --serial_num \"$anyka_md5\""
 PTZ_OPTIONS=""
 
 if [ "$device_ptz" = "1" ]; then

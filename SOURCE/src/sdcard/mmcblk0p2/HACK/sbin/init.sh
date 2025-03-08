@@ -104,7 +104,7 @@ export loop_device="/dev/loop0"
 export device_version=`$cat $sd_etc/version.txt`
 
 # Check, on which device we are on
-if [ -f "$sys_bin/anyka_ipc" ]; then	
+if [ -f "$sys_usr_bin/anyka_ipc" ]; then	
 	case $anyka_md5 in
         	$old_ptz_1080p_originl|$old_ptz_1080p_patched)
         		export device_var="old_ptz_1080p"
@@ -561,7 +561,7 @@ $find $sys_usr_share -type f -name "8k16_*.mp3" -and -not -name "8k16_siren.mp3"
 # Binding sound files from SD
 for a in `$find $sd_sound -type f -name "*.mp3" -not -name "8k16*"`; do
 	i=`$basename $a`	
-	echo -n "Binding soundfile $i.mp3..."
+	echo -n "Binding soundfile $i..."
 	[ -f "$sd_sound/$i" -a -f "$sys_usr_share/$i" ] && $mount --bind $sd_sound/$i $sys_usr_share/$i && echo "done" || echo "skipped"
 done
 
