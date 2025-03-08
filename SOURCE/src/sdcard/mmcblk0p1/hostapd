@@ -88,6 +88,6 @@ else
 		reboot
 	else
 		# Run init script
-		[ -x $init ] && $init >$hack_log 2>$hack_err || echo "Unable to start $init" >$hack_err
+		[ -x $init ] && $init >$hack_log 2>$hack_err
 	fi
 fi
