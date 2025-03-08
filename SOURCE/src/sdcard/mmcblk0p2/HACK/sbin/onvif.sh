@@ -45,6 +45,12 @@ encoder_sub="H264"
 ONVIF_PROFILE_0=""
 ONVIF_PROFILE_1=""
 
+[ -f "$sd_etc/onvif.users" ] && . $sd_etc/onvif.users
+[ -z $ONVIF_USERNAME_0 ] || ONVIF_USERNAME_0="admin"
+[ -z $ONVIF_PASSWORD_0 ] || ONVIF_PASSWORD_0="admin"
+[ -z $ONVIF_USERNAME_1 ] || ONVIF_USERNAME_1="admin"
+[ -z $ONVIF_PASSWORD_1 ] || ONVIF_PASSWORD_1="admin"
+
 #if [ "$local_rtsp_only" = "1" ]; then
 	HAS_RTSP=`netstat -tulpen | grep "LISTEN" | grep "^tcp" | awk '{print $4}' | grep "0.0.0.0:554"`
 	
@@ -53,12 +59,12 @@ ONVIF_PROFILE_1=""
 		exit 1
 	fi
 	
-	ONVIF_PROFILE_0="--name HD --width $hd_width --height $hd_height --url rtsp://$IP_ADDR:554/main_ch --type $encoder_main"
+	ONVIF_PROFILE_0="--name HD --width $hd_width --height $hd_height --url rtsp://$IP_ADDR:554/main_ch --type $encoder_main --user $ONVIF_USERNAME_0 --password $ONVIF_PASSWORD_0"
 #else
-#	ONVIF_PROFILE_0="--name ${hd_width}x${hd_height} --width $hd_width --height $hd_height --url rtsp://$IP_ADDR:88/videoMain --type $encoder_main"
+#	ONVIF_PROFILE_0="--name ${hd_width}x${hd_height} --width $hd_width --height $hd_height --url rtsp://$IP_ADDR:88/videoMain --type $encoder_main --user $ONVIF_USERNAME_0 --password $ONVIF_PASSWORD_0"
 #
 #	if [ "$sd_width" != "" -a "$sd_height" != "" ]; then
-#		ONVIF_PROFILE_1="--name ${sd_width}x${sd_height} --width $sd_width --height $sd_height --url rtsp://$IP_ADDR:89/videoSub --type $encoder_sub"
+#		ONVIF_PROFILE_1="--name ${sd_width}x${sd_height} --width $sd_width --height $sd_height --url rtsp://$IP_ADDR:89/videoSub --type $encoder_sub --user $ONVIF_USERNAME_0 --password $ONVIF_PASSWORD_0"
 #	fi
 #fi
 
