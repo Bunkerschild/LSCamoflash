@@ -84,6 +84,16 @@ esac
 DIR="$1"
 DIST="$2"
 
+INVERT=`cat $sys_config/_ht_sw_settings.ini 2>/dev/null | grep "bool_rotate180" | awk '{print $3}' || echo 0`
+
+if [ "$INVERT" = "0" ]; then
+	VAL_ADD="ffa60000"
+	VAL_SUB="5b0000"
+else
+	VAL_SUB="ffa60000"
+	VAL_ADD="5b0000"
+fi
+
 case $DIR in
 	up|down|left|right)
 	;;
@@ -98,17 +108,24 @@ if [ "$DIST" = "" ]; then
 	exit 5
 fi
 
-if [ "$DIR" == "up" ] || [ "$DIR" == "down" ]; then
- ADDR=$set_up_down
-else
- ADDR=$set_left_right
-fi
-
-if [ "$DIR" == "down" ] || [ "$DIR" == "left" ]; then
- VAL=ffa60000
-else
- VAL=5b0000
-fi
+case $DIR in
+	up)
+		ADDR=$set_up_down
+		VAL=$VAL_ADD
+	;;
+	down)
+		ADDR=$set_up_down
+		VAL=$VAL_SUB
+	;;
+	left)
+		ADDR=$set_left_right
+		VAL=$VAL_ADD
+	;;
+	right)
+		ADDR=$set_left_right
+		VAL=$VAL_SUB
+	;;
+esac
 
 if [ "$anyka_pid" != "" ] && [ "$DIR" != "" ]; then
  # Pause motion detection for 3 seconds
