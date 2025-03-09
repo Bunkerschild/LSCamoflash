@@ -15,6 +15,15 @@ This project includes various third-party software packages, each with its own l
   License: GNU General Public License (GPLv2)
   Source: https://toolchains.bootlin.com
 
+## JavaScript
+- **Bootstrap (5.x)**  
+  Lizenz: MIT License  
+  Quelle: [https://getbootstrap.com](https://getbootstrap.com)  
+
+- **jQuery (3.x)**  
+  Lizenz: MIT License  
+  Quelle: [https://jquery.com](https://jquery.com)
+
 ## Kernel
 - **Linux Kernel (4.4.192)**  
   Lizenz: GNU General Public License (GPL)  

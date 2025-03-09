@@ -5,7 +5,7 @@ DOWNLOAD_URL := $(PROJECT_URL)/raw/refs/heads/main/SOURCE/download/
 # Optional packages
 WITH_RADARE2 := 0
 WITH_GLIBC := 0
-WITH_FFMPEG := 0
+WITH_FFMPEG := 1
 WITH_KERNEL := 0
 WITH_OPUS := 0
 WITH_OPENJPEG := 0
@@ -940,7 +940,10 @@ $(PACKAGES_DIR)/$(PHP)/config.status:
 	@cd $(PACKAGES_DIR)/$(PHP); PKG_CONFIG_PATH=$(STAGING_DIR)/$(SDROOT)/lib/pkgconfig:$(TOOLCHAIN_PATH)/lib/pkgconfig:$(TOOLCHAIN_PATH)/share/pkgconfig ./configure --prefix=$(SDROOT) --host=$(HOST) \
 	--datarootdir=$(SDROOT)/usr/share --disable-all --enable-sockets --enable-sysvmsg --enable-sysvsem --enable-sysvshm \
 	--with-zlib=$(STAGING_DIR)/$(SDROOT)/include --with-openssl=$(STAGING_DIR)/$(SDROOT)/include/openssl \
-	--with-openssl-legacy-provider --with-sqlite3=$(STAGING_DIR)/$(SDROOT)/include --disable-pdo --with-curl=$(STAGING_DIR)/$(SDROOT)/include/curl \
+	--with-openssl-legacy-provider --with-sqlite3=$(STAGING_DIR)/$(SDROOT)/include --with-curl=$(STAGING_DIR)/$(SDROOT)/include/curl \
+	--disable-phpdbg --disable-short-tags --disable-ipv6 --disable-ctype --disable-flatfile --disable-dom --disable-mbregex --disable-opcache --disable-huge-code-pages --disable-opcache-jit \
+	--disable-pdo --disable-phar --disable-tokenizer --disable-xml --disable-xmlreader --disable-xmlwriter --disable-mysqlnd-compression-support --disable-fiber-asm \
+	--disable-zend-signals --without-libxml --without-cdb --without-iconv --without-pdo-sqlite \
 	CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include --sysroot=$(TOOLCHAIN_PATH)/$(HOST)/sysroot -L$(STAGING_DIR)/$(SDROOT)/lib"
 	@touch $@
 
@@ -1126,9 +1129,6 @@ $(BUILD_HACK)/bin/php:
 $(BUILD_HACK)/bin/php-cgi:
 	@cp $(STAGE_HACK)/bin/php-cgi $@ >/dev/null 2>&1 || true
 
-$(BUILD_HACK)/bin/phpdbg:
-	@cp $(STAGE_HACK)/bin/phpdbg $@ >/dev/null 2>&1 || true
-
 $(BUILD_HACK)/bin/phpize:
 	@cp $(STAGE_HACK)/bin/phpize $@ >/dev/null 2>&1 || true
 
@@ -1241,7 +1241,7 @@ build: $(BUILD_DIR)/install.ps1 $(BUILD_HACK)/bin/radare2 $(BUILD_HACK)/bin/r2ag
        $(BUILD_HACK)/bin/opj_compress $(BUILD_HACK)/bin/opj_decompress $(BUILD_HACK)/sbin/onvif_srvd $(BUILD_HACK)/bin/upnpc $(BUILD_HACK)/bin/tcpdump $(BUILD_HACK)/bin/strace-log-merge \
        $(BUILD_HACK)/bin/strace $(BUILD_HACK)/bin/sqlite3 $(BUILD_HACK)/bin/sqlcipher $(BUILD_HACK)/bin/pcap-config $(BUILD_HACK)/bin/openssl $(BUILD_HACK)/sbin/msmtpd $(BUILD_HACK)/bin/msmtp $(BUILD_HACK)/bin/joe \
        $(BUILD_HACK)/bin/curl-config $(BUILD_HACK)/bin/curl $(BUILD_HACK)/bin/busybox $(BUILD_HACK)/bin/mosquitto_rr $(BUILD_HACK)/bin/mosquitto_pub $(BUILD_HACK)/bin/mosquitto_sub $(BUILD_HACK)/bin/mosquitto_passwd \
-       $(BUILD_HACK)/sbin/mosquitto $(BUILD_HACK)/bin/php $(BUILD_HACK)/bin/php-cgi $(BUILD_HACK)/bin/phpdbg $(BUILD_HACK)/bin/phpize $(BUILD_HACK)/bin/python $(BUILD_HACK)/bin/pydoc \
+       $(BUILD_HACK)/sbin/mosquitto $(BUILD_HACK)/bin/php $(BUILD_HACK)/bin/php-cgi $(BUILD_HACK)/bin/phpize $(BUILD_HACK)/bin/python $(BUILD_HACK)/bin/pydoc \
        $(BUILD_HACK)/bin/idle $(BUILD_HACK)/bin/pip $(BUILD_HACK)/etc/version.txt $(BUILD_DIR)/LICENSE.md
 	
 build-clean:
