@@ -70,7 +70,7 @@ case "$RETURN_AS" in
         echo "$STREAM_URL"
         ;;
     json)
-        echo "{\"url\": \"$STREAM_URL\"}"
+        echo "{\"url\": \"$STREAM_URL\",\"type\": \"$STREAM_TYPE\", \"source\": \"REMOTE\"}"
         ;;
     *)
         echo "{\"error\": \"Invalid return format\"}"

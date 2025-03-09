@@ -4,8 +4,11 @@
 
 cd $sd_sbin
 
-ONVIF_SNAP_USER="onvif"
-ONVIF_SNAP_PASS="snap_human"
+ONVIF_SNAP_TOKEN=""
+
+[ -f "$sd_etc/onvif.token" ] && ONVIF_SNAP_TOKEN=`cat $sd_etc/onvif.token`
+
+ONVIF_SCOPE="onvif://www.onvif.org/Profile/S"
 
 STEPS=15
 MOTOR_CONTROL="$sd_sbin/ptz.sh"
@@ -19,7 +22,6 @@ IP_ADDR=$(ip -4 addr show wlan0 | grep inet | awk '{print $2}' | cut -d'/' -f1)
 while [[ -z $IP_ADDR ]]; do
     IP_ADDR=$(ip -4 addr show wlan0 | grep inet | awk '{print $2}' | cut -d'/' -f1)
 done
-echo $IP_ADDR
 
 [ "$hd_width" = "auto" ] && hd_width=`cat $sys_config/_ht_hw_settings.ini 2>/dev/null | grep "^main_width" | awk '{print $3}' || echo "$device_width"`
 [ "$hd_height" = "auto" ] && hd_height=`cat $sys_config/_ht_hw_settings.ini 2>/dev/null | grep "^main_height" | awk '{print $3}' || echo "$device_height"`
@@ -76,13 +78,10 @@ ONVIF_PROFILE_1=""
 #	fi
 #fi
 
-echo $ONVIF_PROFILE_0
-echo $ONVIF_PROFILE_1
-
 HARDWARE_ID=`cat $sys_config/wifimac.txt`
 
 if [ "$human_filter_enable" = "1" ]; then
-	SNAPURL="--snapurl http://$ONVIF_SNAP_USER:$ONVIF_SNAP_PASS@$IP_ADDR:$port_http/cgi-bin/snap_human.cgi"
+	SNAPURL="--snapurl http://$IP_ADDR:$port_http/cgi-bin/snap_human.cgi?token=$ONVIF_SNAP_TOKEN"
 else
 	SNAPURL=""
 fi
@@ -90,14 +89,14 @@ fi
 if [ "$device_has_ptz" = "1" ]; then
 	LD_LIBRARY_PATH=$sd_lib:/lib:/usr/lib $sd_sbin/onvif_srvd \
 	--no_fork --pid_file /var/run/onvif_srvd.pid --model "$device_model" --manufacturer "$device_manufacturer" --ifs wlan0 --port $port_onvif \
-	--scope onvif://www.onvif.org/Profile/S --firmware_ver "LSCamoflash $device_version" --hardware_id "$HARDWARE_ID" --serial_num "$anyka_md5" \
+	--scope $ONVIF_SCOPE --firmware_ver "LSCamoflash $device_version" --hardware_id "$HARDWARE_ID" --serial_num "$anyka_md5" \
 	--ptz --move_left "eval $LEFT" --move_right "eval $RIGHT" --move_up "eval $UP" --move_down "eval $DOWN" $SNAPURL \
 	$ONVIF_PROFILE_0 \
 	$ONVIF_PROFILE_1
 else
 	LD_LIBRARY_PATH=$sd_lib:/lib:/usr/lib $sd_sbin/onvif_srvd \
 	--no_fork --pid_file /var/run/onvif_srvd.pid --model "$device_model" --manufacturer "$device_manufacturer" --ifs wlan0 --port $port_onvif \
-	--scope onvif://www.onvif.org/Profile/S --firmware_ver "LSCamoflash $device_version" --hardware_id "$HARDWARE_ID" --serial_num "$anyka_md5" $SNAPURL \
+	--scope $ONVIF_SCOPE --firmware_ver "LSCamoflash $device_version" --hardware_id "$HARDWARE_ID" --serial_num "$anyka_md5" $SNAPURL \
 	$ONVIF_PROFILE_0 \
 	$ONVIF_PROFILE_1
 fi

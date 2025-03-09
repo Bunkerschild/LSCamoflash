@@ -762,8 +762,11 @@ $(STAGING_DIR)/$(SDROOT)/sbin/onvif_srvd: $(PACKAGES_DIR)/$(ONVIF)/build/onvif_s
 	@mkdir -p $(STAGING_DIR)/$(SDROOT)/sbin/ || true
 	@cp $(PACKAGES_DIR)/$(ONVIF)/build/onvif_srvd $@
 	@touch $@
+	
+$(STAGING_DIR)/$(SDROOT)/etc/onvif.token: $(STAGING_DIR)/$(SDROOT)/sbin/onvif_srvd
+	@dd if=/dev/urandom count=32 2>/dev/null | sha512sum | awk '{print $1}' > $(STAGING_DIR)/$(SDROOT)/etc/onvif.token
 
-onvif: $(STAGING_DIR)/$(SDROOT)/sbin/onvif_srvd
+onvif: $(STAGING_DIR)/$(SDROOT)/etc/onvif.token
 
 onvif-clean:
 	@rm -rf $(PACKAGES_DIR)/$(ONVIF)/build
@@ -871,12 +874,11 @@ opus-clean:
 $(PACKAGES_DIR)/$(FFMPEG)/ffbuild/config.mak:
 	@cp $(SRC_DIR)/patches/$(FFMPEG)/configure $(PACKAGES_DIR)/$(FFMPEG)/configure
 	@cd $(PACKAGES_DIR)/$(FFMPEG); ./configure --prefix=$(SDROOT) --arch=arm --cross-prefix=$(HOST)- --target-os=linux \
-	--extra-cflags="-Dstatic_assert=_Static_assert -I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/usr/include -I$(STAGING_DIR)/$(SDROOT)/include/opus -I$(STAGING_DIR)/$(SDROOT)/include/openjpeg-2.5" \
-	--extra-ldflags="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib -lgmp -lgcrypt -lgpg-error -lilbc -lopenjp2 -lopus" \
-	--disable-static --enable-shared --enable-cross-compile --stdc=c11 --disable-doc --enable-zlib --enable-gmp --enable-gcrypt --enable-gpl --enable-version3 --enable-libilbc --enable-libopus --disable-encoders --disable-decoders --disable-protocols \
-	--enable-decoder=adpcm_g722 --enable-decoder=adpcm_g726 --enable-decoder=adpcm_g7261e --enable-decoder=aac --enable-decoder=aac_latm --enable-decoder=aac_mediacodec --enable-decoder=ac3 --enable-decoder=ac3_at --enable-decoder=ac3_fixed --enable-decoder=flv --enable-decoder=flac --enable-decoder=g729 --enable-decoder=gif --enable-decoder=h261 --enable-decoder=h263 --enable-decoder=h263_v4l2m2m --enable-decoder=h263i --enable-decoder=h263p --enable-decoder=h264 --enable-decoder=h264_cuvid --enable-decoder=h264_mediacodec --enable-decoder=h264_v4l2m2m --enable-decoder=hevc --enable-decoder=hevc_cuvid --enable-decoder=hevc_mediacodec --enable-decoder=hevc_v4l2m2m --enable-decoder=ilbc --enable-decoder=ilbc_at --enable-decoder=mjpeg --enable-decoder=mjpeg_cuvid --enable-decoder=mjpegb --enable-decoder=mp1 --enable-decoder=mp1_at --enable-decoder=mp1float --enable-decoder=mp2 --enable-decoder=mp2_at --enable-decoder=mp2float --enable-decoder=mp3 --enable-decoder=mp3_at --enable-decoder=mp3_mediacodec --enable-decoder=mp3adu --enable-decoder=mp3adufloat --enable-decoder=mp3float --enable-decoder=mp3on4 --enable-decoder=mp3on4float --enable-decoder=mpeg1_cuvid --enable-decoder=mpeg1_v4l2m2m --enable-decoder=mpeg1video --enable-decoder=mpeg2_cuvid --enable-decoder=mpeg2_mediacodec --enable-decoder=mpeg2_v4l2m2m --enable-decoder=mpeg2video --enable-decoder=mpeg4 --enable-decoder=mpeg4_cuvid --enable-decoder=mpeg4_mediacodec --enable-decoder=mpeg4_v4l2m2m --enable-decoder=mpegvideo --enable-decoder=pcm_alaw --enable-decoder=pcm_alaw_at --enable-decoder=pcm_mulaw --enable-decoder=pcm_mulaw_at --enable-decoder=speex --enable-decoder=text --enable-decoder=vp7 --enable-decoder=vp8 --enable-decoder=vp8_cuvid --enable-decoder=vp8_mediacodec --enable-decoder=vp8_v4l2m2m --enable-decoder=vp9 --enable-decoder=vp9_cuvid --enable-decoder=vp9_mediacodec --enable-decoder=vp9_v4l2m2m --enable-decoder=webp --enable-decoder=wmav1 --enable-decoder=wmav2 --enable-decoder=yuv4 --enable-decoder=zlib \
-	--enable-encoder=aac --enable-encoder=aac_at --enable-encoder=ac3 --enable-encoder=ac3_fixed --enable-encoder=ac3_mf --enable-encoder=adpcm_g722 --enable-encoder=adpcm_g726 --enable-encoder=adpcm_7261e --enable-encoder=flac --enable-encoder=flv --enable-encoder=h261 --enable-encoder=h263 --enable-encoder=h263_v4l2m2m --enable-encoder=h263p --enable-encoder=h264_mediacodec --enable-encoder=h264_v4l2m2m --enable-encoder=hevc_mediacodec --enable-encoder=hevc_v4l2m2m --enable-encoder=ilbc_at --enable-encoder=mjpeg --enable-encoder=mp2 --enable-encoder=mp2fixed --enable-encoder=mp3_mf --enable-encoder=mpeg1video --enable-encoder=mpeg2video --enable-encoder=mpeg4 --enable-encoder=mpeg4_mediacodec --enable-encoder=mpeg4_v4l2m2m --enable-encoder=opus --enable-encoder=pcm_alaw --enable-encoder=pcm_alaw_at --enable-encoder=pcm_mulaw --enable-encoder=pcm_mulaw_at --enable-encoder=png --enable-encoder=rawvideo --enable-encoder=text --enable-encoder=vorbis --enable-encoder=vp8_mediacodec --enable-encoder=vp8_v4l2m2m --enable-encoder=vp9_mediacodec --enable-encoder=wacpack --enable-encoder=wmav1 --enable-encoder=wmav2 --enable-encoder=yuv4 --enable-encoder=zlib \
-	--enable-protocol=concat --enable-protocol=concaf --enable-protocol=data --enable-protocol=fd --enable-protocol=file --enable-protocol=hls --enable-protocol=http --enable-protocol=https --enable-protocol=pipe --enable-protocol=prompeg --enable-protocol=rtmp --enable-protocol=rtmpe --enable-protocol=rtmps --enable-protocol=rtmpt --enable-protocol=rtmpte --enable-protocol=rtmpts --enable-protocol=trp --enable-protocol=sctp --enable-protocol=srtp --enable-protocol=subfile --enable-protocol=tcp --enable-protocol=tee --enable-protocol=tls --enable-protocol=udp --enable-protocol=unix
+	--extra-cflags="-Dstatic_assert=_Static_assert -I$(STAGING_DIR)/$(SDROOT)/include -I$(STAGING_DIR)/$(SDROOT)/usr/include" \
+	--extra-ldflags="-L$(STAGING_DIR)/$(SDROOT)/lib -L$(STAGING_DIR)/$(SDROOT)/usr/lib" \
+	--disable-static --enable-shared --enable-cross-compile --stdc=c11 --enable-gpl --enable-version3 --enable-small --enable-avcodec --enable-avformat --enable-swresample --enable-swscale \
+	--disable-network --disable-filters --disable-indevs --disable-outdevs --disable-zlib --disable-bzlib --disable-doc --disable-encoders --disable-decoders --disable-protocols --disable-debug \
+	--enable-decoder=h264,mpeg4,mp3,mjpeg --enable-encoder=h264,mpeg4,mp3,mjpeg --enable-muxer=h264,mpeg4,mp3,mjpeg,ts --enable-demuxer=h264,mpeg4,mp3,mjpeg,ts --enable-protocol=file,pipe --enable-filter=scale
 
 $(PACKAGES_DIR)/$(FFMPEG)/ffprobe: $(PACKAGES_DIR)/$(FFMPEG)/ffbuild/config.mak
 	@make -C $(PACKAGES_DIR)/$(FFMPEG) -j$(nproc)

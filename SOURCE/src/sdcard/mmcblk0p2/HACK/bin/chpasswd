@@ -32,12 +32,12 @@ else
 	else
 		mount /dev/mmcblk0p1 $mnt && cp -f /etc/config/shadow $mnt/shadow && umount $mnt
 	fi
-	$cat $root/etc/httpd.conf | grep -v "^/:root" > /tmp/httpd.conf
-	echo "Writing new root password line to httpd.conf"
-	echo "/:root:$NEWROOT" >> /tmp/httpd.conf
-	$mv /tmp/httpd.conf $root/etc/httpd.conf
+#	$cat $root/etc/httpd.conf | grep -v "^/:root" > /tmp/httpd.conf
+#	echo "Writing new root password line to httpd.conf"
+#	echo "/:root:$NEWROOT" >> /tmp/httpd.conf
+#	$mv /tmp/httpd.conf $root/etc/httpd.conf
 	echo "Password also changed on SD cards shadow and httpd.conf"
-	httpdpid=`$ps awx | $grep httpd | $grep -v grep | $awk '{print $1}'`
-	kill -KILL $httpdpid
-	echo "Please wait a minute for httpd to restart"
+#	httpdpid=`$ps awx | $grep httpd | $grep -v grep | $awk '{print $1}'`
+#	kill -KILL $httpdpid
+#	echo "Please wait a minute for httpd to restart"
 fi
