@@ -1,8 +1,10 @@
 #!/bin/sh
 
-. ./validate_session.cgi
+root="/tmp/sd/HACK"
 
-echo -e "Content-type: application/json\r"
-echo -e "\r"
+. ./common.cgi
 
-echo "{\"hostname\":\"$($hostname)\",\"fqdn\":\"$($hostname -f)\"}"
+send_header application/json
+is_private_ip $IPADDRESS && \
+echo "{\"hostname\":\"$($hostname)\",\"fqdn\":\"$($hostname -f)\",\"masked\":0}" || \
+echo "{\"hostname\":\"camera\",\"fqdn\":\"camera.local\",\"masked\":1}"

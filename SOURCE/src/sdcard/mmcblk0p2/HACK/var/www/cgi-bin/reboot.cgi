@@ -1,9 +1,9 @@
 #!/bin/sh
 
-. ./validate_session.cgi
+root="/tmp/sd/HACK"
 
-echo -e "Content-type: application/json\r"
-echo -e "\r"
+. ./common.cgi
 
-echo "{\"reboot\":\"ok\"}"
-reboot
+send_header application/json
+sleep 3 && reboot & send_json reboot=1
+

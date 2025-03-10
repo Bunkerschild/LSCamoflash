@@ -1,25 +1,19 @@
 #!/bin/sh
 
-. ./validate_session.cgi
+root="/tmp/sd/HACK"
 
-echo -e "Content-type: text/plain\r"
-echo -e "\r"
+. ./common.cgi
 
-TMP=${REQUEST_URI#*dist=};
-DIST=${TMP%&*}
-TMP=${REQUEST_URI#*dir=};
-DIR=${TMP%&*}
+send_header application/json
 
-[ "$DIR" = "$REQUEST_URI" ] && DIR=""
-[ "$DIST" = "$REQUEST_URI" ] && DIST=""
+DIST=`parse_keyval '&' "$QUERY_STRING" dist`
+DIR=`parse_keyval '&' "$QUERY_STRING" dir`
 
 if [ "$DIST" = "" -a "$DIR" = "" ]; then
-	if [ "$device_has_ptz" = "1" ]; then
-		echo "yes"
-	else
-		echo "no"
-	fi
+	send_json has_ptz=$device_has_ptz
 	exit
 fi
 
-$sd_sbin/ptz.sh $DIR $DIST
+did_ptz=0
+$sd_sbin/ptz.sh $DIR $DIST 2>/dev/null && did_ptz=1
+send_json has_ptz=$device_has_ptz did_ptz=$did_ptz dir=$DIR dist=$DIST 

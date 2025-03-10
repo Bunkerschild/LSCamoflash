@@ -12,7 +12,7 @@ body {
     left: 0px;
     width: 100vw;
     height: 100vh;
-    background-image: url(/images/background.jpg);
+    background-image: url(/cgi-bin/background.cgi);
     background-repeat: no-repeat;
     background-size: cover;
     filter: blur(20px) brightness(1.8) contrast(1.2) grayscale(100%);

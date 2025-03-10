@@ -24,6 +24,6 @@ mkdir -p $sdtmp >/dev/null 2>&1
 cp -f $stream $sdtmp/snapshot.h264
 touch $sd_www/snapshot_$ext.lock >/dev/null 2>&1
 ffmpeg -r 15 -i $sdtmp/snapshot.h264 -c:v copy -bsf:v h264_mp4toannexb $sdtmp/snapshot.ts -y && \
-ffmpeg -i $sdtmp/snapshot.ts -frames:v 1 $sd_www/snapshot_$ext.jpg -y
+ffmpeg -i $sdtmp/snapshot.ts -frames:v 1 $sd_www/images/snapshot_$ext.jpg -y
 rm -rf $sdtmp >/dev/null 2>&1
 rm -f $sd_www/snapshot_$ext.lock >/dev/null 2>&1

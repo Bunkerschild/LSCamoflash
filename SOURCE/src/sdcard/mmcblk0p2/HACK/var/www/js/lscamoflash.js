@@ -245,6 +245,9 @@ function sessionCallback(error, sessionId) {
         $("#navbarLogout").removeClass("d-none");
         $("#containerCam").removeClass("d-none");
         updateSession(sessionId);
+        getHostname();
+        checkMotor();
+        fetchStreamURL();
     }
 }
 
@@ -284,10 +287,6 @@ function fallbackCopyToClipboard(text) {
 }
 
 $(document).ready(function() {
-    getHostname();
-    checkMotor();
-    fetchStreamURL();
-    
     cleanupSessions();
 
     address = window.location.hostname;
