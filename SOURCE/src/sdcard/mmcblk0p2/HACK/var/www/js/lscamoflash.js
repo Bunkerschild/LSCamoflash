@@ -5,6 +5,7 @@ var sessionid = null;
 var streamurl = null;
 var hostname = null;
 var control = null;
+var address = null;
 var fqdn = null;
 var dist = 15;
 
@@ -257,13 +258,39 @@ function getSessionCallback(error, sessionData) {
     sessionCallback(error, sessionId);
 }
 
+function copyToClipboard(text) {
+    if (!navigator.clipboard) {
+        console.error("Clipboard API not available, using fallback.");
+        fallbackCopyToClipboard(text);
+        return;
+    }
+    
+    navigator.clipboard.writeText(text).then(function() {
+        console.log("Text copied to clipboard: " + text);
+    }).catch(function(err) {
+        console.error("Clipboard copy error:", err);
+        fallbackCopyToClipboard(text);
+    });
+}
+
+function fallbackCopyToClipboard(text) {
+    var textArea = document.createElement("textarea");
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textArea);
+    alert("Text copied to clipboard (fallback)");
+}
+
 $(document).ready(function() {
     getHostname();
     checkMotor();
     fetchStreamURL();
     
     cleanupSessions();
-    
+
+    address = window.location.hostname;
     sessionid = getCookie("sessionid");
     
     if (sessionid !== null) {
@@ -329,6 +356,42 @@ $(document).ready(function() {
                 }
             }
         }).html("Are you sure you want to restart IPC?");
+        $("#confirmDialog").dialog("open");
+    });
+    
+    $("#btn-rtsp-local").click(function() {
+        var link = "rtsp://" + address + ":554/main_ch";
+        $("#confirmDialog").dialog({
+            autoOpen: false,
+            modal: true,
+            title: "RTSP Link",
+            buttons: {
+                "Copy link": function() {
+                    copyToClipboard(link);
+                },
+                "Close": function() {
+                    $(this).dialog("close");
+                }
+            }
+        }).html(link);
+        $("#confirmDialog").dialog("open");
+    });
+
+    $("#btn-onvif-local").click(function() {
+        var link = "onvif://" + address + ":5000/";
+        $("#confirmDialog").dialog({
+            autoOpen: false,
+            modal: true,
+            title: "ONVIF Link",
+            buttons: {
+                "Copy link": function() {
+                    copyToClipboard(link);
+                },
+                "Close": function() {
+                    $(this).dialog("close");
+                }
+            }
+        }).html(link);
         $("#confirmDialog").dialog("open");
     });
 });

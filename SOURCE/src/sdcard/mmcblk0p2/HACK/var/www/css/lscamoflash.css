@@ -6,16 +6,17 @@ body {
     height: 100vh;
     background-color: #f8f9fa;
 }
-.background-image {
+#background-image {
     position: fixed;
     top: 0px;
     left: 0px;
-    right: 0px;
-    bottom: 0px;
-    background-image: url(/cgi-bin/snap_human.cgi);
+    width: 100vw;
+    height: 100vh;
+    background-image: url(/images/background.jpg);
     background-repeat: no-repeat;
     background-size: cover;
-    filter: blur(10px);
+    filter: blur(20px) brightness(1.8) contrast(1.2);
+    z-index: -1;
 }
 .container-box {
     width: 100%;
@@ -23,6 +24,9 @@ body {
     background: white;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.container-loading {
+    width: 50%;
 }
 #containerLogin {
     max-width: 400px;

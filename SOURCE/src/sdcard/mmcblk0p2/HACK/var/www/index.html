@@ -56,7 +56,7 @@
     </nav>
     
     <!-- Wait -->
-    <div class="cam-container" id="containerWait">
+    <div class="container-box container-loading" id="containerWait">
         <h2 class="text-center">L o a d i n g</h2>
         <h3 class="text-center" id="loading">&nbsp;</h3>
     </div>
@@ -123,20 +123,21 @@
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">RTSP-Stream</h5>
-                        <p class="card-text">Get local or cloud RTSP address.</p>
-                        <button class="btn btn-success" id="btn-rtsp-local">RTSP (local)</button>
-                        <button class="btn btn-secondary" id="btn-rtsp-cloud">RTSP (cloud)</button>
+                        <h5 class="card-title">Local streams</h5>
+                        <p class="card-text">Get a local stream address.</p>
+                        <button class="btn btn-success" id="btn-rtsp-local">Local RTSP</button>
+                        <button class="btn btn-primary" id="btn-onvif-local">Local ONVIF</button>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Other streams</h5>
-                        <p class="card-text">Get cloud FLV or HLS address.</p>
-                        <button class="btn btn-secondary" id="btn-flv-cloud">FLV (cloud)</button>
-                        <button class="btn btn-secondary" id="btn-hls-cloud">HLS (cloud)</button>
+                        <h5 class="card-title">Cloud streams</h5>
+                        <p class="card-text">Get a cloud stream address.</p>
+                        <button class="btn btn-secondary" id="btn-rtsp-cloud">RTSP</button>
+                        <button class="btn btn-secondary" id="btn-hls-cloud">HLS</button>
+                        <button class="btn btn-secondary" id="btn-flv-cloud">FLV</button>
                     </div>
                 </div>
             </div>
