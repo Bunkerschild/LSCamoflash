@@ -79,34 +79,73 @@
     
     <!-- Cam -->
     <div class="container-box d-none" id="containerCam">
-        <h2 class="text-center" id="connecting">&nbsp;</h2>
-        <h3 class="text-center" id="hostname">C o n n e c t i n g</h3>
-        <div id="video-container" class="d-none">
-            <video id="hls-player" controls autoplay muted></video>
+        <div class="row">
+            <div class="col-12">
+                <h2 class="text-center" id="connecting">&nbsp;</h2>
+                <h3 class="text-center" id="hostname">C o n n e c t i n g</h3>
+                <div id="video-container" class="d-none">
+                    <video id="hls-player" controls autoplay muted></video>
+                </div>
+                <div id="ptz-container" class="d-none">
+                    <div id="motor-container" class="d-none">
+                        <div id="motor-controls">
+                            <div id="motor-left-container" class="motor-direction">
+                                <button class="btn btn-primary w-25 ptz-button" id="ptz-left">&lArr;</button>
+                            </div>
+                            <div id="motor-updown-container" class="motor-direction">
+                                <button class="btn btn-primary w-25 ptz-button" id="ptz-up">&uArr;</button>
+                                <button class="btn btn-primary w-25 ptz-button" id="ptz-down">&dArr;</button>
+                            </div>
+                            <div id="motor-right-container" class="motor-direction">
+                                <button class="btn btn-primary w-25 ptz-button" id="ptz-right">&rArr;</button>
+                            </div>
+                            <div id="ptz-slider-container">
+                                <label for="ptz-speed">PTZ Distance per Click:</label>
+                                <input type="range" id="ptz-dist" min="10" max="100" step="1" value="20">
+                                <span id="ptz-dist-value">20</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div id="ptz-container" class="d-none">
-            <div id="motor-container" class="d-none">
-                <div id="motor-controls">
-                    <div id="motor-left-container" class="motor-direction">
-                        <button class="btn btn-primary w-25 ptz-button" id="ptz-left">&lArr;</button>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Device-Control</h5>
+                        <p class="card-text">Reboot device or restart IPC.</p>
+                        <button class="btn btn-danger" id="btn-reboot-now">Reboot device</button>
+                        <button class="btn btn-warning" id="btn-restart-ipc">Restart IPC</button>
                     </div>
-                    <div id="motor-updown-container" class="motor-direction">
-                        <button class="btn btn-primary w-25 ptz-button" id="ptz-up">&uArr;</button>
-                        <button class="btn btn-primary w-25 ptz-button" id="ptz-down">&dArr;</button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">RTSP-Stream</h5>
+                        <p class="card-text">Get local or cloud RTSP address.</p>
+                        <button class="btn btn-success" id="btn-rtsp-local">RTSP (local)</button>
+                        <button class="btn btn-secondary" id="btn-rtsp-cloud">RTSP (cloud)</button>
                     </div>
-                    <div id="motor-right-container" class="motor-direction">
-                        <button class="btn btn-primary w-25 ptz-button" id="ptz-right">&rArr;</button>
-                    </div>
-                    <div id="ptz-slider-container">
-                        <label for="ptz-speed">PTZ Distance per Click:</label>
-                        <input type="range" id="ptz-dist" min="10" max="100" step="1" value="20">
-                        <span id="ptz-dist-value">20</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Other streams</h5>
+                        <p class="card-text">Get cloud FLV or HLS address.</p>
+                        <button class="btn btn-secondary" id="btn-flv-cloud">FLV (cloud)</button>
+                        <button class="btn btn-secondary" id="btn-hls-cloud">HLS (cloud)</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     
+    <!-- Reboot dialog -->
+    <div id="confirmDialog" class="d-none"></div>
+            
     <!-- Bootstrap & jQuery Scripts -->
     <script src="/js/jquery-3.7.1.min.js"></script>
     <script src="/js/jquery-ui.min.js"></script>

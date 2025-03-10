@@ -4,6 +4,7 @@ var loggedin = false;
 var sessionid = null;
 var streamurl = null;
 var hostname = null;
+var control = null;
 var fqdn = null;
 var dist = 15;
 
@@ -208,13 +209,20 @@ function doReboot() {
     });
 }
 
+function doRestart() {
+    $.ajax({
+        url: "/cgi-bin/restart.cgi",
+        type: "GET"
+    });
+}
+
 function sessionDestroy(error, success) {
     if (error === null) {
         loggedin = false;
         sessionid = null;
         deleteCookie("sessionid");
-        $("#navbarLogout").addClass("d-none");
         $("#containerCam").addClass("d-none");
+        $("#navbarLogout").addClass("d-none");
         $("#navbarLogin").removeClass("d-none");
         $("#containerLogin").removeClass("d-none");
     }
@@ -232,7 +240,7 @@ function sessionCallback(error, sessionId) {
         sessionid = sessionId;
         setCookie("sessionid", sessionId, 1);
         loggedin = true;
-        $("#containerWait").addClass("d-none");        
+        $("#containerWait").addClass("d-none");
         $("#navbarLogout").removeClass("d-none");
         $("#containerCam").removeClass("d-none");
         updateSession(sessionId);
@@ -286,5 +294,41 @@ $(document).ready(function() {
     $("#ptz-dist").on("input", function() {
         dist = $(this).val();
         $("#ptz-dist-value").html(dist);
+    });
+    
+    $("#btn-reboot-now").click(function() {
+        $("#confirmDialog").dialog({
+            autoOpen: false,
+            modal: true,
+            title: "Reboot device",
+            buttons: {
+                "Yes, reboot": function() {
+                    $(this).dialog("close");
+                    doReboot();
+                },
+                "No": function() {
+                    $(this).dialog("close");
+                }
+            }
+        }).html("Are you sure you want to reboot the device?");
+        $("#confirmDialog").dialog("open");
+    });
+    
+    $("#btn-restart-ipc").click(function() {
+        $("#confirmDialog").dialog({
+            autoOpen: false,
+            modal: true,
+            title: "Restart IPC",
+            buttons: {
+                "Yes, restart": function() {
+                    $(this).dialog("close");
+                    doRestart();
+                },
+                "No": function() {
+                    $(this).dialog("close");
+                }
+            }
+        }).html("Are you sure you want to restart IPC?");
+        $("#confirmDialog").dialog("open");
     });
 });
