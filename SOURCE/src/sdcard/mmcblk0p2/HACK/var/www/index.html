@@ -142,10 +142,34 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title" id="cpu-title">CPU: 0%</h5>
+                        <div class="progress-container">
+                            <span class="progress-label" id="cpu-label">Calculating...</span>
+                            <div id="cpu-progress" class="progressbar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title" id="ram-title">RAM: 0%</h5>
+                        <div class="progress-container">
+                            <span class="progress-label" id="ram-label">Calculating...</span>
+                            <div id="ram-progress" class="progressbar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     
     <!-- Reboot dialog -->
-    <div id="confirmDialog" class="d-none"></div>
+    <div id="confirmDialog"></div>
             
     <!-- Bootstrap & jQuery Scripts -->
     <script src="/js/jquery-3.7.1.min.js"></script>

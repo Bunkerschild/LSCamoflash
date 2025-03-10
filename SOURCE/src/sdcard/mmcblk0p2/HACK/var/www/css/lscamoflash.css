@@ -6,6 +6,9 @@ body {
     height: 100vh;
     background-color: #f8f9fa;
 }
+.bg-dark {
+    background-color: rgba(30, 30, 30, 0.7) !important;
+}
 #background-image {
     position: fixed;
     top: 0px;
@@ -32,7 +35,8 @@ body {
     max-width: 400px;
 }
 #containerCam {
-    max-width: 980px;
+    max-width: 960px;
+    margin-top: 180px;
 }
 #hls-player {
     width: 100%;
@@ -82,4 +86,6 @@ body {
 .card {
     margin-top: 20px;
 }
-        
+.progressbar {
+    height: 16px !important;
+}        

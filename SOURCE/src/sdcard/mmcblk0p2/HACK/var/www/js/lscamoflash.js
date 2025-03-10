@@ -144,6 +144,33 @@ function getHostname() {
     });
 }
 
+function getSysinfo() {
+    $.ajax({
+        url: "/cgi-bin/sysinfo.cgi",
+        type: "GET", 
+        dataType: "json",
+        success: function(data) {            
+            let cpuUsage = data.cpu.usage_percent;
+            let ramUsed = (data.memory.total_kB - data.memory.free_kB);
+            let ramTotal = data.memory.total_kB;
+            let ramPercent = Math.round((ramUsed / ramTotal) * 100);
+            let load1Min = data.load.min1;
+            let load5Min = data.load.min5;
+            let load15Min = data.load.min15;
+            
+            $("#cpu-progress").progressbar("value", cpuUsage);
+            $("#cpu-title").text("CPU: " + cpuUsage + "%");
+            $("#cpu-label").text("Load: " + load1Min + ", " + load5Min + ", " + load15Min);
+
+            $("#ram-progress").progressbar("value", ramPercent);
+            $("#ram-title").text("RAM: " + ramPercent + "%");
+            $("#ram-label").text("Used: " + Math.round(ramUsed / 1024) + "MB / " + Math.round(ramTotal / 1024) + "MB");
+            
+            setTimeout('getSysinfo()', 30000);
+        }
+    });
+}
+
 function fetchStreamURL() {
     $.ajax({
         url: "/cgi-bin/streamurl.cgi",
@@ -160,13 +187,28 @@ function fetchStreamURL() {
     });
 }
 
+function getRemoteURL(urlType) {
+    $.ajax({
+        url: "/cgi-bin/streamurl.cgi",
+        type: "GET", 
+        dataType: "json",
+        data: {
+            type: urlType,
+            source: "remote"
+        },
+        success: function(response) {
+            $("#confirmDialog").html(response.url);
+        }
+    });
+}
+
 function checkMotor() {
     $.ajax({
         url: "/cgi-bin/motor.cgi",
         type: "GET", 
-        dataType: "text",
+        dataType: "json",
         success: function(response) {
-            if (response.trim() == "yes") {
+            if (response.has_ptz == "1") {
                 motorized = true;
                 $("#motor-container").removeClass("d-none");
             }
@@ -187,7 +229,7 @@ function setMotor(Dir, Dist) {
     $.ajax({
         url: "/cgi-bin/motor.cgi",
         type: "GET",
-        dataType: "text", 
+        dataType: "json", 
         data: {
             dist: Dist,
             dir: Dir
@@ -244,7 +286,9 @@ function sessionCallback(error, sessionId) {
         $("#containerWait").addClass("d-none");
         $("#navbarLogout").removeClass("d-none");
         $("#containerCam").removeClass("d-none");
+        $("#cpu-progress, #ram-progress").progressbar({ value: 0, min: 0, max: 100 });
         updateSession(sessionId);
+        getSysinfo();
         getHostname();
         checkMotor();
         fetchStreamURL();
@@ -283,7 +327,6 @@ function fallbackCopyToClipboard(text) {
     textArea.select();
     document.execCommand("copy");
     document.body.removeChild(textArea);
-    alert("Text copied to clipboard (fallback)");
 }
 
 $(document).ready(function() {
@@ -392,5 +435,59 @@ $(document).ready(function() {
             }
         }).html(link);
         $("#confirmDialog").dialog("open");
+    });
+
+    $("#btn-rtsp-cloud").click(function() {
+        $("#confirmDialog").dialog({
+            autoOpen: false,
+            modal: true,
+            title: "RTSP Cloud Link",
+            buttons: {
+                "Copy link": function() {
+                    copyToClipboard(link);
+                },
+                "Close": function() {
+                    $(this).dialog("close");
+                }
+            }
+        }).html("Generating URL...");
+        $("#confirmDialog").dialog("open");
+        getRemoteURL("RTSP");
+    });
+
+    $("#btn-hls-cloud").click(function() {
+        $("#confirmDialog").dialog({
+            autoOpen: false,
+            modal: true,
+            title: "HLS Cloud Link",
+            buttons: {
+                "Copy link": function() {
+                    copyToClipboard(link);
+                },
+                "Close": function() {
+                    $(this).dialog("close");
+                }
+            }
+        }).html("Generating URL...");
+        $("#confirmDialog").dialog("open");
+        getRemoteURL("HLS");
+    });
+
+    $("#btn-flv-cloud").click(function() {
+        $("#confirmDialog").dialog({
+            autoOpen: false,
+            modal: true,
+            title: "FLV Cloud Link",
+            buttons: {
+                "Copy link": function() {
+                    copyToClipboard(link);
+                },
+                "Close": function() {
+                    $(this).dialog("close");
+                }
+            }
+        }).html("Generating URL...");
+        $("#confirmDialog").dialog("open");
+        getRemoteURL("FLV");
     });
 });
