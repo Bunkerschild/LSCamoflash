@@ -81,7 +81,7 @@ ONVIF_PROFILE_1=""
 HARDWARE_ID=`cat $sys_config/wifimac.txt`
 
 if [ "$human_filter_enable" = "1" ]; then
-	SNAPURL="--snapurl http://$IP_ADDR:$port_http/cgi-bin/snap_human.cgi?token=$ONVIF_SNAP_TOKEN"
+	SNAPURL="--snapurl http://$IP_ADDR:$port_http/cgi-bin/snapshot.cgi?token=$ONVIF_SNAP_TOKEN"
 else
 	SNAPURL=""
 fi
