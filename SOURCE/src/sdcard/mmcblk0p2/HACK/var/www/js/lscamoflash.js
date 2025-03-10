@@ -1,18 +1,24 @@
+var motorlock = false;
 var motorized = false;
 var loggedin = false;
 var sessionid = null;
 var streamurl = null;
 var hostname = null;
 var fqdn = null;
+var dist = 15;
 
 function initHlsPlayer() {
     if (Hls.isSupported()) {
         const hls = new Hls();
-        hls.loadSource(streamUrl);
+        const video = document.getElementById('hls-player');
+        hls.loadSource(streamurl);
         hls.attachMedia(video);
         hls.on(Hls.Events.MANIFEST_PARSED, function() {
+            $("#connecting").fadeOut();
+            $("#hostname").html(hostname);
+            $("#video-container").removeClass("d-none");
+            $("#ptz-container").removeClass("d-none");
             $("#hls-player").show();
-            document.getElementById('hls-player').play();
         });
     }
 }
@@ -158,9 +164,39 @@ function checkMotor() {
         type: "GET", 
         dataType: "text",
         success: function(response) {
-            if (response == "yes") {
+            if (response.trim() == "yes") {
                 motorized = true;
+                $("#motor-container").removeClass("d-none");
             }
+        }
+    });
+}
+
+function setMotor(Dir, Dist) {
+    if (!motorized)
+        return false;
+        
+    if (motorlock)
+        return false;
+        
+    motorlock = true;
+    $(".ptz-button").addClass("disabled");
+        
+    $.ajax({
+        url: "/cgi-bin/motor.cgi",
+        type: "GET",
+        dataType: "text", 
+        data: {
+            dist: Dist,
+            dir: Dir
+        },
+        success: function(response) {
+            motorlock = false;
+            $(".ptz-button").removeClass("disabled");
+        },
+        error: function(xhr, status, error) {
+            motorlock = false;
+            $(".ptz-button").removeClass("disabled");
         }
     });
 }
@@ -240,5 +276,15 @@ $(document).ready(function() {
     
     $("#logoutLink").click(function() {
         doLogout(sessionid, sessionDestroy);
+    });
+    
+    $(".ptz-button").click(function() {
+        var dir = $(this).attr("id").substr(4);        
+        setMotor(dir, dist);        
+    });
+    
+    $("#ptz-dist").on("input", function() {
+        dist = $(this).val();
+        $("#ptz-dist-value").html(dist);
     });
 });

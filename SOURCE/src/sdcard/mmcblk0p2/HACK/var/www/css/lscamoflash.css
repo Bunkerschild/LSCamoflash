@@ -6,25 +6,72 @@ body {
     height: 100vh;
     background-color: #f8f9fa;
 }
-.login-container {
+.background-image {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    background-image: url(/cgi-bin/snap_human.cgi);
+    background-repeat: no-repeat;
+    background-size: cover;
+    filter: blur(10px);
+}
+.container-box {
     width: 100%;
-    max-width: 400px;
     padding: 30px;
     background: white;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
-#video-container {
-    width: 100%;
-    max-width: 800px;
-    background-color: #000;
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.1);
-    position: relative;
+#containerLogin {
+    max-width: 400px;
+}
+#containerCam {
+    max-width: 980px;
 }
 #hls-player {
     width: 100%;
     border-radius: 10px;
     display: none;
+}
+#loading {
+    background-image: url(/images/loading.gif);
+    background-repeat: no-repeat;
+    background-position: center center;
+    min-height: 64px;
+}
+#connecting {
+    background-image: url(/images/connecting.gif);
+    background-repeat: no-repeat;
+    background-position: center center;
+    min-height: 64px;
+}
+#motor-controls {
+    display: flex;
+    padding-top: 20px;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+#motor-updown-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+#motor-left-container,
+#motor-right-container {
+    display: flex;
+    align-items: center;
+}
+.ptz-button {
+    min-width: 50px;
+}
+#ptz-slider-container {
+    text-align: center;
+    margin-top: 15px;
+}
+#ptz-dist {
+    width: 80%;
 }

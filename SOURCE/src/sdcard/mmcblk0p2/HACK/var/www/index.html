@@ -20,6 +20,8 @@
 
 </head>
 <body>
+    <!-- Background-Image -->
+    <div id="background-image"></div>
     
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top d-none" id="navbarLogin">
@@ -55,11 +57,12 @@
     
     <!-- Wait -->
     <div class="cam-container" id="containerWait">
-        <h2 class="text-center">L o a d i n g . . .</h2>
+        <h2 class="text-center">L o a d i n g</h2>
+        <h3 class="text-center" id="loading">&nbsp;</h3>
     </div>
 
     <!-- Login Form -->
-    <div class="login-container d-none" id="containerLogin">
+    <div class="container-box d-none" id="containerLogin">
         <h2 class="text-center">Login</h2>
         <form id="loginForm">
             <div class="mb-3">
@@ -75,10 +78,32 @@
     </div>
     
     <!-- Cam -->
-    <div class="cam-container d-none" id="containerCam">
-        <h2 class="text-center">Cam</h2>
-        <div id="video-container">
-            <video id="video" id="hls-player" controls autoplay muted></video>
+    <div class="container-box d-none" id="containerCam">
+        <h2 class="text-center" id="connecting">&nbsp;</h2>
+        <h3 class="text-center" id="hostname">C o n n e c t i n g</h3>
+        <div id="video-container" class="d-none">
+            <video id="hls-player" controls autoplay muted></video>
+        </div>
+        <div id="ptz-container" class="d-none">
+            <div id="motor-container" class="d-none">
+                <div id="motor-controls">
+                    <div id="motor-left-container" class="motor-direction">
+                        <button class="btn btn-primary w-25 ptz-button" id="ptz-left">&lArr;</button>
+                    </div>
+                    <div id="motor-updown-container" class="motor-direction">
+                        <button class="btn btn-primary w-25 ptz-button" id="ptz-up">&uArr;</button>
+                        <button class="btn btn-primary w-25 ptz-button" id="ptz-down">&dArr;</button>
+                    </div>
+                    <div id="motor-right-container" class="motor-direction">
+                        <button class="btn btn-primary w-25 ptz-button" id="ptz-right">&rArr;</button>
+                    </div>
+                    <div id="ptz-slider-container">
+                        <label for="ptz-speed">PTZ Distance per Click:</label>
+                        <input type="range" id="ptz-dist" min="10" max="100" step="1" value="20">
+                        <span id="ptz-dist-value">20</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     
