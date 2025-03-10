@@ -14,12 +14,12 @@ DB_SCRIPT="/tmp/sd/HACK/sbin/webui_db.sh"
 IPADDRESS="${REMOTE_ADDR:-127.0.0.1}"
 
 parse_keyval() {
+	IFS="$1"
 	KEYVALS="$2"
 	PARAM="$3"
-	IFS="$1"
-	[ -z "$KEYVALS" ] || return 1
-	[ -z "$PARAM" ] || return 1
-	[ -z "$IFS" ] || return 1
+	[ -z "$KEYVALS" ] && return 1
+	[ -z "$PARAM" ] && return 1
+	[ -z "$IFS" ] && return 1
 	for keyval in $KEYVALS; do
 		key=$(echo "$keyval" | sed 's/=/ /g' | awk '{print $1}')
 		value=$(echo "$keyval" | sed 's/=/ /g' | awk '{print $2}')

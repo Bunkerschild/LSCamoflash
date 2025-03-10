@@ -37,14 +37,14 @@ EOF
     echo "Database and admin user created."
 fi
 
-while [ "$#" -gt 0 ]; do
-    case "$1" in
-        -u|--username) USERNAME="$2"; shift 2;;
-        -p|--password) PASSWORD="$2"; shift 2;;
-        -i|--ipaddress) IPADDRESS="$2"; shift 2;;
-        -s|--sessionid) SESSIONID="$2"; shift 2;;
-        -o|--operation) OPERATION="$2"; shift 2;;
-        *) echo "Unknown parameter: $1"; exit 1;;
+while getopts "u:p:i:s:o:" opt; do
+    case "$opt" in
+        u) USERNAME="$OPTARG" ;;
+        p) PASSWORD="$OPTARG" ;;
+        i) IPADDRESS="$OPTARG" ;;
+        s) SESSIONID="$OPTARG" ;;
+        o) OPERATION="$OPTARG" ;;
+        *) echo "Unknown parameter: -$opt"; exit 1 ;;
     esac
 done
 
