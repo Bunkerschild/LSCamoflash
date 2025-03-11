@@ -481,6 +481,8 @@ $(document).ready(function() {
     
     $(".progressbar").progressbar({ value: 0, min: 0, max: 100 });
     $("#cameraSettingsAcc").accordion({ heightStyle: "content" });
+    $("input:checkbox").checkboxradio();
+    $("select").selectmenu();
     
     if (sessionid !== null) {
         getSession(sessionid, getSessionCallback);
