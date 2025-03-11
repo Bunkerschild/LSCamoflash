@@ -272,6 +272,47 @@ function getRemoteURL(urlType) {
     });
 }
 
+function saveSettings() {
+    if (settingsRead == false)
+        return false;
+    
+    $("#saveSettings").addClass("disabled");
+    var postvals = {};
+        
+    Object.entries(settingsJSON.keylist).forEach(([key, elementId]) => {
+        const $element = $("#" + elementId);
+        var value = null;
+
+        if ($element.length) {
+            if ($element.is("select")) {
+                value = $element.val();
+            } else if ($element.is("input")) {
+                if ($element.attr("type") === "checkbox" || $element.attr("type") === "radio") {
+                    value = $element.prop("checked") ? "1" : "0";
+                } else {
+                    value = $element.val();
+                }
+            }
+            settingsJSON.valuelist[elementId] = value;
+            postvals[key] = value;
+        }
+    });
+    
+    $.ajax({
+        url: "/cgi-bin/settings.cgi",
+        type: "POST", 
+        dataType: "json",
+        data: postvals,
+        success: function(s) {
+            restartIPC();
+            $("#saveSettings").removeClass("disabled");
+        },
+        error: function (a, b, c) {
+            $("#saveSettings").removeClass("disabled");
+        }
+    });
+}
+
 function getSettings() {
     $.ajax({
         url: "/cgi-bin/settings.cgi",
@@ -553,6 +594,10 @@ $(document).ready(function() {
     $(".ptz-button").click(function() {
         var dir = $(this).attr("id").substr(4);        
         setMotor(dir, dist);        
+    });
+    
+    $("#saveSettings").click(function() {
+        saveSettings();
     });
     
     $("#ptz-dist").on("input", function() {

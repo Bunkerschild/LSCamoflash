@@ -116,8 +116,8 @@
                 <h3>Video Settings</h3>
                 <div>
                         <div class="mb-3">
-                                <label for="antiFlicker" class="form-label">Anti-Flicker Mode</label><br>
-                                <select class="form-select" id="antiFlicker">
+                                <label for="basicAntiFlicker" class="form-label">Anti-Flicker Mode</label><br>
+                                <select class="form-select" id="basicAntiFlicker">
                                         <option value="0">Off</option>
                                         <option value="1">50Hz</option>
                                         <option value="2">60Hz</option>
@@ -180,16 +180,16 @@
                                 <input type="checkbox" class="form-check-input" id="alarmSirenEnable">
                         </div>
                         <div class="mb-3">
-                                <label for="motionDetectionAreaEnable" class="form-label">Enable Motion Detection Area</label>
-                                <input type="checkbox" class="form-check-input" id="motionDetectionAreaEnable">
+                                <label for="mdAreaEnable" class="form-label">Enable Motion Detection Area</label>
+                                <input type="checkbox" class="form-check-input" id="mdAreaEnable">
                         </div>
                         <div class="mb-3">
-                                <label for="motionDetectionArea" class="form-label">Motion Detection Area (x,y,w,h)</label>
-                                <input type="text" class="form-control" id="motionDetectionArea" placeholder="0,0,100,100">
+                                <label for="mdAreaRect" class="form-label">Motion Detection Area (x,y,w,h)</label>
+                                <input type="text" class="form-control" id="mdAreaRect" placeholder="0,0,100,100">
                         </div>
                         <div class="mb-3">
-                                <label for="soundDetectionEnable" class="form-label">Enable Sound Detection</label>
-                                <input type="checkbox" class="form-check-input" id="soundDetectionEnable">
+                                <label for="soundDetectEnable" class="form-label">Enable Sound Detection</label>
+                                <input type="checkbox" class="form-check-input" id="soundDetectEnable">
                         </div>
                         <div class="mb-3">
                                 <label for="soundSensitivity" class="form-label">Sound Sensitivity</label><br>
@@ -258,8 +258,8 @@
                                 <input type="number" class="form-control" id="presetNum" min="0" max="10">
                         </div>
                         <div class="mb-3">
-                                <label for="presetName" class="form-label">Preset Name</label>
-                                <input type="text" class="form-control" id="presetName" placeholder="Preset1">
+                                <label for="preset" class="form-label">Preset Name</label>
+                                <input type="text" class="form-control" id="preset" placeholder="Preset1">
                         </div>
                 </div>
                 <h3>Temperature Monitoring</h3>
@@ -269,20 +269,28 @@
                                 <input type="checkbox" class="form-check-input" id="tempMaxEnable">
                         </div>
                         <div class="mb-3">
-                                <label for="tempMaxValue" class="form-label">Maximum Temperature (°C)</label>
-                                <input type="number" class="form-control" id="tempMaxValue" min="-50" max="100">
+                                <label for="tempMaxCvalue" class="form-label">Maximum Temperature (°C)</label>
+                                <input type="number" class="form-control" id="tempMaxCvalue" min="-50" max="100">
+                        </div>
+                        <div class="mb-3">
+                                <label for="tempMaxFvalue" class="form-label">Maximum Temperature (°F)</label>
+                                <input type="number" class="form-control" id="tempMaxFvalue" min="0" max="200">
                         </div>
                         <div class="mb-3">
                                 <label for="tempMinEnable" class="form-label">Enable Minimum Temperature Monitoring</label>
                                 <input type="checkbox" class="form-check-input" id="tempMinEnable">
                         </div>
                         <div class="mb-3">
-                                <label for="tempMinValue" class="form-label">Minimum Temperature (°C)</label>
-                                <input type="number" class="form-control" id="tempMinValue" min="-50" max="100">
+                                <label for="tempMinCvalue" class="form-label">Minimum Temperature (°C)</label>
+                                <input type="number" class="form-control" id="tempMinCvalue" min="-50" max="100">
                         </div>
                         <div class="mb-3">
-                                <label for="temperatureUnit" class="form-label">Temperature Unit</label><br>
-                                <select class="form-select" id="temperatureUnit">
+                                <label for="tempMinFvalue" class="form-label">Minimum Temperature (°F)</label>
+                                <input type="number" class="form-control" id="tempMinFvalue" min="0" max="200">
+                        </div>
+                        <div class="mb-3">
+                                <label for="tempUnitSelect" class="form-label">Temperature Unit</label><br>
+                                <select class="form-select" id="tempUnitSelect">
                                         <option value="0">Celsius (°C)</option>
                                         <option value="1">Fahrenheit (°F)</option>
                                 </select>
@@ -291,16 +299,16 @@
                 <h3>Audio & Lullaby Function</h3>
                 <div>
                         <div class="mb-3">
-                                <label for="lullabyControl" class="form-label">Lullaby Control</label><br>
-                                <select class="form-select" id="lullabyControl">
+                                <label for="ipcLullabyControl" class="form-label">Lullaby Control</label><br>
+                                <select class="form-select" id="ipcLullabyControl">
                                         <option value="0">Off</option>
                                         <option value="1">Play</option>
                                         <option value="2">Stop</option>
                                 </select>
                         </div>
                         <div class="mb-3">
-                                <label for="lullabyList" class="form-label">Lullaby List</label><br>
-                                <select class="form-select" id="lullabyList">
+                                <label for="ipcLullabyList" class="form-label">Lullaby List</label><br>
+                                <select class="form-select" id="ipcLullabyList">
                                         <option value="0">Lullaby 1</option>
                                         <option value="1">Lullaby 2</option>
                                         <option value="2">Lullaby 3</option>
@@ -308,15 +316,15 @@
                                 </select>
                         </div>
                         <div class="mb-3">
-                                <label for="lullabyMode" class="form-label">Lullaby Mode</label><br>
-                                <select class="form-select" id="lullabyMode">
+                                <label for="ipcLlullabyMode" class="form-label">Lullaby Mode</label><br>
+                                <select class="form-select" id="ipcLullabyMode">
                                         <option value="0">Single Play</option>
                                         <option value="1">Repeat</option>
                                 </select>
                         </div>
                         <div class="mb-3">
-                                <label for="lullabyVolume" class="form-label">Lullaby Volume</label><br>
-                                <select class="form-select" id="lullabyVolume">
+                                <label for="ipcLullabyVolume" class="form-label">Lullaby Volume</label><br>
+                                <select class="form-select" id="ipcLullabyVolume">
                                         <option value="0">Mute</option>
                                         <option value="1">Low</option>
                                         <option value="2">Medium</option>
@@ -339,16 +347,16 @@
                                 <input type="checkbox" class="form-check-input" id="sleepMode">
                         </div>
                         <div class="mb-3">
-                                <label for="customAlarmControl" class="form-label">Custom Alarm Control</label><br>
-                                <select class="form-select" id="customAlarmControl">
+                                <label for="customAlarmCtrl" class="form-label">Custom Alarm Control</label><br>
+                                <select class="form-select" id="customAlarmCtrl">
                                         <option value="0">Off</option>
                                         <option value="1">Mode 1</option>
                                         <option value="2">Mode 2</option>
                                 </select>
                         </div>
                         <div class="mb-3">
-                                <label for="doorControl" class="form-label">Door Control</label><br>
-                                <select class="form-select" id="doorControl">
+                                <label for="doorCtrl" class="form-label">Door Control</label><br>
+                                <select class="form-select" id="doorCtrl">
                                         <option value="0">Locked</option>
                                         <option value="1">Unlocked</option>
                                 </select>
@@ -368,7 +376,7 @@
                 </div>
         </div>
         &nbsp;<br>
-        <button type="button" id="saveSettings" class="btn btn-success w-100">Save Settings</button>
+        <button type="button" id="saveSettings" class="btn btn-success w-100">Save Settings and Restart IPC</button>
     </div>
 
     <!-- Cam -->
