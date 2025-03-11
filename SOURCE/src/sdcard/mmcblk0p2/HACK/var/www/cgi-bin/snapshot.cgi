@@ -13,7 +13,14 @@ TOKEN=`parse_keyval '&' "$QUERY_STRING" token`
 [ "$TOKEN" = "$onvif_token" ] || send_error 401 "Unauthorized" "Invalid onvif token"
 
 SNAPSHOT=`parse_keyval '&' "$QUERY_STRING" snapshot`
-[ "$SNAPSHOT" = "update" ] && $sd_sbin/snapshot.sh
+if [ "$SNAPSHOT" = "update" ]; then
+	snapdone=0
+	$sd_sbin/snapshot.sh && snapdone=1
+	
+	send_header application/json
+	send_json success=$snapdone
+	exit
+fi
 
 SNAP_HUMAN_TMP="/tmp/snap_human.jpg"
 SNAP_HUMAN_SD="$sd_www/images/snap_human.jpg"

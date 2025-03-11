@@ -1,6 +1,8 @@
 #!/bin/sh
 root="/tmp/sd/HACK"
 
+LD_LIBRARY_PATH=$root/lib:/lib:/usr/lib
+
 busybox_firmware="/bin/busybox"
 busybox_hack="$root/bin/busybox"
 
