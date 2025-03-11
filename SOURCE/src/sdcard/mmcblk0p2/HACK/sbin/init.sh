@@ -485,7 +485,7 @@ echo "  exit 2" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "else" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "  kill -KILL `pidof anyka_ipc` >/dev/null 2>&1" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "  kill -KILL `pidof anyka_ipc_patched` >/dev/null 2>&1" >> $sys_temp/anyka_ipc_wrapper.sh
-echo "  killall ipc_log_parser.sh >/dev/null 2>&1" >> $sys_temp/anyka_ipc_wrapper.sh
+#echo "  killall ipc_log_parser.sh >/dev/null 2>&1" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "fi" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "[ -f \"$hack_conf\" ] && . $hack_conf || exit 1" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "[ -f \"$hack_custom_conf\" ] && . $hack_custom_conf || exit 1" >> $sys_temp/anyka_ipc_wrapper.sh
@@ -543,7 +543,8 @@ fi
 echo "while [ -f \"/tmp/_ak39_startlock.ini\" ]; do" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "  sleep 3" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "done" >> $sys_temp/anyka_ipc_wrapper.sh
-echo "\$anyka_ipc_bin 2>&1 | $sd_sbin/ipc_log_parser.sh $ipc_log" >> $sys_temp/anyka_ipc_wrapper.sh
+#echo "\$anyka_ipc_bin 2>&1 | $sd_sbin/ipc_log_parser.sh $ipc_log" >> $sys_temp/anyka_ipc_wrapper.sh
+echo "\$anyka_ipc_bin" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "sleep 1" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "done"
 

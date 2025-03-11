@@ -82,6 +82,9 @@ if [ "$REQUEST_METHOD" = "POST" -a -n "$POST_DATA" ]; then
 	  done
 	  echo ""
 	} > "$settings_prep"
+	mv -f $settings_prep $settings_persist >/dev/null 2>&1
+	cp -f $settings_persist $settings_live >/dev/null 2>&1
+	rm -f $settings_tmp >/dev/null 2>&1
 	rm -f $lockfile >/dev/null 2>&1
 	send_json status=saved
 else
