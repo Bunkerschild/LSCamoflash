@@ -93,12 +93,288 @@
             <button type="button" id="updatePasswd" class="btn btn-danger w-100">Update password</button>
         </div>
     </div>
-    
-    <!-- Settings -->
+        
+    <!-- Camera Settings -->
     <div class="container-box d-none" id="containerSettings">
-        <h2 class="text-center">Settings</h2>
+        <h2 class="text-center">Camera Settings</h2>
+        <div id="cameraSettingsAcc">
+                <h3>General Settings</h3>
+                <div>
+                        <div class="mb-3">
+                                <label for="ledEnable" class="form-label">Enable LED</label>
+                                <input type="checkbox" class="form-check-input" id="ledEnable">
+                        </div>
+                        <div class="mb-3">
+                                <label for="rotate180" class="form-label">Rotate 180°</label>
+                                <input type="checkbox" class="form-check-input" id="rotate180">
+                        </div>
+                        <div class="mb-3">
+                                <label for="osdTime" class="form-label">Display Time OSD</label>
+                                <input type="checkbox" class="form-check-input" id="osdTime">
+                        </div>
+                        <div class="mb-3">
+                                <label for="hasConfigWifi" class="form-label">Configured WiFi</label>
+                                <input type="checkbox" class="form-check-input" id="hasConfigWifi">
+                        </div>
+                </div>
+                <h3>Video Settings</h3>
+                <div>
+                        <div class="mb-3">
+                                <label for="antiFlicker" class="form-label">Anti-Flicker Mode</label>
+                                <select class="form-select" id="antiFlicker">
+                                        <option value="0">Off</option>
+                                        <option value="1">50Hz</option>
+                                        <option value="2">60Hz</option>
+                                </select>
+                        </div>
+                        <div class="mb-3">
+                                <label for="wdrEnable" class="form-label">Enable WDR (Wide Dynamic Range)</label>
+                                <input type="checkbox" class="form-check-input" id="wdrEnable">
+                        </div>
+                        <div class="mb-3">
+                                <label for="videoBrightness" class="form-label">Brightness</label>
+                                <input type="range" class="form-range" id="videoBrightness" min="0" max="100">
+                        </div>
+                        <div class="mb-3">
+                                <label for="videoContrast" class="form-label">Contrast</label>
+                                <input type="range" class="form-range" id="videoContrast" min="0" max="100">
+                        </div>
+                        <div class="mb-3">
+                                <label for="videoSharpness" class="form-label">Sharpness</label>
+                                <input type="range" class="form-range" id="videoSharpness" min="0" max="100">
+                        </div>
+                </div>
+                <h3>Night Mode & Infrared</h3>
+                <div>
+                        <div class="mb-3">
+                                <label for="nightMode" class="form-label">Night Mode</label>
+                                <select class="form-select" id="nightMode">
+                                        <option value="0">Off</option>
+                                        <option value="1">On</option>
+                                </select>
+                        </div>
+                        <div class="mb-3">
+                                <label for="nightVisionMode" class="form-label">Night Vision Mode</label>
+                                <select class="form-select" id="nightVisionMode">
+                                        <option value="0">Off</option>
+                                        <option value="1">On</option>
+                                </select>
+                        </div>
+                </div>
+                <h3>Motion Detection & Alarms</h3>
+                <div>
+                        <div class="mb-3">
+                                <label for="alarmEnable" class="form-label">Enable Alarm</label>
+                                <input type="checkbox" class="form-check-input" id="alarmEnable">
+                        </div>
+                        <div class="mb-3">
+                                <label for="humanFilterEnable" class="form-label">Enable Human Filter</label>
+                                <input type="checkbox" class="form-check-input" id="humanFilterEnable">
+                        </div>
+                        <div class="mb-3">
+                                <label for="alarmSensitivity" class="form-label">Alarm Sensitivity</label>
+                                <select class="form-select" id="alarmSensitivity">
+                                        <option value="1">Low</option>
+                                        <option value="2">Medium</option>
+                                        <option value="3">High</option>
+                                </select>
+                        </div>
+                        <div class="mb-3">
+                                <label for="alarmSirenEnable" class="form-label">Enable Alarm Siren</label>
+                                <input type="checkbox" class="form-check-input" id="alarmSirenEnable">
+                        </div>
+                        <div class="mb-3">
+                                <label for="motionDetectionAreaEnable" class="form-label">Enable Motion Detection Area</label>
+                                <input type="checkbox" class="form-check-input" id="motionDetectionAreaEnable">
+                        </div>
+                        <div class="mb-3">
+                                <label for="motionDetectionArea" class="form-label">Motion Detection Area (x,y,w,h)</label>
+                                <input type="text" class="form-control" id="motionDetectionArea" placeholder="0,0,100,100">
+                        </div>
+                        <div class="mb-3">
+                                <label for="soundDetectionEnable" class="form-label">Enable Sound Detection</label>
+                                <input type="checkbox" class="form-check-input" id="soundDetectionEnable">
+                        </div>
+                        <div class="mb-3">
+                                <label for="soundSensitivity" class="form-label">Sound Sensitivity</label>
+                                <select class="form-select" id="soundSensitivity">
+                                        <option value="0">Low</option>
+                                        <option value="1">Medium</option>
+                                        <option value="2">High</option>
+                                </select>
+                        </div>
+                        <div class="mb-3">
+                                <label for="pirSwitch" class="form-label">PIR Sensor</label>
+                                <select class="form-select" id="pirSwitch">
+                                        <option value="0">Off</option>
+                                        <option value="1">Low</option>
+                                        <option value="2">High</option>
+                                </select>
+                        </div>
+                        <div class="mb-3">
+                                <label for="audibleAlarmEnable" class="form-label">Enable Audible Alarm</label>
+                                <input type="checkbox" class="form-check-input" id="audibleAlarmEnable">
+                        </div>
+                        <div class="mb-3">
+                                <label for="objectOutlineSwitch" class="form-label">Show Object Outlines</label>
+                                <input type="checkbox" class="form-check-input" id="objectOutlineSwitch">
+                        </div>
+                </div>
+                <h3>Storage & Recording</h3>
+                <div>
+                        <div class="mb-3">
+                                <label for="sdRecordEnable" class="form-label">Enable SD Card Recording</label>
+                                <input type="checkbox" class="form-check-input" id="sdRecordEnable">
+                        </div>
+                        <div class="mb-3">
+                                <label for="sdRecordMode" class="form-label">Recording Mode</label>
+                                <select class="form-select" id="sdRecordMode">
+                                        <option value="0">Continuous</option>
+                                        <option value="1">Motion-Triggered</option>
+                                        <option value="2">Scheduled</option>
+                                </select>
+                        </div>
+                </div>
+                <h3>PTZ & Tracking</h3>
+                <div>
+                        <div class="mb-3">
+                                <label for="patrolSwitch" class="form-label">Enable Patrol Mode</label>
+                                <input type="checkbox" class="form-check-input" id="patrolSwitch">
+                        </div>
+                        <div class="mb-3">
+                                <label for="trackEnable" class="form-label">Enable Auto-Tracking</label>
+                                <input type="checkbox" class="form-check-input" id="trackEnable">
+                        </div>
+                        <div class="mb-3">
+                                <label for="ptzSavePoint" class="form-label">PTZ Save Point</label>
+                                <input type="text" class="form-control" id="ptzSavePoint" placeholder="147,119">
+                        </div>
+                        <div class="mb-3">
+                                <label for="patrolMode" class="form-label">Patrol Mode</label>
+                                <select class="form-select" id="patrolMode">
+                                        <option value="0">Off</option>
+                                        <option value="1">Preset-Based</option>
+                                        <option value="2">Continuous</option>
+                                </select>
+                        </div>
+                        <div class="mb-3">
+                                <label for="presetNum" class="form-label">Number of Saved Positions</label>
+                                <input type="number" class="form-control" id="presetNum" min="0" max="10">
+                        </div>
+                        <div class="mb-3">
+                                <label for="presetName" class="form-label">Preset Name</label>
+                                <input type="text" class="form-control" id="presetName" placeholder="Preset1">
+                        </div>
+                </div>
+                <h3>Temperature Monitoring</h3>
+                <div>
+                        <div class="mb-3">
+                                <label for="tempMaxEnable" class="form-label">Enable Maximum Temperature Monitoring</label>
+                                <input type="checkbox" class="form-check-input" id="tempMaxEnable">
+                        </div>
+                        <div class="mb-3">
+                                <label for="tempMaxValue" class="form-label">Maximum Temperature (°C)</label>
+                                <input type="number" class="form-control" id="tempMaxValue" min="-50" max="100">
+                        </div>
+                        <div class="mb-3">
+                                <label for="tempMinEnable" class="form-label">Enable Minimum Temperature Monitoring</label>
+                                <input type="checkbox" class="form-check-input" id="tempMinEnable">
+                        </div>
+                        <div class="mb-3">
+                                <label for="tempMinValue" class="form-label">Minimum Temperature (°C)</label>
+                                <input type="number" class="form-control" id="tempMinValue" min="-50" max="100">
+                        </div>
+                        <div class="mb-3">
+                                <label for="temperatureUnit" class="form-label">Temperature Unit</label>
+                                <select class="form-select" id="temperatureUnit">
+                                        <option value="0">Celsius (°C)</option>
+                                        <option value="1">Fahrenheit (°F)</option>
+                                </select>
+                        </div>
+                </div>
+                <h3>Audio & Lullaby Function</h3>
+                <div>
+                        <div class="mb-3">
+                                <label for="lullabyControl" class="form-label">Lullaby Control</label>
+                                <select class="form-select" id="lullabyControl">
+                                        <option value="0">Off</option>
+                                        <option value="1">Play</option>
+                                        <option value="2">Stop</option>
+                                </select>
+                        </div>
+                        <div class="mb-3">
+                                <label for="lullabyList" class="form-label">Lullaby List</label>
+                                <select class="form-select" id="lullabyList">
+                                        <option value="0">Lullaby 1</option>
+                                        <option value="1">Lullaby 2</option>
+                                        <option value="2">Lullaby 3</option>
+                                        <option value="3">Lullaby 4</option>
+                                </select>
+                        </div>
+                        <div class="mb-3">
+                                <label for="lullabyMode" class="form-label">Lullaby Mode</label>
+                                <select class="form-select" id="lullabyMode">
+                                        <option value="0">Single Play</option>
+                                        <option value="1">Repeat</option>
+                                </select>
+                        </div>
+                        <div class="mb-3">
+                                <label for="lullabyVolume" class="form-label">Lullaby Volume</label>
+                                <select class="form-select" id="lullabyVolume">
+                                        <option value="0">Mute</option>
+                                        <option value="1">Low</option>
+                                        <option value="2">Medium</option>
+                                        <option value="3">High</option>
+                                </select>
+                        </div>
+                </div>
+                <h3>Miscellaneous</h3>
+                <div>
+                        <div class="mb-3">
+                                <label for="bulbEnable" class="form-label">Enable Light Bulb</label>
+                                <input type="checkbox" class="form-check-input" id="bulbEnable">
+                        </div>
+                        <div class="mb-3">
+                                <label for="cryDetectEnable" class="form-label">Enable Baby Cry Detection</label>
+                                <input type="checkbox" class="form-check-input" id="cryDetectEnable">
+                        </div>
+                        <div class="mb-3">
+                                <label for="sleepMode" class="form-label">Enable Sleep Mode</label>
+                                <input type="checkbox" class="form-check-input" id="sleepMode">
+                        </div>
+                        <div class="mb-3">
+                                <label for="customAlarmControl" class="form-label">Custom Alarm Control</label>
+                                <select class="form-select" id="customAlarmControl">
+                                        <option value="0">Off</option>
+                                        <option value="1">Mode 1</option>
+                                        <option value="2">Mode 2</option>
+                                </select>
+                        </div>
+                        <div class="mb-3">
+                                <label for="doorControl" class="form-label">Door Control</label>
+                                <select class="form-select" id="doorControl">
+                                        <option value="0">Locked</option>
+                                        <option value="1">Unlocked</option>
+                                </select>
+                        </div>
+                        <div class="mb-3">
+                                <label for="flightWarnSwitch" class="form-label">Enable Flight Warning</label>
+                                <input type="checkbox" class="form-check-input" id="flightWarnSwitch">
+                        </div>
+                        <div class="mb-3">
+                                <label for="flightWarnTime" class="form-label">Flight Warning Time (Seconds)</label>
+                                <input type="number" class="form-control" id="flightWarnTime" min="0" max="60">
+                        </div>
+                        <div class="mb-3">
+                                <label for="floodlightLightness" class="form-label">Floodlight Brightness</label>
+                                <input type="range" class="form-range" id="floodlightLightness" min="0" max="100">
+                        </div>
+                </div>
+        </div>
+        &nbsp;<br>
+        <button type="button" id="saveSettings" class="btn btn-success w-100">Save Settings</button>
     </div>
-    
+
     <!-- Cam -->
     <div class="container-box d-none" id="containerCam">
         <div class="row">

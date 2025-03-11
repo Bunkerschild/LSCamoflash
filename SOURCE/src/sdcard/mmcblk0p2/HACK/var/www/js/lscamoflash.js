@@ -386,6 +386,7 @@ function showWait() {
 function showSettings() {
     hideAll();
     bsShow($("#navbarLogout"));
+    bsShow($("#containerSettings"));
 }
 
 function showPassword() {
@@ -479,6 +480,7 @@ $(document).ready(function() {
     sessionid = getCookie("sessionid");
     
     $(".progressbar").progressbar({ value: 0, min: 0, max: 100 });
+    $("#cameraSettingsAcc").accordion({ heightStyle: "content" });
     
     if (sessionid !== null) {
         getSession(sessionid, getSessionCallback);
