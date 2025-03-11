@@ -12,6 +12,7 @@ var fqdn = null;
 var dist = 15;
 
 var settingsRead = false;
+var settingsJSON = null;
 
 function initHlsPlayer() {
     if (Hls.isSupported()) {
@@ -279,6 +280,8 @@ function getSettings() {
         success: function(s) {
             if (!s.ts)
                 return false;
+                
+            settingsJSON = s;
                 
             Object.entries(s.keylist).forEach(([key, elementId]) => {
                 const elementValue = s.valuelist[elementId];
