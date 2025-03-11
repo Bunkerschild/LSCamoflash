@@ -467,6 +467,9 @@ if [ "$use_offline_mode" != "" ]; then
 	$mount --bind $sd_etc/hosts.offline /etc/hosts
 fi
 
+# Create onvif.token file, if not exists
+[ -f "$sd_etc/onvif.token" ] || $dd if=/dev/urandom bs=1 count=32 2>/dev/null | $sha256sum | $awk '{print $1}' > $sd_etc/onvif.token
+
 # Construct the anyka ipc wrapper
 echo -n "Creating anyka_ipc_wrapper..."
 echo "#!/bin/sh" > $sys_temp/anyka_ipc_wrapper.sh

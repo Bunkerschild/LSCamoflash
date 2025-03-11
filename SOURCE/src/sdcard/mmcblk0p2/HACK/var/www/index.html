@@ -26,13 +26,13 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top d-none" id="navbarLogin">
         <div class="container">
-            <a class="navbar-brand" href="#">LSCamoflash</a>
+            <a class="navbar-brand" href="/">LSCamoflash</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item active"><a class="nav-link" href="#">Login</a></li>
+                    <li class="nav-item active"><a class="nav-link" href="#login">Login</a></li>
                     <li class="nav-item"><a class="nav-link" href="https://github.com/Bunkerschild/LSCamoflash" target="_blank">Github</a></li>
                 </ul>
             </div>
@@ -40,15 +40,16 @@
     </nav>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top d-none" id="navbarLogout">
         <div class="container">
-            <a class="navbar-brand" href="#">LSCamoflash</a>
+            <a class="navbar-brand" href="/">LSCamoflash<br/><span id="version"></span></a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item active"><a class="nav-link" id="camLink" href="#">Cam</a></li>
-                    <li class="nav-item"><a class="nav-link" id="settingsLink" href="#">Settings</a></li>
-                    <li class="nav-item"><a class="nav-link" id="logoutLink" href="#">Logout</a></li>
+                    <li class="nav-item active"><a class="nav-link" href="#cam">Cam</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#settings">Settings</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#password">Password</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#logout">Logout</a></li>
                     <li class="nav-item"><a class="nav-link" href="https://github.com/Bunkerschild/LSCamoflash" target="_blank">Github</a></li>
                 </ul>
             </div>
@@ -77,6 +78,27 @@
         </form>
     </div>
     
+    <!-- Password Form -->
+    <div class="container-box d-none" id="containerPassword">
+        <h2 class="text-center">Change password</h2>
+        <div id="passwordForm">
+            <div class="mb-3">
+                <label for="password1" class="form-label">New password</label>
+                <input type="password" class="form-control" id="password1" placeholder="Enter new password" required>
+            </div>
+            <div class="mb-3">
+                <label for="password2" class="form-label">Repeat password</label>
+                <input type="password" class="form-control" id="password2" placeholder="Enter password again" required>
+            </div>
+            <button type="button" id="updatePasswd" class="btn btn-danger w-100">Update password</button>
+        </div>
+    </div>
+    
+    <!-- Settings -->
+    <div class="container-box d-none" id="containerSettings">
+        <h2 class="text-center">Settings</h2>
+    </div>
+    
     <!-- Cam -->
     <div class="container-box d-none" id="containerCam">
         <div class="row">
@@ -85,6 +107,9 @@
                 <h3 class="text-center" id="hostname">C o n n e c t i n g</h3>
                 <div id="video-container" class="d-none">
                     <video id="hls-player" controls autoplay muted></video>
+                </div>
+                <div id="info-container" class="d-none text-center">
+                    Camera: <span id="camera-name">unknown</span> | Hostname: <span id="camera-fqdn">unknown</span>
                 </div>
                 <div id="ptz-container" class="d-none">
                     <div id="motor-container" class="d-none">
@@ -115,7 +140,7 @@
                     <div class="card-body">
                         <h5 class="card-title">Device-Control</h5>
                         <p class="card-text">Reboot device or restart IPC.</p>
-                        <button class="btn btn-danger" id="btn-reboot-now">Reboot device</button>
+                        <button class="btn btn-danger" id="btn-reboot-now">Reboot Cam</button>
                         <button class="btn btn-warning" id="btn-restart-ipc">Restart IPC</button>
                     </div>
                 </div>
@@ -146,10 +171,14 @@
             <div class="col-6">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title" id="cpu-title">CPU: 0%</h5>
+                        <h5 class="card-title">CPU <span id="cpu-percent">0</span>% | RAM <span id="ram-percent">0</span>%</h5>
                         <div class="progress-container">
                             <span class="progress-label" id="cpu-label">Calculating...</span>
                             <div id="cpu-progress" class="progressbar"></div>
+                        </div>
+                        <div class="progress-container">
+                            <span class="progress-label" id="ram-label">Calculating...</span>
+                            <div id="ram-progress" class="progressbar"></div>
                         </div>
                     </div>
                 </div>
@@ -157,10 +186,14 @@
             <div class="col-6">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title" id="ram-title">RAM: 0%</h5>
+                        <h5 class="card-title"><span id="sd-size"></span> SD-Card <span id="sd-percent">0</span>%</h5>
                         <div class="progress-container">
-                            <span class="progress-label" id="ram-label">Calculating...</span>
-                            <div id="ram-progress" class="progressbar"></div>
+                            <span class="progress-label" id="sd1-label">Calculating...</span>
+                            <div id="sd1-progress" class="progressbar"></div>
+                        </div>
+                        <div class="progress-container">
+                            <span class="progress-label" id="sd2-label">Calculating...</span>
+                            <div id="sd2-progress" class="progressbar"></div>
                         </div>
                     </div>
                 </div>

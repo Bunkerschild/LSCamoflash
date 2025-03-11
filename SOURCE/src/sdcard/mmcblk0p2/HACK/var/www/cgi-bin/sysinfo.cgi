@@ -40,6 +40,14 @@ CPU_DELTA_SYSTEM=$((CPU2_SYSTEM - CPU1_SYSTEM))
 CPU_DELTA_IDLE=$((CPU2_IDLE - CPU1_IDLE))
 CPU_TOTAL=$((CPU_DELTA_USER + CPU_DELTA_NICE + CPU_DELTA_SYSTEM + CPU_DELTA_IDLE))
 
+SD_PART1_SIZE=$(fdisk -l /dev/mmcblk0p1 | grep Disk | awk '{print $5}')
+SD_PART2_SIZE=$(fdisk -l /dev/mmcblk0p2 | grep Disk | awk '{print $5}')
+SD_PART1_USED=$(df -k /dev/mmcblk0p1 | awk 'NR==2 {print $3 * 1024}')
+SD_PART2_USED=$(df -k /dev/mmcblk0p2 | awk 'NR==2 {print $3 * 1024}')
+SD_CARD_SIZE_GB=$(fdisk -l /dev/mmcblk0 | grep Disk | awk '{print $3" "$4}' | cut -d "," -f1)
+SD_CARD_SIZE=$((SD_PART1_SIZE + SD_PART2_SIZE))
+SD_CARD_USED=$((SD_PART1_USED + SD_PART2_USED))
+
 if [ "$CPU_TOTAL" -gt 0 ]; then
     CPU_USAGE=$((100 * (CPU_DELTA_USER + CPU_DELTA_NICE + CPU_DELTA_SYSTEM) / CPU_TOTAL))
 fi
@@ -65,6 +73,19 @@ cat <<EOF
     "min1": $LOAD_1MIN,
     "min5": $LOAD_5MIN,
     "min15": $LOAD_15MIN
+  },
+  "sdcard": {
+    "size": $SD_CARD_SIZE,
+    "used": $SD_CARD_USED,
+    "size_gb": "$SD_CARD_SIZE_GB",
+    "partition1": {
+      "size": $SD_PART1_SIZE,
+      "used": $SD_PART1_USED
+    },
+    "partition2": {
+      "size": $SD_PART2_SIZE,
+      "used": $SD_PART2_USED
+    }
   }
 }
 EOF

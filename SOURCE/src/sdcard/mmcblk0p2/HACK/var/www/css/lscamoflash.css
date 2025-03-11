@@ -34,8 +34,15 @@ body {
 #containerLogin {
     max-width: 400px;
 }
+#containerPassword {
+    max-width: 400px;
+}
 #containerCam {
-    max-width: 960px;
+    max-width: 940px;
+    margin-top: 180px;
+}
+#containerCam {
+    max-width: 940px;
     margin-top: 180px;
 }
 #hls-player {
@@ -88,4 +95,5 @@ body {
 }
 .progressbar {
     height: 16px !important;
-}        
+}
+        

@@ -24,6 +24,7 @@ parse_query() {
             operation) OPERATION="$value" ;;
             username) USERNAME="$value" ;;
             password) PASSWORD="$value" ;;
+            uid) UID="$value" ;;
         esac
     done
 }
@@ -68,20 +69,32 @@ handle_request() {
             ;;
 
         update-password)
-            if [ -n "$USERNAME" ] && [ -n "$PASSWORD" ]; then
-                OUTPUT=$("$DB_SCRIPT" -o update-password -u "$USERNAME" -p "$PASSWORD" 2>/dev/null)
-                json_response "success" "Password updated" "$USERNAME"
+            if [ -n "$SESSIONID" ] && [ -n "$PASSWORD" ]; then
+                UID=$("$DB_SCRIPT" -o get-session -s "$SESSIONID" 2>/dev/null | cut -d "|" -f1)
+                if [ -z "$UID" ]; then
+                	json_response "error" "Unable to find user for session" "$SESSIONID"
+                else
+                	USERNAME=$("$DB_SCRIPT" -o get-username -d "$UID" 2>/dev/null)
+	                OUTPUT=$("$DB_SCRIPT" -o update-password -u "$USERNAME" -p "$PASSWORD" 2>/dev/null)
+        	        json_response "success" "Password updated" "$USERNAME"
+                fi
             else
                 json_response "error" "Password update failed" "$USERNAME"
             fi
             ;;
 
         update-username)
-            if [ -n "$USERNAME" ]; then
-                OUTPUT=$("$DB_SCRIPT" -o update-username -u "$USERNAME" -i "$IPADDRESS" 2>/dev/null)
-                json_response "success" "Username updated" ""
+            if [ -n "$SESSIONID" ] && [ -n "$USERNAME" ]; then
+                UID=$("$DB_SCRIPT" -o get-session -s "$SESSIONID" 2>/dev/null | cut -d "|" -f1)
+                if [ -z "$UID" ]; then
+                	json_response "error" "Unable to find user for session" "$SESSIONID"
+                else
+                	ORIGUSERNAME=$("$DB_SCRIPT" -o get-username -d "$UID" 2>/dev/null)
+	                OUTPUT=$("$DB_SCRIPT" -o update-username -u "$ORIGUSERNAME" -U "$USERNAME" 2>/dev/null)
+        	        json_response "success" "Username updated" "$USERNAME"
+                fi
             else
-                json_response "error" "Missing parameters for username update" ""
+                json_response "error" "Password update failed" "$USERNAME"
             fi
             ;;
 
@@ -140,6 +153,19 @@ handle_request() {
                 fi
             else
                 json_response "error" "Missing username for retrieving user information" ""
+            fi
+            ;;
+
+        get-username)
+            if [ -n "$UID" ]; then
+                OUTPUT=$("$DB_SCRIPT" -o get-username -d "$UID" 2>/dev/null)
+                if [ -n "$OUTPUT" ]; then
+                    json_response "success" "Username retrieved" "$OUTPUT"
+                else
+                    json_response "error" "Username not found" "$UID"
+                fi
+            else
+                json_response "error" "Missing session ID for retrieving username" ""
             fi
             ;;
 

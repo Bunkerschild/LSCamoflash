@@ -32,18 +32,20 @@ CREATE TABLE session (
     FOREIGN KEY (uid) REFERENCES user(uid) ON DELETE CASCADE
 );
 
-INSERT INTO user (username, password, is_admin, timestamp_created, timestamp_password_update, timestamp_username_update, timestamp_status_upadte, timestamp_last_login) VALUES ('admin', '$(echo admin | sha256sum | awk '{print $1}')', 1, $CURRENT_TIME, $CURRENT_TIME, $CURRENT_TIME, $CURRENT_TIME, $CURRENT_TIME);
+INSERT INTO user (username, password, is_admin, timestamp_created, timestamp_password_update, timestamp_username_update, timestamp_status_update, timestamp_last_login) VALUES ('admin', '$(echo admin | sha256sum | awk '{print $1}')', 1, $CURRENT_TIME, $CURRENT_TIME, $CURRENT_TIME, $CURRENT_TIME, $CURRENT_TIME);
 EOF
     echo "Database and admin user created."
 fi
 
-while getopts "u:p:i:s:o:" opt; do
+while getopts "u:U:p:i:s:o:d:" opt; do
     case "$opt" in
         u) USERNAME="$OPTARG" ;;
+        U) UPDATEUSERNAME="$OPTARG" ;;
         p) PASSWORD="$OPTARG" ;;
         i) IPADDRESS="$OPTARG" ;;
         s) SESSIONID="$OPTARG" ;;
         o) OPERATION="$OPTARG" ;;
+        d) UID="$OPTARG" ;;
         *) echo "Unknown parameter: -$opt"; exit 1 ;;
     esac
 done
@@ -56,7 +58,7 @@ case "$OPERATION" in
         HASHED_PW=$(echo "$PASSWORD" | sha256sum | awk '{print $1}')
         USER=$(sqlite3 "$DB_PATH" "SELECT uid FROM user WHERE username='$USERNAME' AND password='$HASHED_PW' AND is_enabled=1;")
         if [ -n "$USER" ]; then
-            SESSIONID=$(echo "$RANDOM$USERNAME$CURRENT_TIME" | md5sum | awk '{print $1}')
+            SESSIONID=$(echo "$RANDOM$USERNAME$CURRENT_TIME" | sha256sum | awk '{print $1}')
             sqlite3 "$DB_PATH" "INSERT INTO session (uid, session_id, ipaddress, timestamp_created, timestamp_last_update) VALUES ($USER, '$SESSIONID', '$IPADDRESS', $CURRENT_TIME, $CURRENT_TIME);"
             sqlite3 "$DB_PATH" "UPDATE user SET timestamp_last_login=$CURRENT_TIME, last_ipaddress='$IPADDRESS' WHERE uid=$USER;"
             echo "Session started: $SESSIONID"
@@ -78,16 +80,16 @@ case "$OPERATION" in
         if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
             echo "Missing Parameter for update-password"; exit 1
         fi
-        HASHED_PW=$(busybox httpd -m "$PASSWORD")
+        HASHED_PW=$(echo "$PASSWORD" | sha256sum | awk '{print $1}')
         sqlite3 "$DB_PATH" "UPDATE user SET password='$HASHED_PW', timestamp_password_update=$CURRENT_TIME WHERE username='$USERNAME';"
         echo "Password updated"
         ;;
     
     update-username)
-        if [ -z "$USERNAME" ] || [ -z "$IPADDRESS" ]; then
+        if [ -z "$USERNAME" ] || [ -z "$UPDATEUSERNAME" ]; then
             echo "Missing parameter for update-username"; exit 1
         fi
-        sqlite3 "$DB_PATH" "UPDATE user SET username='$IPADDRESS', timestamp_username_update=$CURRENT_TIME WHERE username='$USERNAME';"
+        sqlite3 "$DB_PATH" "UPDATE user SET username='$UPDATEUSERNAME', timestamp_username_update=$CURRENT_TIME WHERE username='$USERNAME';"
         echo "Username updated"
         ;;
     
@@ -146,6 +148,13 @@ case "$OPERATION" in
             echo "Missing username for get-user"; exit 1
         fi
         sqlite3 "$DB_PATH" "SELECT * FROM user WHERE username='$USERNAME';"
+        ;;
+    
+    get-username)
+        if [ -z "$UID" ]; then
+            echo "Missing uid for get-username"; exit 1
+        fi
+        sqlite3 "$DB_PATH" "SELECT username FROM user WHERE uid='$UID';"
         ;;
     
     *)

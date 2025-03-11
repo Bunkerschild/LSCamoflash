@@ -1,3 +1,4 @@
+var manufacturer = null;
 var motorlock = false;
 var motorized = false;
 var loggedin = false;
@@ -6,6 +7,7 @@ var streamurl = null;
 var hostname = null;
 var control = null;
 var address = null;
+var model = null;
 var fqdn = null;
 var dist = 15;
 
@@ -17,8 +19,8 @@ function initHlsPlayer() {
         hls.attachMedia(video);
         hls.on(Hls.Events.MANIFEST_PARSED, function() {
             $("#connecting").fadeOut();
-            $("#hostname").html(hostname);
             $("#video-container").removeClass("d-none");
+            $("#info-container").removeClass("d-none");
             $("#ptz-container").removeClass("d-none");
             $("#hls-player").show();
         });
@@ -87,14 +89,14 @@ function getSession(sessionId, callback) {
     });
 }
 
-function doLogin(username, password, callback) {
+function doLogin(Username, Password, callback) {
     $.ajax({
         url: "/cgi-bin/session.cgi",
         type: "GET",
         data: {
             operation: "login",
-            username: username,
-            password: password
+            username: Username,
+            password: Password
         },
         dataType: "json",
         success: function(response) {
@@ -140,6 +142,11 @@ function getHostname() {
         success: function(response) {
             hostname = response.hostname;
             fqdn = response.fqdn;
+            manufacturer = response.manufacturer;
+            model = response.model;
+            $("#hostname").html(hostname);
+            $("#camera-name").text(manufacturer + " " + model);
+            $("#camera-fqdn").text(fqdn);
         }
     });
 }
@@ -157,16 +164,33 @@ function getSysinfo() {
             let load1Min = data.load.min1;
             let load5Min = data.load.min5;
             let load15Min = data.load.min15;
+            let sdCardUsed = data.sdcard.used;
+            let sdCardSize = data.sdcard.size;
+            var sdCardSizeGB = data.sdcard.size_gb;            
+            let sdCardUsedPercent = Math.round((sdCardUsed / sdCardSize) * 100);
+            let sdPart1Used = data.sdcard.partition1.used;
+            let sdPart1Size = data.sdcard.partition1.size;
+            let sdPart1UsedPercent = Math.round((sdPart1Used / sdPart1Size) * 100);
+            let sdPart2Used = data.sdcard.partition2.used;
+            let sdPart2Size = data.sdcard.partition2.size;
+            let sdPart2UsedPercent = Math.round((sdPart2Used / sdPart2Size) * 100);
             
             $("#cpu-progress").progressbar("value", cpuUsage);
-            $("#cpu-title").text("CPU: " + cpuUsage + "%");
-            $("#cpu-label").text("Load: " + load1Min + ", " + load5Min + ", " + load15Min);
+            $("#cpu-percent").text(cpuUsage);
+            $("#cpu-label").text("CPU: load " + load1Min + ", " + load5Min + ", " + load15Min);
 
             $("#ram-progress").progressbar("value", ramPercent);
-            $("#ram-title").text("RAM: " + ramPercent + "%");
-            $("#ram-label").text("Used: " + Math.round(ramUsed / 1024) + "MB / " + Math.round(ramTotal / 1024) + "MB");
+            $("#ram-percent").text(ramPercent);
+            $("#ram-label").text("RAM: used " + Math.round(ramUsed / 1024) + "MB / " + Math.round(ramTotal / 1024) + "MB");
             
-            setTimeout('getSysinfo()', 30000);
+            $("#sd-percent").text(sdCardUsedPercent);
+            $("#sd-size").text(Math.ceil(sdCardSize / 1000 / 1000 / 1000) + " GB");
+            $("#sd1-label").text("Part1: used " + (Math.round(sdPart1Used / 1024 / 1024 / 1024 * 10) / 10) + "GB / " + (Math.round(sdPart1Size / 1024 / 1024 / 1024 * 10) / 10) + "GB");
+            $("#sd1-progress").progressbar("value", sdPart1UsedPercent);
+            $("#sd2-label").text("Part2: used " + (Math.round(sdPart2Used / 1024 / 1024 / 1024 * 10) / 10) + "GB / " + (Math.round(sdPart2Size / 1024 / 1024 / 1024 * 10) / 10) + "GB");
+            $("#sd2-progress").progressbar("value", sdPart2UsedPercent);
+            
+            setTimeout('getSysinfo()', 20000);
         }
     });
 }
@@ -183,6 +207,49 @@ function fetchStreamURL() {
         success: function(response) {
             streamurl = response.url;
             initHlsPlayer();
+        }
+    });
+}
+
+function updatePassword(newPassword1, newPassword2) {
+    $("#confirmDialog").dialog({
+        autoOpen: false,
+        modal: true,
+        title: "Update password",
+        buttons: {
+            "Close": function() {
+                $(this).dialog("close");
+            }
+        }
+    }).html("Please wait...");
+    $("#confirmDialog").dialog("open");
+    
+    if (newPassword1.length < 4) {
+        $("#confirmDialog").html("Password must have at least 4 characters");
+        return false;
+    }
+    
+    if (newPassword1 != newPassword2) {
+        $("#confirmDialog").html("Passwords did not match");
+        return false;    
+    }
+    
+    $.ajax({
+        url: "/cgi-bin/session.cgi",
+        type: "GET", 
+        dataType: "json",
+        data: {
+            operation: "update-password",
+            password: newPassword1
+        },
+        success: function(response) {
+            if (response.status == "success")
+                $("#confirmDialog").html("Password updated");
+            else
+                $("#confirmDialog").html("Password update failed");
+        },
+        error: function(xhr, status, error) {
+            $("#confirmDialog").html("Password update error");
         }
     });
 }
@@ -264,35 +331,67 @@ function sessionDestroy(error, success) {
         loggedin = false;
         sessionid = null;
         deleteCookie("sessionid");
-        $("#containerCam").addClass("d-none");
-        $("#navbarLogout").addClass("d-none");
-        $("#navbarLogin").removeClass("d-none");
-        $("#containerLogin").removeClass("d-none");
+        showLogin();
     }
 }
 
 function sessionCallback(error, sessionId) {
+    hideAll();
+    
     if (error !== null) {
         loggedin = false;
         sessionid = null;
         deleteCookie("sessionid");
-        $("#containerWait").addClass("d-none");
-        $("#navbarLogin").removeClass("d-none");
-        $("#containerLogin").removeClass("d-none");
+        showLogin();
     } else {
         sessionid = sessionId;
         setCookie("sessionid", sessionId, 1);
         loggedin = true;
-        $("#containerWait").addClass("d-none");
-        $("#navbarLogout").removeClass("d-none");
-        $("#containerCam").removeClass("d-none");
-        $("#cpu-progress, #ram-progress").progressbar({ value: 0, min: 0, max: 100 });
+        showCam();
         updateSession(sessionId);
         getSysinfo();
         getHostname();
         checkMotor();
         fetchStreamURL();
     }
+}
+
+function hideAll() {
+    bsHide($("#containerWait"));
+    bsHide($("#navbarLogin"));
+    bsHide($("#navbarLogout"));
+    bsHide($("#containerLogin"));
+    bsHide($("#containerCam"));
+    bsHide($("#containerPassword"));
+    bsHide($("#containerSettings"));
+}
+
+function showLogin() {
+    hideAll();
+    bsShow($("#navbarLogin"));
+    bsShow($("#containerLogin"));
+}
+
+function showCam() {
+    hideAll();
+    bsShow($("#navbarLogout"));
+    bsShow($("#containerCam"));
+}
+
+function showWait() {
+    hideAll();
+    bsShow($("#containerWait"));
+}
+
+function showSettings() {
+    hideAll();
+    bsShow($("#navbarLogout"));
+}
+
+function showPassword() {
+    hideAll();
+    bsShow($("#navbarLogout"));
+    bsShow($("#containerPassword"));
 }
 
 function getSessionCallback(error, sessionData) {
@@ -329,32 +428,81 @@ function fallbackCopyToClipboard(text) {
     document.body.removeChild(textArea);
 }
 
+function bsHide(element) {
+    element.addClass("d-none");
+}
+
+function bsShow(element) {
+    element.removeClass("d-none");
+}
+
+function navLinkClick(link) {
+    if (!link.attr("href").startsWith("#"))
+        return true;
+        
+    const navFunction = link.attr("href").split("#")[1];
+    
+    switch (navFunction)
+    {
+        case "cam":
+            if (loggedin)
+                showCam();
+            break;
+        case "login":
+            if (!loggedin)
+                showLogin();
+            break;
+        case "logout":
+            if (loggedin)
+            {
+                showWait();
+                doLogout(sessionid, sessionDestroy);
+            }
+            break;
+        case "settings":
+            if (loggedin)
+                showSettings();
+            break;
+        case "password":
+            if (loggedin)
+                showPassword();
+            break;
+    }
+    
+    return false;
+}
+
 $(document).ready(function() {
     cleanupSessions();
 
     address = window.location.hostname;
     sessionid = getCookie("sessionid");
     
+    $(".progressbar").progressbar({ value: 0, min: 0, max: 100 });
+    
     if (sessionid !== null) {
         getSession(sessionid, getSessionCallback);
     } else {
-        $("#containerWait").addClass("d-none");
-        $("#navbarLogin").removeClass("d-none");
-        $("#containerLogin").removeClass("d-none");        
-    }
+        showLogin();
+    }    
     
     $("#loginForm").submit(function() {
-        $("#navbarLogin").addClass("d-none");
-        $("#containerLogin").addClass("d-none");
-        $("#containerWait").removeClass("d-none");
+        showWait();
         doLogin($("#username").val(), $("#password").val(), sessionCallback);
         return false;
     });
     
-    $("#logoutLink").click(function() {
-        doLogout(sessionid, sessionDestroy);
+    $("#updatePasswd").click(function() {
+        if (!loggedin)
+            return false;
+            
+        return updatePassword($("#password1").val(), $("#password2").val());
     });
     
+    $(".nav-link").click(function() {
+        return navLinkClick($(this));
+    });
+        
     $(".ptz-button").click(function() {
         var dir = $(this).attr("id").substr(4);        
         setMotor(dir, dist);        
