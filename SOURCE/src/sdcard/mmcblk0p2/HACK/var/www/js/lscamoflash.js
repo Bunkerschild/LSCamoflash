@@ -276,7 +276,7 @@ function saveSettings() {
     if (settingsRead == false)
         return false;
     
-    $("#saveSettings").addClass("disabled");
+    showSave();
     var postvals = {};
         
     Object.entries(settingsJSON.keylist).forEach(([key, elementId]) => {
@@ -303,12 +303,24 @@ function saveSettings() {
         type: "POST", 
         dataType: "json",
         data: postvals,
-        success: function(s) {
-            restartIPC();
-            $("#saveSettings").removeClass("disabled");
+        success: function(response) {
+            showSettings();
+            if (response.status == "locked")
+            {
+                alert("Another saving process is running. Try again later.");
+            }
+            else if (response.status == "saved")
+            {
+                restartIPC();
+            }
+            else
+            {
+                alert("Settings were not saved");
+            }
         },
         error: function (a, b, c) {
-            $("#saveSettings").removeClass("disabled");
+            showSettings();
+            alert("Settings were not saved, due to error");
         }
     });
 }
@@ -462,8 +474,15 @@ function showCam() {
     bsShow($("#containerCam"));
 }
 
+function showSave() {
+    hideAll();
+    $("#loading-label").html("S a v i n g<br><small>This could take a while</small>");
+    bsShow($("#containerWait"));
+}
+
 function showWait() {
     hideAll();
+    $("#loading-label").text("L o a d i n g");
     bsShow($("#containerWait"));
 }
 

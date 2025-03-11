@@ -4,13 +4,27 @@ root="/tmp/sd/HACK"
 
 . ./common.cgi
 
+lockfile="/tmp/settings.lock"
+
 settings_template="$sd_config/_ht_sw_config.tmpl"
 settings_live="$sys_config/_ht_sw_settings.ini"
 settings_persist="$sd_config/_ht_sw_settings.ini"
+settings_tmp="$sd_config/_ht_sw_settings.tmp"
+settings_prep="$sd_config/_ht_sw_settings.prep"
 
 POST_DATA=""
 
-[ "$REQUEST_METHOD" = "POST" -a -n "$CONTENT_LENGTH" ] && read -r -n "$CONTENT_LENGTH" POST_DATA
+if [ "$REQUEST_METHOD" = "POST" -a -n "$CONTENT_LENGTH" ]; then
+	if [ -f "$lockfile" ]; then
+		send_header application/json
+		send_json status=locked
+		exit
+	fi
+
+	touch $lockfile >/dev/null 2>&1
+	read -r -n "$CONTENT_LENGTH" POST_DATA
+	echo "[config]" > $settings_tmp
+fi
 
 convert_key() {
     key="$1"
@@ -36,14 +50,12 @@ json="{\"ts\":\"$(date +%s)\""
 keylist="{"
 valuelist="{"
 
-echo "" > /tmp/sd/postdata.txt
-
-for key in `cat $settings_template | grep -v "^[config]" | grep -v "^#" | grep "=" | awk '{print $1}'`; do
+for key in `cat $settings_template | grep -v "^\[config\]" | grep -v "^#" | grep "=" | awk '{print $1}'`; do
 	[ "$key" = "bool_has_config_wifi" ] && continue
 	
 	if [ "$REQUEST_METHOD" = "POST" -a -n "$POST_DATA" ]; then
 		value=`parse_keyval '&' $POST_DATA $key`
-		echo "$key = $value" >> /tmp/sd/postdata.txt
+		echo "$key = $value" >> $settings_tmp
 		continue
 	fi
 	
@@ -60,7 +72,18 @@ for key in `cat $settings_template | grep -v "^[config]" | grep -v "^#" | grep "
 done
 
 if [ "$REQUEST_METHOD" = "POST" -a -n "$POST_DATA" ]; then
-	send_json saved=1
+	fixed_length=30
+	{
+	  echo -e "\n[config]"
+	  sed '/^\[/d' "$settings_tmp" | while IFS='=' read -r key value; do
+	    key_trimmed=$(echo "$key" | sed 's/[[:space:]]*$//')
+	    val_trimmed=$(echo "$value" | sed 's/^[[:space:]]*//')
+	    printf "%-${fixed_length}s = %s\n" "$key_trimmed" "$val_trimmed"
+	  done
+	  echo ""
+	} > "$settings_prep"
+	rm -f $lockfile >/dev/null 2>&1
+	send_json status=saved
 else
 	json="${json},\"keylist\":$keylist},\"valuelist\":$valuelist}}"
 

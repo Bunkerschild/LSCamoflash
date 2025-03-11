@@ -24,6 +24,7 @@ parse_keyval() {
 		key=$(echo "$keyval" | sed 's/=/ /g' | awk '{print $1}')
 		value=$(echo "$keyval" | sed 's/=/ /g' | awk '{print $2}')
 		value=$(printf '%b' "${value//+/ }")
+		value=$(printf '%b' "${value//%/\\x}")
 		
 		if [ "$key" = "$PARAM" ]; then
 			echo $value
