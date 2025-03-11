@@ -11,6 +11,8 @@ var model = null;
 var fqdn = null;
 var dist = 15;
 
+var settingsRead = false;
+
 function initHlsPlayer() {
     if (Hls.isSupported()) {
         const hls = new Hls();
@@ -269,6 +271,43 @@ function getRemoteURL(urlType) {
     });
 }
 
+function getSettings() {
+    $.ajax({
+        url: "/cgi-bin/settings.cgi",
+        type: "GET", 
+        dataType: "json",
+        success: function(s) {
+            if (!s.ts)
+                return false;
+                
+            Object.entries(s.keylist).forEach(([key, elementId]) => {
+                const elementValue = s.valuelist[elementId];
+                const $element = $("#" + elementId);
+
+                if ($element.length) {
+                    if ($element.is("select")) {
+                        $element.val(elementValue).trigger("change");
+                    } else if ($element.is("input")) {
+                        if ($element.attr("type") === "checkbox" || $element.attr("type") === "radio") {
+                            $element.prop("checked", elementValue === "1");
+                        } else {
+                            $element.val(elementValue);
+                        }
+                    }
+                }
+            });
+
+            $("#cameraSettingsAcc").accordion({ heightStyle: "content" });
+            $("input:checkbox").checkboxradio();
+            $("select").selectmenu();
+            
+            settingsRead = true;
+            
+            bsShow($("#settingsMenuEntry"));
+        }
+    });
+}
+
 function checkMotor() {
     $.ajax({
         url: "/cgi-bin/motor.cgi",
@@ -351,6 +390,7 @@ function sessionCallback(error, sessionId) {
         updateSession(sessionId);
         getSysinfo();
         getHostname();
+        getSettings();
         checkMotor();
         fetchStreamURL();
     }
@@ -384,9 +424,12 @@ function showWait() {
 }
 
 function showSettings() {
-    hideAll();
-    bsShow($("#navbarLogout"));
-    bsShow($("#containerSettings"));
+    if (settingsRead)
+    {
+        hideAll();
+        bsShow($("#navbarLogout"));
+        bsShow($("#containerSettings"));
+    }
 }
 
 function showPassword() {
@@ -480,9 +523,6 @@ $(document).ready(function() {
     sessionid = getCookie("sessionid");
     
     $(".progressbar").progressbar({ value: 0, min: 0, max: 100 });
-    $("#cameraSettingsAcc").accordion({ heightStyle: "content" });
-    $("input:checkbox").checkboxradio();
-    $("select").selectmenu();
     
     if (sessionid !== null) {
         getSession(sessionid, getSessionCallback);
