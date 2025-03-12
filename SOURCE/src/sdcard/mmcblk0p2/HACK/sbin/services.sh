@@ -189,3 +189,13 @@ if [ -f $reboot_flag ]; then
 	reboot
 fi
 
+# Check, wether sd card is read only and if we have to reboot
+if [ "$reboot_on_sd_readonly" = "1" ]; then
+	force_sd_reboot=0
+	touch $sd_path/is.ro 2>/dev/null || force_sd_reboot=1
+	if [ "$force_sd_reboot" = "1" ]; then
+		reboot
+	else
+		rm -f $sd_path/is.ro >/dev/null 2>&1
+	fi
+fi
