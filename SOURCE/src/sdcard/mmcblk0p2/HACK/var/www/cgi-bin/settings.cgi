@@ -55,7 +55,10 @@ for key in `cat $settings_template | grep -v "^\[config\]" | grep -v "^#" | grep
 	
 	if [ "$REQUEST_METHOD" = "POST" -a -n "$POST_DATA" ]; then
 		value=`parse_keyval '&' $POST_DATA $key`
-		echo "$key = $value" >> $settings_tmp
+		[ -z $value ] && value=`cat $settings_live | grep "^$key" | awk '{print $3}'`
+		[ -z $value ] && value=`cat $settings_persist | grep "^$key" | awk '{print $3}'`
+		[ -z $value ] && value=`cat $settings_template | grep "^$key" | awk '{print $3}'`
+		[ -z $value ] || echo "$key = $value" >> $settings_tmp
 		continue
 	fi
 	

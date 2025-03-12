@@ -276,10 +276,11 @@ function saveSettings() {
     if (settingsRead == false)
         return false;
     
-    showSave();
     var postvals = {};
+    let settingsNew = structuredClone(settingsJSON);
+    let valcount = 0;
         
-    Object.entries(settingsJSON.keylist).forEach(([key, elementId]) => {
+    Object.entries(settingsNew.keylist).forEach(([key, elementId]) => {
         const $element = $("#" + elementId);
         var value = null;
 
@@ -293,10 +294,24 @@ function saveSettings() {
                     value = $element.val();
                 }
             }
-            settingsJSON.valuelist[elementId] = value;
-            postvals[key] = value;
+
+            settingsNew.valuelist[elementId] = value;
+            
+            if (settingsNew.valuelist[elementId] != settingsJSON.valuelist[elementId])
+            {
+                postvals[key] = value;
+                valcount++;
+            }
         }
     });
+
+    if (valcount == 0)
+    {
+        alert("Nothing to save");
+        return false;
+    }
+            
+    showSave();
     
     $.ajax({
         url: "/cgi-bin/settings.cgi",
@@ -311,7 +326,8 @@ function saveSettings() {
             }
             else if (response.status == "saved")
             {
-                restartIPC();
+                settingsJSON = settingsNew;
+                doRestart();
             }
             else
             {
