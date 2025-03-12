@@ -9,21 +9,25 @@ old_ptz_1080p_seek="4313c8"
 old_ptz_1080p_up_down="431684"
 old_ptz_1080p_left_right="431614"
 old_ptz_1080p_checksum="2bc721ccfcd502291f10486aa72ce8a6"
+old_ptz_1080p_force_inverted="0"
 
 indoor_ptz_1080p_seek="51c1d8"
 indoor_ptz_1080p_up_down="51c3a4"
 indoor_ptz_1080p_left_right="51c334"
 indoor_ptz_1080p_checksum="8ea59723a177e1c68a798ca1a2882798"
+indoor_ptr_1080p_force_inverted="0"
 
 indoor_ptz_1296p_seek="51a888"
 indoor_ptz_1296p_up_down="51aa54"
 indoor_ptz_1296p_left_right="51a9e4"
 indoor_ptz_1296p_checksum="86396fdb14f2e029fa169afd4b598391"
+indoor_ptz_1296p_force_inverted="0"
 
 outdoor_ptz_1296p_seek="5357cc"
 outdoor_ptz_1296p_up_down="53599c"
 outdoor_ptz_1296p_left_right="53592c"
 outdoor_ptz_1296p_checksum="339313038233b6f7645197ff93dd0d88"
+outdoor_ptr_1296p_force_inverted="1"
 
 set_seek=""
 set_up_down=""
@@ -59,21 +63,25 @@ case $anyka_chk in
 		set_seek="$old_ptz_1080p_seek"
 		set_up_down="$old_ptz_1080p_up_down"
 		set_left_right="$old_ptz_1080p_left_right"
+		force_inverted="$old_ptr_1080p_force_inverted"
 	;;
 	$indoor_ptz_1080p_originl|$indoor_ptz_1080p_patched)
 		set_seek="$indoor_ptz_1080p_seek"
 		set_up_down="$indoor_ptz_1080p_up_down"
 		set_left_right="$indoor_ptz_1080p_left_right"
+		force_inverted="$indoor_ptr_1080p_force_inverted"
 	;;
 	$indoor_ptz_1296p_originl|$indoor_ptz_1296p_patched)
 		set_seek="$indoor_ptz_1296p_seek"
 		set_up_down="$indoor_ptz_1296p_up_down"
 		set_left_right="$indoor_ptz_1296p_left_right"
+		force_inverted="$indoor_ptr_1296p_force_inverted"
 	;;
 	$outdoor_ptz_1296p_originl|$outdoor_ptz_1296p_patched)
 		set_seek="$outdoor_ptz_1296p_seek"
 		set_up_down="$outdoor_ptz_1296p_up_down"
 		set_left_right="$outdoor_ptz_1296p_left_right"
+		force_inverted="$outdoor_ptr_1296p_force_inverted"
 	;;
 	*)
 		echo "Not a supported ptz camera"
@@ -87,11 +95,21 @@ DIST="$2"
 INVERT=`cat $sys_config/_ht_sw_settings.ini 2>/dev/null | grep "bool_rotate180" | awk '{print $3}' || echo 0`
 
 if [ "$INVERT" = "0" ]; then
-	VAL_ADD="ffa60000"
-	VAL_SUB="5b0000"
+	if [ "$force_inverted" = "1" ]; then
+		VAL_SUB="ffa60000"
+		VAL_ADD="5b0000"
+	else
+		VAL_ADD="ffa60000"
+		VAL_SUB="5b0000"
+	fi
 else
-	VAL_SUB="ffa60000"
-	VAL_ADD="5b0000"
+	if [ "$force_inverted" = "1" ]; then
+		VAL_ADD="ffa60000"
+		VAL_SUB="5b0000"	
+	else
+		VAL_SUB="ffa60000"
+		VAL_ADD="5b0000"
+	fi
 fi
 
 case $DIR in
