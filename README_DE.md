@@ -13,7 +13,6 @@ LSCamoflash ist ein modifiziertes Firmware-Paket für bestimmte IP-Kameras, das 
 - [Webserver-Funktionen](#webserver-funktionen)
 - [Update-Mechanismus](#update-mechanismus)
 - [SD-Karten-Partitionierung](#sd-karten-partitionierung)
-- [Hinweise zur Motorsteuerung](#hinweise-zur-motorsteuerung)
 - [Geplante Verbesserungen](#geplante-verbesserungen)
 
 ## Installation
@@ -116,10 +115,6 @@ Die SD-Karte ist so partitioniert, dass eine Formatierung über die TUYA-App den
 - **Automatische Wiederherstellung:** Ein Skript (`services.sh`) überprüft alle 30 Sekunden den Zustand der Partitionen und stellt sicher, dass notwendige Dateien nach einer Formatierung automatisch wiederhergestellt werden.
 
 **Hinweis:** Vermeiden Sie es, die Kamera innerhalb von 1 Minute nach einer Formatierung neu zu starten, um die automatische Wiederherstellung zu gewährleisten. Sollte dies dennoch geschehen, können die erforderlichen Dateien manuell auf die erste Partition kopiert werden.
-
-## Hinweise zur Motorsteuerung
-
-Die Motorsteuerung ist derzeit nur mit älteren Versionen der 1080p Indoor PTZ-Kamera kompatibel. Im Webinterface wird die Steuerungsoption nur angezeigt, wenn die angeschlossene Kamera diese Funktion unterstützt.
 
 ## Geplante Verbesserungen
 
