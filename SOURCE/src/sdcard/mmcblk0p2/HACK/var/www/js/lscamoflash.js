@@ -637,7 +637,7 @@ $(document).ready(function() {
     
     $("#ptz-dist").on("input", function() {
         dist = $(this).val();
-        $("#ptz-dist-value").html(dist);
+        $("#ptz-dist-value").text(dist);
     });
     
     $("#btn-reboot-now").click(function() {
