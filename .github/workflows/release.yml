@@ -2,10 +2,6 @@ name: Create Stable Release
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Release version (e.g. v1.0.0)'
-        required: true
 
 jobs:
   release:
@@ -17,6 +13,10 @@ jobs:
 
       - name: Install required build tools
         run: sudo apt update && sudo apt install -y build-essential flex bison gsoap binutils make automake autoconf autoconf-archive
+
+      - name: Version aus Datei lesen
+        id: version
+        run: echo "VERSION=$(cat SOURCE/version.txt)" >> $GITHUB_OUTPUT
 
       - name: Build release
         run: |
@@ -32,8 +32,8 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.inputs.version }}
-          name: Release ${{ github.event.inputs.version }}
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          name: Release v${{ steps.version.outputs.VERSION }}
           files: |
             release/LSCamoflash-*-uclibc.tar.gz
             release/update-*-uclibc.tar.gz
