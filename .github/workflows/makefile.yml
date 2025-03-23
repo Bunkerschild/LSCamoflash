@@ -1,19 +1,22 @@
 name: Auto-Build & Deploy
+
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
-  
+
 on:
   push:
     branches:
-      - main  # Läuft nur, wenn auf "main" gepusht wird
+      - main
+    paths-ignore:
+      - 'docs/autobuild/**'
   pull_request:
     branches:
-      - main  # Optional: PRs prüfen
+      - main
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Läuft auf einem Ubuntu-Runner
+    runs-on: ubuntu-latest
 
     steps:
       - name: Repository auschecken
@@ -26,12 +29,12 @@ jobs:
         run: |
           cd SOURCE
           make mrproper-full download
-          
+
       - name: Starte Build-Test mit uclibc
         run: |
           cd SOURCE
           make build-test-uclibc
-          
+
       - name: Release erstellen
         run: |
           cd SOURCE
@@ -46,14 +49,16 @@ jobs:
           mkdir -p ../docs/autobuild
           cp update-*-uclibc.tgz ../docs/autobuild/update-autobuild.tgz
 
-      - name: Build als Artefakt hochladen
-        uses: actions/upload-artifact@v4
-        with:
-          name: LSCamoflash-Autobuild
-          path: docs/autobuild/
+      - name: Git Commit & Push der autobuild-Dateien
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase
+          git add docs/autobuild/
+          git commit -m "Auto-Build: Deploy latest build artifacts to GitHub Pages" || echo "Nothing to commit"
+          git push
 
       - name: Starte Build-Test mit gclibc
         run: |
           cd SOURCE
           make build-test-glibc
-          
