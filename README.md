@@ -2,9 +2,10 @@
 
 LSCamoflash is a modified firmware package for specific IP cameras that provides additional features and improvements.
 
-![Build Status](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/makefile.yml/badge.svg)
-![CodeQL](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/codeql.yml/badge.svg)
-
+[![Build and Deploy Status](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/makefile.yml/badge.svg)](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/makefile.yml)
+[![Create Stable Release](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/release.yml/badge.svg)](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/release.yml)
+[![CodeQL Advanced](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/codeql.yml/badge.svg)(https://github.com/Bunkerschild/LSCamoflash/actions/workflows/codeql.yml)
+[![Deploy GitHub Pages](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/jekyll-gh-pages.yml/badge.svg)](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/jekyll-gh-pages.yml)
 
 ## Table of Contents
 
