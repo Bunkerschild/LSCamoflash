@@ -103,6 +103,8 @@ jobs:
         cd SOURCE
         make mrproper-full download
         make build-test-uclibc
+        make mrproper-phase1
+        make download-clean
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3

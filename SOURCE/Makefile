@@ -1267,10 +1267,14 @@ toolchain-glibc-clean:
 
 toolchain-clean: toolchain-uclibc-clean toolchain-glibc-clean
 	@rm -rf $(TOOLCHAIN_BASE_DIR)
+	
+mrproper: mrproper-phase1 mrproper-phase2
 
-mrproper: staging-clean packages-clean toolchain-clean host-clean build-clean
+mrproper-phase2: staging-clean build-clean
 	@rm -f $(ROOT_DIR)/LSCamoflash-*.tar.gz || true
 	@rm -f $(ROOT_DIR)/update-*.tgz || true
+
+mrproper-phase1: packages-clean toolchain-clean host-clean
 
 mrproper-full: download-clean mrproper
 	

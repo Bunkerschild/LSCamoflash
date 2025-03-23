@@ -32,6 +32,26 @@ jobs:
           cd SOURCE
           make build-test-uclibc
           
+      - name: Release erstellen
+        run: |
+          cd SOURCE
+          make release
+          mkdir -p ../release
+          cp build/LSCamoflash-*-uclibc.tar.gz ../release/LSCamoflash-Autobuild.tar.gz
+
+      - name: Update erstellen
+        run: |
+          cd SOURCE
+          make update
+          mkdir -p ../release
+          cp build/update-*-uclibc.tgz ../release/update-autobuild.tgz
+
+      - name: Build als Artefakt hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: LSCamoflash-Autobuild
+          path: release/
+
       - name: Starte Build-Test mit gclibc
         run: |
           cd SOURCE

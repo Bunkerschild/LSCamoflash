@@ -1,0 +1,41 @@
+name: Create Stable Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. v1.0.0)'
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Install required build tools
+        run: sudo apt update && sudo apt install -y build-essential flex bison gsoap binutils make automake autoconf autoconf-archive
+
+      - name: Build release
+        run: |
+          cd SOURCE
+          make mrproper-full download
+          make all-and-optionals
+          make release
+          make update
+          mkdir -p ../release
+          cp build/LSCamoflash-*-uclibc.tar.gz ../release/
+          cp build/update-*-uclibc.tar.gz ../release/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          name: Release ${{ github.event.inputs.version }}
+          files: |
+            release/LSCamoflash-*-uclibc.tar.gz
+            release/update-*-uclibc.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
