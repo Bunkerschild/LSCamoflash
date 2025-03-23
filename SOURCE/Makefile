@@ -1372,4 +1372,3 @@ install: all
 	@cd $(BUILD_DIR); sh install.sh
 
 .PHONY: all clean
-
