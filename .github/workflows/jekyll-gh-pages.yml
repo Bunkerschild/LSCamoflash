@@ -1,8 +1,11 @@
-name: Deploy Jekyll with GitHub Pages dependencies preinstalled
+name: Deploy Autobuild & GitHub Pages
 
 on:
   push:
-    branches: ["main"]
+    branches: 
+      - main
+    paths:
+      - 'SOURCE/**'
   workflow_dispatch:
 
 permissions:
@@ -20,14 +23,44 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Pages
+
+      - name: Installiere Build-Tools
+        run: sudo apt update && sudo apt install -y build-essential flex bison gsoap binutils make automake autoconf autoconf-archive
+
+      - name: Download der Quellen
+        run: |
+          cd SOURCE
+          make mrproper-full download
+
+      - name: Starte Build mit all-and-optionals
+        run: |
+          cd SOURCE
+          make all-and-optionals
+
+      - name: Release erstellen
+        run: |
+          cd SOURCE
+          make release
+          mkdir -p ../docs/autobuild
+          cp LSCamoflash-*-uclibc.tar.gz ../docs/autobuild/LSCamoflash-Autobuild.tar.gz
+
+      - name: Update erstellen
+        run: |
+          cd SOURCE
+          make update
+          mkdir -p ../docs/autobuild
+          cp update-*-uclibc.tgz ../docs/autobuild/update-autobuild.tgz
+
+      - name: Pages einrichten
         uses: actions/configure-pages@v5
-      - name: Build with Jekyll
+
+      - name: Pages Build mit Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
           source: ./docs
           destination: ./_site
-      - name: Upload artifact
+
+      - name: Artefakt upload
         uses: actions/upload-pages-artifact@v3
 
   deploy:

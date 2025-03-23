@@ -1,4 +1,4 @@
-name: Auto-Build & Deploy
+name: Auto-Build
 
 permissions:
   contents: write
@@ -8,8 +8,8 @@ on:
   push:
     branches:
       - main
-    paths-ignore:
-      - 'docs/autobuild/**'
+    paths:
+      - 'SOURCE/**'
   pull_request:
     branches:
       - main
@@ -34,29 +34,6 @@ jobs:
         run: |
           cd SOURCE
           make build-test-uclibc
-
-      - name: Release erstellen
-        run: |
-          cd SOURCE
-          make release
-          mkdir -p ../docs/autobuild
-          cp LSCamoflash-*-uclibc.tar.gz ../docs/autobuild/LSCamoflash-Autobuild.tar.gz
-
-      - name: Update erstellen
-        run: |
-          cd SOURCE
-          make update
-          mkdir -p ../docs/autobuild
-          cp update-*-uclibc.tgz ../docs/autobuild/update-autobuild.tgz
-
-      - name: Git Commit & Push der autobuild-Dateien
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git pull --rebase
-          git add docs/autobuild/
-          git commit -m "Auto-Build: Deploy latest build artifacts to GitHub Pages" || echo "Nothing to commit"
-          git push
 
       - name: Starte Build-Test mit gclibc
         run: |
