@@ -31,6 +31,6 @@ See the full [Release Notes](./release.md)
 
 ⚠️ This is the latest development build. It is not tested as thoroughly as stable releases.
 
-👉 [Download LSCamoflash Autobuild](./autobuild/LSCamoflash-autobuild.tar.gz)
+👉 [Download LSCamoflash Autobuild](./autobuild/LSCamoflash-Autobuild.tar.gz)
 
 👉 [Download Update Package](./autobuild/update-autobuild.tgz)
