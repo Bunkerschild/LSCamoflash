@@ -19,12 +19,18 @@ LSCamoflash is a modified firmware package for LSC Tuya based IP cameras that ad
 - CLI/Web integration via PHP & Python
 - Optional `radare2` installation
 
-## 📦 Download
+## 📦 Download Latest Release Version
 
 👉 [Download Latest Release](https://github.com/Bunkerschild/LSCamoflash/releases/latest)
-
-👉 [Download Latest Autobuild](https://github.com/Bunkerschild/LSCamoflash/release/latest)
 
 ## 📚 Full Release Notes
 
 See the full [Release Notes](./release.md)
+
+## 🛠 Latest Autobuild
+
+⚠️ This is the latest development build. It is not tested as thoroughly as stable releases.
+
+👉 [Download LSCamoflash Autobuild](./autobuild/LSCamoflash-autobuild.tar.gz)
+
+👉 [Download Update Package](./autobuild/update-autobuild.tgz)
