@@ -27,7 +27,7 @@ jobs:
           make update
           mkdir -p ../release
           cp LSCamoflash-*-uclibc.tar.gz ../release/
-          cp update-*-uclibc.tar.gz ../release/
+          cp update-*-uclibc.tgz ../release/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
