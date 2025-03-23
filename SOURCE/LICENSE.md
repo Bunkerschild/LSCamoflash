@@ -139,6 +139,15 @@ This project includes various third-party software packages, each with its own l
   Lizenz: BSD License  
   Quelle: [https://www.tcpdump.org](https://www.tcpdump.org)
 
+## Python modules
+- **zeroconf (0.146.1)**  
+  Lizenz: GNU Lesser General Public License (LGPL)
+  Quelle: [https://github.com/python-zeroconf/python-zeroconf](https://github.com/python-zeroconf/python-zeroconf)
+
+- **flask (3.1.0)**  
+  Lizenz: BSD-3-Clause License  
+  Quelle: [https://github.com/pallets/flask](https://github.com/pallets/flask)
+
 ## Cryptographic Functions
 - **MD5 & SHA1 Implementations** (from GNU Coreutils)  
   License: GNU General Public License (GPLv3)
