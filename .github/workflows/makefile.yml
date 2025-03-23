@@ -37,14 +37,14 @@ jobs:
           cd SOURCE
           make release
           mkdir -p ../docs/autobuild
-          cp build/LSCamoflash-*-uclibc.tar.gz ../doc/autobuild/LSCamoflash-Autobuild.tar.gz
+          cp LSCamoflash-*-uclibc.tar.gz ../doc/autobuild/LSCamoflash-Autobuild.tar.gz
 
       - name: Update erstellen
         run: |
           cd SOURCE
           make update
           mkdir -p ../docs/autobuild
-          cp build/update-*-uclibc.tgz ../docs/autobuild/update-autobuild.tgz
+          cp update-*-uclibc.tgz ../docs/autobuild/update-autobuild.tgz
 
       - name: Build als Artefakt hochladen
         uses: actions/upload-artifact@v4
