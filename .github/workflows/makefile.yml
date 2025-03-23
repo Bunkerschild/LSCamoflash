@@ -37,7 +37,7 @@ jobs:
           cd SOURCE
           make release
           mkdir -p ../docs/autobuild
-          cp LSCamoflash-*-uclibc.tar.gz ../doc/autobuild/LSCamoflash-Autobuild.tar.gz
+          cp LSCamoflash-*-uclibc.tar.gz ../docs/autobuild/LSCamoflash-Autobuild.tar.gz
 
       - name: Update erstellen
         run: |
