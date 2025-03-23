@@ -543,6 +543,7 @@ fi
 echo "while [ -f \"/tmp/_ak39_startlock.ini\" ]; do" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "  sleep 3" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "done" >> $sys_temp/anyka_ipc_wrapper.sh
+echo "echo \"\$anyka_ipc_bin\" > $sys_temp/anyka_ipc_wrapper.cmd" >> $sys_temp/anyka_ipc_wrapper.sh
 #echo "\$anyka_ipc_bin 2>&1 | $sd_sbin/ipc_log_parser.sh $ipc_log" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "\$anyka_ipc_bin" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "sleep 1" >> $sys_temp/anyka_ipc_wrapper.sh

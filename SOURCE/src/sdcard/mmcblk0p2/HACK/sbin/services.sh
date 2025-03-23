@@ -1,14 +1,27 @@
 #!/bin/sh
 
-[ -n "$hack" ] || exit 1
+# Check, whether we were called fron CLI
+[ "$1" != "" ] && hack="/tmp/sd/HACK"
+
+# Exit, if we were called from CLI without argument
+if [ -z "$hack" ]; then
+	echo "You must not start $0 from cli without argument(s)"
+ 	exit 1
+fi
 
 # We have to reload the hack and hack_custom config
 [ -f "$hack_conf" ] && . $hack_conf
 [ -f "$hack_custom_conf" ] && . $hack_custom_conf
 
-# Custom scripts run before services
-[ -n "$custom_pre_services_async" -a -x "$custom_pre_services_async" ] && $custom_pre_services_async &
-[ -n "$custom_pre_services" -a -x "$custom_pre_services" ] && $custom_pre_services
+# Service enable files
+ftp_enabled="$sys_temp/ftp_enabled.svc"
+http_enabled="$sys_temp/http_enabled.svc"
+telnet_enabled="$sys_temp/telnet_enabled.svc"
+cron_enabled="$sys_temp/cron_enabled.svc"
+onvif_enabled="$sys_temp/onvif_enabled.svc"
+
+# Anyka IPC Wrapper startlock file
+anyka_startlock="$sys_temp/_ak39_startlock.ini"
 
 # Compare function
 compare() {
@@ -27,6 +40,221 @@ compare() {
         return 1
 }
 
+# Get PID of service
+getServicePID() {
+	[ "$1" = "" ] && return 1
+	
+	local has_pid=""
+	
+	case $1 in
+		anyka_ipc)
+			[ -f "$sys_temp/anyka_ipc_wrapper.cmd" ] || return 1
+			local wrapper_cmd=`cat $sys_temp/anyka_ipc_wrapper.cmd`
+			has_pid=`pgrep -f "$wrapper_cmd"`
+			;;
+		ftp)
+			has_pid=`pgrep -f "tcpsvd 0 .* ftpd"`
+			;;
+		http)
+			has_pid=`pgrep -f "busybox telnetd"`
+			;;
+		telnet)
+			has_pid=`pgrep -f "busybox httpd"`
+			;;
+		cron)
+			has_pid=`pgrep -f "crond"`
+			;;
+		onvif)
+			has_pid=`pgrep -f "onvif_srvd"`
+			;;		
+		*)
+			return 1
+			;;
+	esac
+	
+	[ -z "$has_pid" ] && return 1
+	echo $has_pid && return 0
+}
+
+# Get/Set single service function
+singleService() {
+	[ "$1" = "" ] && return 1
+
+	local cmd="$2"	
+	local pid=""
+	local sid=""
+	local svc="$1"
+	
+	case $svc in
+		anyka_ipc)
+			[ -f "$sys_temp/anyka_ipc_wrapper.cmd" ] || return 1
+			local wrapper_cmd=`cat $sys_temp/anyka_ipc_wrapper.cmd`
+			[ -z "$cmd" ] && echo $svc && return 0
+			pid=$(getServicePID anyka_ipc)
+			sid="Anyka IPC"
+			if [ "$cmd" = "start" ]; then
+				rm -f $anyka_startlock
+				[ -n "$pid" ] && echo "$sid is already running at pid $pid" || echo "$sid will start soon"
+			elif [ "$cmd" = "stop" ]; then
+				touch $anyka_startlock
+				if [ -n "$pid" ]; then
+					echo "$sid is already stopped"
+				else
+					kill -TERM $pid && echo "$sid stopped" || echo "Unable to stop $sid with TERM signal at pid $pid"
+				fi
+			elif [ "$cmd" = "status" ]; then
+				[ -n "$pid" ] && echo "$sid is up and running at pid $pid" || echo "$sid is down"
+			fi
+			;;
+		ftp)
+			[ -z "$cmd" ] && echo $svc && return 0
+			pid=$(getServicePID ftp)
+			sid="FTP service"
+			if [ "$cmd" = "start" ]; then
+				touch $ftp_enabled
+				[ -n "$pid" ] && echo "$sid is already running at pid $pid" || echo "$sid will start soon"
+			elif [ "$cmd" = "stop" ]; then
+				rm -f $ftp_enabled
+				if [ -n "$pid" ]; then
+					echo "$sid is already stopped"
+				else
+					kill -TERM $pid && echo "$sid stopped" || echo "Unable to stop $sid with TERM signal at pid $pid"
+				fi
+			elif [ "$cmd" = "status" ]; then
+				[ -n "$pid" ] && echo "$sid is up and running at pid $pid" || echo "$sid is down"
+			fi
+			;;
+		cron)
+			[ -z "$cmd" ] && echo $svc && return 0
+			pid=$(getServicePID cron)
+			sid="Cron daemon"
+			if [ "$cmd" = "start" ]; then
+				touch $cron_enabled
+				[ -n "$pid" ] && echo "$sid is already running at pid $pid" || echo "$sid will start soon"
+			elif [ "$cmd" = "stop" ]; then
+				rm -f $cron_enabled
+				if [ -n "$pid" ]; then
+					echo "$sid is already stopped"
+				else
+					kill -TERM $pid && echo "$sid stopped" || echo "Unable to stop $sid with TERM signal at pid $pid"
+				fi
+			elif [ "$cmd" = "status" ]; then
+				[ -n "$pid" ] && echo "$sid is up and running at pid $pid" || echo "$sid is down"
+			fi
+			;;
+		telnet)
+			[ -z "$cmd" ] && echo $svc && return 0
+			pid=$(getServicePID telnet)
+			sid="Telnet service"
+			if [ "$cmd" = "start" ]; then
+				touch $telnet_enabled
+				[ -n "$pid" ] && echo "$sid is already running at pid $pid" || echo "$sid will start soon"
+			elif [ "$cmd" = "stop" ]; then
+				rm -f $telnet_enabled
+				if [ -n "$pid" ]; then
+					echo "$sid is already stopped"
+				else
+					kill -TERM $pid && echo "$sid stopped" || echo "Unable to stop $sid with TERM signal at pid $pid"
+				fi
+			elif [ "$cmd" = "status" ]; then
+				[ -n "$pid" ] && echo "$sid is up and running at pid $pid" || echo "$sid is down"
+			fi
+			;;
+		http)
+			[ -z "$cmd" ] && echo $svc && return 0
+			pid=$(getServicePID http)
+			sid="HTTP service"
+			if [ "$cmd" = "start" ]; then
+				touch $http_enabled
+				[ -n "$pid" ] && echo "$sid is already running at pid $pid" || echo "$sid will start soon"
+			elif [ "$cmd" = "stop" ]; then
+				rm -f $http_enabled
+				if [ -n "$pid" ]; then
+					echo "$sid is already stopped"
+				else
+					kill -TERM $pid && echo "$sid stopped" || echo "Unable to stop $sid with TERM signal at pid $pid"
+				fi
+			elif [ "$cmd" = "status" ]; then
+				[ -n "$pid" ] && echo "$sid is up and running at pid $pid" || echo "$sid is down"
+			fi
+			;;
+		onvif)
+			[ -z "$cmd" ] && echo $svc && return 0
+			pid=$(getServicePID onvif)
+			sid="ONVIF service"
+			if [ "$cmd" = "start" ]; then
+				touch $onvif_enabled
+				[ -n "$pid" ] && echo "$sid is already running at pid $pid" || echo "$sid will start soon"
+			elif [ "$cmd" = "stop" ]; then
+				rm -f $onvif_enabled
+				if [ -n "$pid" ]; then
+					echo "$sid is already stopped"
+				else
+					kill -TERM $pid && echo "$sid stopped" || echo "Unable to stop $sid with TERM signal at pid $pid"
+				fi
+			elif [ "$cmd" = "status" ]; then
+				[ -n "$pid" ] && echo "$sid is up and running at pid $pid" || echo "$sid is down"
+			fi
+			;;
+	esac
+	
+	return 1
+}
+
+# CLI callable handling
+if [ "$1" != "" ]; then
+	sis=$(singleService "$2")
+	
+	# We dont want telnet any anyka_ipc to be mass controlled, so we remove it from services list
+	services="ftp http cron onvif"
+	
+	case $1 in
+		start)
+			if [ -n "$sis" ]; then
+				singleService $sis start
+			else
+				for svc in $services; do
+					singleService $svc start
+				done
+			fi
+			;;
+		stop)
+			if [ -n "$sis" ]; then
+				singleService $sis stop
+			else
+				for svc in $services; do
+					singleService $svc stop
+				done
+			fi
+			;;
+		restart)
+			[ -z "$sis" ] && echo "You can only restart single services" && exit 1
+			$0 stop $sis
+			echo "Waiting 15 seconds for $sis to start"
+			sleep 15
+			$0 start $sis
+			;;
+		status)
+			if [ -n "$sis" ]; then
+				singleService $sis status
+			else
+				for svc in $services; do
+					singleService $svc status
+				done
+			fi
+			;;
+		*)
+			echo "Usage: $0 start|stop|restart|status [ftp|cron|telnet|http|onvif|anyka_ipc]"
+			exit 1
+			;;
+	esac
+	exit
+fi
+
+# Custom scripts run before services
+[ -n "$custom_pre_services_async" -a -x "$custom_pre_services_async" ] && $custom_pre_services_async &
+[ -n "$custom_pre_services" -a -x "$custom_pre_services" ] && $custom_pre_services
+
 # Check, whether _ht_sw_settings.ini exists
 if [ ! -e $sd_config/_ht_sw_settings.ini ]; then
         $cp $sys_config/_ht_sw_settings.ini $sd_config
@@ -37,8 +265,8 @@ fi
 
 # FTP Service
 if [ "$port_ftp" != "" ]; then
-	has_ftp=`pgrep -f "tcpsvd 0 $port_ftp ftpd"`
- 	if [ "$ftp_enabled" = "1" ]; then
+	has_ftp=$(getServicePID ftp)
+ 	if [ "$ftp_enabled" = "1" -a -f "$ftp_enabled" ]; then
 		if [ "$has_ftp" = "" ]; then
 			$sys_bin/tcpsvd 0 $port_ftp ftpd -w $sd_path -t 1800 &
 		fi
@@ -51,8 +279,8 @@ fi
 
 # Telnet Service
 if [ "$port_telnet" != "" ]; then
-	has_telnet=`pgrep -f "busybox telnetd"`
- 	if [ "$telnet_enabled" = "1" ]; then
+	has_telnet=$(getServicePID telnet)
+ 	if [ "$telnet_enabled" = "1" -a -f "$telnet_enabled" ]; then
 		if [ "$has_telnet" = "" ]; then
 			$sd_bin/busybox telnetd -p $port_telnet
 		fi
@@ -65,8 +293,8 @@ fi
 
 # HTTP Service
 if [ "$port_http" != "" ]; then
-	has_http=`pgrep -f "busybox httpd"`
- 	if [ "$http_enabled" = "1" ]; then
+	has_http=$(getServicePID http)
+ 	if [ "$http_enabled" = "1" -a -f "$http_enabled" ]; then
 		if [ "$has_http" = "" ]; then
 			$sd_bin/busybox httpd -c $sd_etc/httpd.conf -h $sd_www -p $port_http
 		fi
@@ -91,8 +319,8 @@ if [ "$use_offline_mode" != "" ]; then
 fi
 
 # Cron daemon
-has_crond=`pgrep -f "crond"`
-if [ "$crond_enabled" = "1" ]; then
+has_crond=$(getServicePID cron)
+if [ "$crond_enabled" = "1" -a -f "$cron_enabled" ]; then
  	if [ "$has_crond" = "" ]; then
     		$sd_bin/busybox crond -L $crond_log -c $sys_crontabs -b
   	fi
@@ -104,8 +332,8 @@ fi
 
 # ONVIF Service
 if [ "$port_onvif" != "" ]; then
-	has_onvif=`pgrep -f "onvif"`
- 	if [ "$onvif_enabled" = "1" ]; then
+	has_onvif=$(getServicePID onvif)
+ 	if [ "$onvif_enabled" = "1" -a -f "$onvif_enabled" ]; then
 		if [ "$has_onvif" = "" ]; then
 			$sd_sbin/onvif.sh &
 		fi
