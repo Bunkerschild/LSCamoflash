@@ -19,6 +19,7 @@ http_enabled="$sys_temp/http_enabled.svc"
 telnet_enabled="$sys_temp/telnet_enabled.svc"
 cron_enabled="$sys_temp/cron_enabled.svc"
 onvif_enabled="$sys_temp/onvif_enabled.svc"
+mqtt_enabled="$sys_temp/mqtt_enabled.svc"
 
 # Anyka IPC Wrapper startlock file
 anyka_startlock="$sys_temp/_ak39_startlock.ini"
@@ -67,6 +68,9 @@ getServicePID() {
 		onvif)
 			has_pid=`pgrep -f "onvif_srvd"`
 			;;		
+		mqtt)
+			has_pid=`pgrep -f "mosquitto"`
+			;;
 		*)
 			return 1
 			;;
@@ -196,6 +200,24 @@ singleService() {
 				[ -n "$pid" ] && echo "$sid is up and running at pid $pid" || echo "$sid is down"
 			fi
 			;;
+		mqtt)
+			[ -z "$cmd" ] && echo $svc && return 0
+			pid=$(getServicePID mqtt)
+			sid="Mosquitto service"
+			if [ "$cmd" = "start" ]; then
+				touch $mqtt_enabled
+				[ -n "$pid" ] && echo "$sid is already running at pid $pid" || echo "$sid will start soon"
+			elif [ "$cmd" = "stop" ]; then
+				rm -f $mqtt_enabled
+				if [ -n "$pid" ]; then
+					echo "$sid is already stopped"
+				else
+					kill -TERM $pid && echo "$sid stopped" || echo "Unable to stop $sid with TERM signal at pid $pid"
+				fi
+			elif [ "$cmd" = "status" ]; then
+				[ -n "$pid" ] && echo "$sid is up and running at pid $pid" || echo "$sid is down"
+			fi
+			;;
 	esac
 	
 	return 1
@@ -205,7 +227,7 @@ singleService() {
 if [ "$1" != "" ]; then
 	sis=$(singleService "$2")
 	
-	# We dont want telnet any anyka_ipc to be mass controlled, so we remove it from services list
+	# We dont want telnet, mosquitto and anyka_ipc to be mass controlled, so we remove it from services list
 	services="ftp http cron onvif"
 	
 	case $1 in
@@ -249,6 +271,13 @@ if [ "$1" != "" ]; then
 			;;
 	esac
 	exit
+else
+	touch $ftp_enabled
+	touch $http_enabled
+	touch $cron_enabled
+	touch $telnet_enabled
+	touch $onvif_enabled
+	touch $mqtt_enabled
 fi
 
 # Custom scripts run before services
@@ -340,6 +369,20 @@ if [ "$port_onvif" != "" ]; then
   	else
    		if [ "$has_onvif" != "" ]; then
 			kill -KILL $has_onvif
+     		fi
+   	fi
+fi
+
+# Mosquitto Service
+if [ "$port_mqtt" != "" ]; then
+	has_mqtt=$(getServicePID mqtt)
+ 	if [ "$mqtt_enabled" = "1" -a -f "$mqtt_enabled" ]; then
+		if [ "$has_mqtt" = "" ]; then
+			$sd_sbin/mosquitto -c $sd_etc/mosquitto/mosquitto.conf -p $port_mqtt -d
+		fi
+  	else
+   		if [ "$has_mqtt" != "" ]; then
+			kill -KILL $has_mqtt
      		fi
    	fi
 fi

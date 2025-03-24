@@ -726,9 +726,28 @@ $(STAGING_DIR)/$(SDROOT)/usr/sbin/mosquitto: $(PACKAGES_DIR)/$(MOSQUITTO)/build/
 	@make -C $(PACKAGES_DIR)/$(MOSQUITTO)/build DESTDIR=$(STAGING_DIR)/$(SDROOT) WITH_DOCS=no install
 	@touch $@
 	
-mosquitto: $(STAGING_DIR)/$(SDROOT)/usr/sbin/mosquitto
+$(STAGING_DIR)/$(SDROOT)/etc/mosquitto/certs/server.crt:
+	@mkdir -p $(STAGING_DIR)/$(SDROOT)/etc/mosquitto/certs
+	@openssl req -x509 -nodes -days 7300 -newkey rsa:2048 \
+		-keyout $(STAGING_DIR)/$(SDROOT)/etc/mosquitto/certs//server.key \
+		-out $(STAGING_DIR)/$(SDROOT)/etc/mosquitto/certs//server.crt \
+		-config $(SRC_DIR)/sdcard/mmcblk0p2/HACK/etc/mosquitto/mosquitto-ssl.cnf \
+		-extensions ext
+
+$(STAGING_DIR)/$(SDROOT)/etc/mosquitto/certs/ca.crt: $(STAGING_DIR)/$(SDROOT)/etc/mosquitto/certs/server.crt
+	@mkdir -p $(STAGING_DIR)/$(SDROOT)/etc/mosquitto/certs
+	@cp -f $(DOWNLOAD_DIR)/cacert.pem $@
+	@touch $@
+		
+$(STAGING_DIR)/$(SDROOT)/usr/lib/mqtt_mitm_auth.so: $(STAGING_DIR)/$(SDROOT)/etc/mosquitto/certs/ca.crt
+	@make -C $(SRC_DIR)/contrib/mqtt_mitm_auth MOSQ_STAGING=$(STAGING_DIR)/$(SDROOT)
+	@chmod 644 $@
+	@touch $@
+
+mosquitto: $(STAGING_DIR)/$(SDROOT)/usr/sbin/mosquitto $(STAGING_DIR)/$(SDROOT)/usr/lib/mqtt_mitm_auth.so
 
 mosquitto-clean:
+	@rm -f $(SRC_DIR)/contrib/mqtt_mitm_auth/mqtt_mitm_auth.so
 	@rm -rf $(PACKAGES_DIR)/$(MOSQUITTO)/build
 	@rm $(PACKAGES_DIR)/$(MOSQUITTO)/mosquitto-config
 

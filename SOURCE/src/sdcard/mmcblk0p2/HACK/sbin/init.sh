@@ -28,7 +28,11 @@ export setup_lock_file="/tmp/setup.lock"
 # Binding and setting up hostname config
 if [ -n "$system_hostname" ]; then
         echo $system_hostname | $cut -d . -f1 > /tmp/hostname
-        echo "127.0.0.1         localhost:localdomain           localhost" > /tmp/hosts
+        if [ -f "$sd_etc/hosts.online" ]; then
+		$cp $sd_etc/hosts.online /tmp/hosts
+	else
+	        echo "127.0.0.1         localhost:localdomain           localhost" > /tmp/hosts
+	fi
         echo "127.0.1.1         $system_hostname        $(echo $system_hostname | $cut -d . -f1)" >> /tmp/hosts
         $mount --bind /tmp/hostname /etc/sysconfig/HOSTNAME
         $mount --bind /tmp/hosts /etc/hosts

@@ -1,0 +1,27 @@
+[req]
+default_bits       = 2048
+prompt             = no
+default_md         = sha256
+distinguished_name = dn
+x509_extensions    = ext
+
+[dn]
+C  = EU
+ST = LSCamoflash
+L  = Camera
+O  = MITM
+CN = localhost
+
+[ext]
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = m2.tuyaus.com
+DNS.2 = mq.gw.tuyaus.com
+DNS.3 = m2-ueaz.tuyaus.com
+DNS.4 = m2.tuyacn.com
+DNS.5 = mq.gw.tuyacn.com
+DNS.6 = m2-ceaz.tuyacn.com
+DNS.7 = m2.tuyaeu.com
+DNS.8 = mq.gw.tuyaeu.com
+DNS.9 = m2-weaz.tuyaeu.com
