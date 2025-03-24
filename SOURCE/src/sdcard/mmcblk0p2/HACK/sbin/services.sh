@@ -1,7 +1,11 @@
 #!/bin/sh
 
 # Check, whether we were called fron CLI
-[ "$1" != "" ] && hack="/tmp/sd/HACK"
+if [ "$1" != "" ]; then
+        hack="/tmp/sd/HACK"
+        hack_conf="$hack/etc/hack.conf"
+        hack_custom_conf="$hack/etc/hack_custom.conf"
+fi
 
 # Exit, if we were called from CLI without argument
 if [ -z "$hack" ]; then
@@ -20,6 +24,12 @@ telnet_enabled="$sys_temp/telnet_enabled.svc"
 cron_enabled="$sys_temp/cron_enabled.svc"
 onvif_enabled="$sys_temp/onvif_enabled.svc"
 mqtt_enabled="$sys_temp/mqtt_enabled.svc"
+
+# First start file
+first_start="$sys_temp/services.fs"
+
+# Services run file
+services_run="$sys_temp/services.run"
 
 # Anyka IPC Wrapper startlock file
 anyka_startlock="$sys_temp/_ak39_startlock.ini"
@@ -101,7 +111,7 @@ singleService() {
 				[ -n "$pid" ] && echo "$sid is already running at pid $pid" || echo "$sid will start soon"
 			elif [ "$cmd" = "stop" ]; then
 				touch $anyka_startlock
-				if [ -n "$pid" ]; then
+				if [ -z "$pid" ]; then
 					echo "$sid is already stopped"
 				else
 					kill -TERM $pid && echo "$sid stopped" || echo "Unable to stop $sid with TERM signal at pid $pid"
@@ -119,7 +129,7 @@ singleService() {
 				[ -n "$pid" ] && echo "$sid is already running at pid $pid" || echo "$sid will start soon"
 			elif [ "$cmd" = "stop" ]; then
 				rm -f $ftp_enabled
-				if [ -n "$pid" ]; then
+				if [ -z "$pid" ]; then
 					echo "$sid is already stopped"
 				else
 					kill -TERM $pid && echo "$sid stopped" || echo "Unable to stop $sid with TERM signal at pid $pid"
@@ -137,7 +147,7 @@ singleService() {
 				[ -n "$pid" ] && echo "$sid is already running at pid $pid" || echo "$sid will start soon"
 			elif [ "$cmd" = "stop" ]; then
 				rm -f $cron_enabled
-				if [ -n "$pid" ]; then
+				if [ -z "$pid" ]; then
 					echo "$sid is already stopped"
 				else
 					kill -TERM $pid && echo "$sid stopped" || echo "Unable to stop $sid with TERM signal at pid $pid"
@@ -155,7 +165,7 @@ singleService() {
 				[ -n "$pid" ] && echo "$sid is already running at pid $pid" || echo "$sid will start soon"
 			elif [ "$cmd" = "stop" ]; then
 				rm -f $telnet_enabled
-				if [ -n "$pid" ]; then
+				if [ -z "$pid" ]; then
 					echo "$sid is already stopped"
 				else
 					kill -TERM $pid && echo "$sid stopped" || echo "Unable to stop $sid with TERM signal at pid $pid"
@@ -173,7 +183,7 @@ singleService() {
 				[ -n "$pid" ] && echo "$sid is already running at pid $pid" || echo "$sid will start soon"
 			elif [ "$cmd" = "stop" ]; then
 				rm -f $http_enabled
-				if [ -n "$pid" ]; then
+				if [ -z "$pid" ]; then
 					echo "$sid is already stopped"
 				else
 					kill -TERM $pid && echo "$sid stopped" || echo "Unable to stop $sid with TERM signal at pid $pid"
@@ -191,7 +201,7 @@ singleService() {
 				[ -n "$pid" ] && echo "$sid is already running at pid $pid" || echo "$sid will start soon"
 			elif [ "$cmd" = "stop" ]; then
 				rm -f $onvif_enabled
-				if [ -n "$pid" ]; then
+				if [ -z "$pid" ]; then
 					echo "$sid is already stopped"
 				else
 					kill -TERM $pid && echo "$sid stopped" || echo "Unable to stop $sid with TERM signal at pid $pid"
@@ -209,7 +219,7 @@ singleService() {
 				[ -n "$pid" ] && echo "$sid is already running at pid $pid" || echo "$sid will start soon"
 			elif [ "$cmd" = "stop" ]; then
 				rm -f $mqtt_enabled
-				if [ -n "$pid" ]; then
+				if [ -z "$pid" ]; then
 					echo "$sid is already stopped"
 				else
 					kill -TERM $pid && echo "$sid stopped" || echo "Unable to stop $sid with TERM signal at pid $pid"
@@ -222,6 +232,17 @@ singleService() {
 	
 	return 1
 }
+
+# Initialize services enabled files on first start
+if [ !-f "$first_start" ]; then
+	touch $first_start
+	touch $ftp_enabled
+	touch $http_enabled
+	touch $cron_enabled
+	touch $telnet_enabled
+	touch $onvif_enabled
+	touch $mqtt_enabled
+fi
 
 # CLI callable handling
 if [ "$1" != "" ]; then
@@ -271,13 +292,6 @@ if [ "$1" != "" ]; then
 			;;
 	esac
 	exit
-else
-	touch $ftp_enabled
-	touch $http_enabled
-	touch $cron_enabled
-	touch $telnet_enabled
-	touch $onvif_enabled
-	touch $mqtt_enabled
 fi
 
 # Custom scripts run before services
@@ -432,7 +446,7 @@ fi
 [ -n "$custom_post_services" -a -x "$custom_post_services" ] && $custom_post_services
 
 # Touch services.run and tell the system, that the script is alive
-touch $sys_temp/services.run >/dev/null 2>&1
+touch $services_run >/dev/null 2>&1
 
 # Update script path
 update="$sd_sbin/update.sh"
