@@ -101,9 +101,9 @@ singleService() {
 	
 	case $svc in
 		anyka_ipc)
+			[ -z "$cmd" ] && echo $svc && return 0
 			[ -f "$sys_temp/anyka_ipc_wrapper.cmd" ] || return 1
 			local wrapper_cmd=`cat $sys_temp/anyka_ipc_wrapper.cmd`
-			[ -z "$cmd" ] && echo $svc && return 0
 			pid=$(getServicePID anyka_ipc)
 			sid="Anyka IPC"
 			if [ "$cmd" = "start" ]; then
