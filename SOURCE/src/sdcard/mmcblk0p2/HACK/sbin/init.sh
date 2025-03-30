@@ -267,6 +267,8 @@ if [ ! -f "$sd_overlay/fs.img" ]; then
 	$mkfs_vfat $loop_device && \
 	$mount $loop_device $sd_mnt || exit 1
 	echo -n "Setting up overlay filesystem..."
+	$mkdir -p $sd_mnt/override/bin
+	$mkdir -p $sd_mnt/override/sbin
 	for i in $overlay_dirs; do
 		$mkdir -p $sd_mnt/real/$i
 		$mkdir -p $sd_mnt/$i
@@ -283,8 +285,13 @@ fi
 # Prepare overlay filesystem
 if [ -f "$sd_overlay/fs.img" ]; then
 	echo -n "Preparing overlay filesystem..."
+	$mkdir -p $sd_mnt/override/bin
+	$mkdir -p $sd_mnt/override/sbin
+	$mount -t tmpfs -o size=1K tmpfs $sd_mnt/override/bin
+	$mount -t tmpfs -o size=1K tmpfs $sd_mnt/override/sbin
 	for i in $overlay_dirs; do
 		$mkdir -p $sd_mnt/real/$i
+		$mkdir -p $sd_mnt/override/$i
 		$mkdir -p $sd_mnt/$i
 		$mount -t tmpfs -o size=2K tmpfs $sd_mnt/$i
 		$find /$i -maxdepth 1 -type f -exec $cp {} $sd_mnt/real/$i \;
@@ -296,20 +303,35 @@ if [ -f "$sd_overlay/fs.img" ]; then
 	for i in `$sd_mnt/real/bin/busybox --install 2>&1 | $cut -d : -f2 | $sed -e 's/\/usr//g'`; do 
 		$ln -sf $sd_mnt/real/bin/busybox $sd_mnt/$i 
 	done
+	rm -f $sd_mnt/override/sbin/ifconfig >/dev/null 2>&1
+	rm -f $sd_mnt/override/sbin/udhcpc >/dev/null 2>&1
 	for i in `$busybox --install 2>&1 | $cut -d : -f2`; do 
 		$ln -sf $busybox $sd_mnt/$i 
 	done
+	$find $sys_bin -maxdepth 1 -type l -exec $ln -sf $sd_mnt/real/bin/busybox $sd_mnt/.{} \;
+	$find $sys_sbin -maxdepth 1 -type l -exec $ln -sf $sd_mnt/real/bin/busybox $sd_mnt/.{} \;
+	$find $sys_bin -maxdepth 1 -type l -exec $ln -sf $sd_mnt/real/bin/busybox $sd_mnt/override{} \;
+	$find $sys_sbin -maxdepth 1 -type l -exec $ln -sf $sd_mnt/real/bin/busybox $sd_mnt/override{} \;
 	$find $sd_bin -maxdepth 1 -type f -exec $ln -sf {} $sd_mnt/bin \;
 	$find $sd_sbin -maxdepth 1 -type f -not -name "*.sh" -exec $ln -sf {} $sd_mnt/sbin \;
 	$find $sd_lib -maxdepth 1 -type f -exec $ln -sf {} $sd_mnt/lib \;
 	$find $sd_lib -maxdepth 1 -type l -exec $ln -sf {} $sd_mnt/lib \;
 	$find $sd_lib/pkgconfig -maxdepth 1 -type f -exec $ln -sf {} $sd_mnt/lib/pkgconfig \;
-	for i in jmacs jpico jstar rjoe; do
+ 	$ln -sf $sd_mnt/real/bin/busybox $sd_mnt/override/bin/busybox
+ 	$ln -sf $sd_mnt/real/bin/mtd_debug $sd_mnt/override/bin/mtd_debug
+ 	$ln -sf $sd_mnt/real/bin/mtd_debug $sd_mnt/bin/mtd_debug
+ 	$rm -f $sd_mnt/override/sbin/ifconfig
+ 	$rm -f $sd_mnt/override/sbin/udhcpc
+ 	for i in jmacs jpico jstar rjoe; do
 		$ln -sf $sd_bin/joe $sd_mnt/bin/$i
 	done
 	$ln -sf $sd_share/joe $sd_mnt/usr/share
 	$ln -sf $sd_share/aclocal $sd_mnt/usr/share
 	echo "done"
+	echo -n "Mounting overlay over /bin..."
+	$mount --bind $sd_mnt/override/bin /bin >/dev/null 2>&1 && echo "done" || echo "failed"
+	echo -n "Mounting overlay over /sbin..."
+	$mount --bind $sd_mnt/override/sbin /sbin >/dev/null 2>&1 && echo "done" || echo "failed"
 fi
 
 # Copy shadow and passwd files and clean them in case they were edited in windows
