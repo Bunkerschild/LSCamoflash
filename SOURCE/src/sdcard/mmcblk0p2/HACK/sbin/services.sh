@@ -17,22 +17,15 @@ fi
 [ -f "$hack_conf" ] && . $hack_conf
 [ -f "$hack_custom_conf" ] && . $hack_custom_conf
 
-# Service enable files
-ftp_enabled="$sys_temp/ftp_enabled.svc"
-http_enabled="$sys_temp/http_enabled.svc"
-telnet_enabled="$sys_temp/telnet_enabled.svc"
-cron_enabled="$sys_temp/cron_enabled.svc"
-onvif_enabled="$sys_temp/onvif_enabled.svc"
-mqtt_enabled="$sys_temp/mqtt_enabled.svc"
-
-# First start file
-first_start="$sys_temp/services.fs"
-
 # Services run file
 services_run="$sys_temp/services.run"
 
 # Anyka IPC Wrapper startlock file
 anyka_startlock="$sys_temp/_ak39_startlock.ini"
+
+# Define options for telnetd
+export telnetd_options="-p $port_telnet"
+[ "$FORCE_PASSWORDLESS_TELNETD" = "1" ] && telnetd_options="$telnetd_options -a"
 
 # Compare function
 compare() {
@@ -67,7 +60,7 @@ getServicePID() {
 			has_pid=`pgrep -f "tcpsvd 0 .* ftpd"`
 			;;
 		http)
-			has_pid=`pgrep -f "busybox telnetd"`
+			has_pid=`pgrep -f "busybox telnetd $telnetd_options"`
 			;;
 		telnet)
 			has_pid=`pgrep -f "busybox httpd"`
@@ -233,17 +226,6 @@ singleService() {
 	return 1
 }
 
-# Initialize services enabled files on first start
-if [ !-f "$first_start" ]; then
-	touch $first_start
-	touch $ftp_enabled
-	touch $http_enabled
-	touch $cron_enabled
-	touch $telnet_enabled
-	touch $onvif_enabled
-	touch $mqtt_enabled
-fi
-
 # CLI callable handling
 if [ "$1" != "" ]; then
 	sis=$(singleService "$2")
@@ -325,7 +307,7 @@ if [ "$port_telnet" != "" ]; then
 	has_telnet=$(getServicePID telnet)
  	if [ "$telnet_enabled" = "1" -a -f "$telnet_enabled" ]; then
 		if [ "$has_telnet" = "" ]; then
-			$sd_bin/busybox telnetd -p $port_telnet
+			$sd_bin/busybox telnetd $telnetd_options
 		fi
 	else
  		if [ "$has_telnet" != "" ]; then

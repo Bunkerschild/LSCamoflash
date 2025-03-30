@@ -233,6 +233,12 @@ for i in $sd_etc $sd_bin $sd_lib $sd_sbin $sd_backup $sd_www $sd_log $sd_patch $
 	$mkdir -p $i >/dev/null 2>&1 && echo " - $i"
 done
 
+# Create enabled files on tmp
+echo "Creating enabled files"
+for i in $ftp_enabled $http_enabled $telnet_enabled $cron_enabled $onvif_enabled $mqtt_enabled; do
+	touch $i > /dev/null 2>&1
+done
+
 # Swap configuration (disabled, because kernel does not support it, yet)
 swap_file="$sd_overlay/swap.fil"
 swap_space="64"
