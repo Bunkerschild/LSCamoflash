@@ -59,10 +59,10 @@ getServicePID() {
 		ftp)
 			has_pid=`pgrep -f "tcpsvd 0 .* ftpd"`
 			;;
-		http)
+		telnet)
 			has_pid=`pgrep -f "busybox telnetd $telnetd_options"`
 			;;
-		telnet)
+		http)
 			has_pid=`pgrep -f "busybox httpd"`
 			;;
 		cron)
