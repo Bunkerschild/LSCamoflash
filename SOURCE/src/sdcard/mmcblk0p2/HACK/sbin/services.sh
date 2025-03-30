@@ -118,10 +118,10 @@ singleService() {
 			pid=$(getServicePID ftp)
 			sid="FTP service"
 			if [ "$cmd" = "start" ]; then
-				touch $ftp_enabled
+				touch $file_ftp_enabled
 				[ -n "$pid" ] && echo "$sid is already running at pid $pid" || echo "$sid will start soon"
 			elif [ "$cmd" = "stop" ]; then
-				rm -f $ftp_enabled
+				rm -f $file_ftp_enabled
 				if [ -z "$pid" ]; then
 					echo "$sid is already stopped"
 				else
@@ -136,10 +136,10 @@ singleService() {
 			pid=$(getServicePID cron)
 			sid="Cron daemon"
 			if [ "$cmd" = "start" ]; then
-				touch $cron_enabled
+				touch $file_cron_enabled
 				[ -n "$pid" ] && echo "$sid is already running at pid $pid" || echo "$sid will start soon"
 			elif [ "$cmd" = "stop" ]; then
-				rm -f $cron_enabled
+				rm -f $file_cron_enabled
 				if [ -z "$pid" ]; then
 					echo "$sid is already stopped"
 				else
@@ -154,14 +154,18 @@ singleService() {
 			pid=$(getServicePID telnet)
 			sid="Telnet service"
 			if [ "$cmd" = "start" ]; then
-				touch $telnet_enabled
+				touch $file_telnet_enabled
 				[ -n "$pid" ] && echo "$sid is already running at pid $pid" || echo "$sid will start soon"
 			elif [ "$cmd" = "stop" ]; then
-				rm -f $telnet_enabled
-				if [ -z "$pid" ]; then
-					echo "$sid is already stopped"
+				rm -f $file_telnet_enabled
+				if [ "$FORCE_IMMUTABLE_TELNETD" = "1" ]; then
+					echo "Telnetd is immutable"
 				else
-					kill -TERM $pid && echo "$sid stopped" || echo "Unable to stop $sid with TERM signal at pid $pid"
+					if [ -z "$pid" ]; then
+						echo "$sid is already stopped"
+					else
+						kill -TERM $pid && echo "$sid stopped" || echo "Unable to stop $sid with TERM signal at pid $pid"
+					fi
 				fi
 			elif [ "$cmd" = "status" ]; then
 				[ -n "$pid" ] && echo "$sid is up and running at pid $pid" || echo "$sid is down"
@@ -172,10 +176,10 @@ singleService() {
 			pid=$(getServicePID http)
 			sid="HTTP service"
 			if [ "$cmd" = "start" ]; then
-				touch $http_enabled
+				touch $file_http_enabled
 				[ -n "$pid" ] && echo "$sid is already running at pid $pid" || echo "$sid will start soon"
 			elif [ "$cmd" = "stop" ]; then
-				rm -f $http_enabled
+				rm -f $file_http_enabled
 				if [ -z "$pid" ]; then
 					echo "$sid is already stopped"
 				else
@@ -190,10 +194,10 @@ singleService() {
 			pid=$(getServicePID onvif)
 			sid="ONVIF service"
 			if [ "$cmd" = "start" ]; then
-				touch $onvif_enabled
+				touch $file_onvif_enabled
 				[ -n "$pid" ] && echo "$sid is already running at pid $pid" || echo "$sid will start soon"
 			elif [ "$cmd" = "stop" ]; then
-				rm -f $onvif_enabled
+				rm -f $file_onvif_enabled
 				if [ -z "$pid" ]; then
 					echo "$sid is already stopped"
 				else
@@ -208,10 +212,10 @@ singleService() {
 			pid=$(getServicePID mqtt)
 			sid="Mosquitto service"
 			if [ "$cmd" = "start" ]; then
-				touch $mqtt_enabled
+				touch $file_mqtt_enabled
 				[ -n "$pid" ] && echo "$sid is already running at pid $pid" || echo "$sid will start soon"
 			elif [ "$cmd" = "stop" ]; then
-				rm -f $mqtt_enabled
+				rm -f $file_mqtt_enabled
 				if [ -z "$pid" ]; then
 					echo "$sid is already stopped"
 				else
@@ -291,7 +295,7 @@ fi
 # FTP Service
 if [ "$port_ftp" != "" ]; then
 	has_ftp=$(getServicePID ftp)
- 	if [ "$ftp_enabled" = "1" -a -f "$ftp_enabled" ]; then
+ 	if [ "$service_ftp_enabled" = "1" -a -f "$file_ftp_enabled" ]; then
 		if [ "$has_ftp" = "" ]; then
 			$sys_bin/tcpsvd 0 $port_ftp ftpd -w $sd_path -t 1800 &
 		fi
@@ -305,7 +309,11 @@ fi
 # Telnet Service
 if [ "$port_telnet" != "" ]; then
 	has_telnet=$(getServicePID telnet)
- 	if [ "$telnet_enabled" = "1" -a -f "$telnet_enabled" ]; then
+	if [ "$FORCE_IMMUTABLE_TELNETD" = "1" ]; then
+		if [ "$has_telnet" = "" ]; then
+			$sd_bin/busybox telnetd $telnetd_options
+		fi	
+ 	elif [ "$service_telnet_enabled" = "1" -a -f "$file_telnet_enabled" ]; then
 		if [ "$has_telnet" = "" ]; then
 			$sd_bin/busybox telnetd $telnetd_options
 		fi
@@ -319,7 +327,7 @@ fi
 # HTTP Service
 if [ "$port_http" != "" ]; then
 	has_http=$(getServicePID http)
- 	if [ "$http_enabled" = "1" -a -f "$http_enabled" ]; then
+ 	if [ "$service_http_enabled" = "1" -a -f "$file_http_enabled" ]; then
 		if [ "$has_http" = "" ]; then
 			$sd_bin/busybox httpd -c $sd_etc/httpd.conf -h $sd_www -p $port_http
 		fi
@@ -345,7 +353,7 @@ fi
 
 # Cron daemon
 has_crond=$(getServicePID cron)
-if [ "$crond_enabled" = "1" -a -f "$cron_enabled" ]; then
+if [ "$crond_enabled" = "1" -a -f "$file_cron_enabled" ]; then
  	if [ "$has_crond" = "" ]; then
     		$sd_bin/busybox crond -L $crond_log -c $sys_crontabs -b
   	fi
@@ -358,7 +366,7 @@ fi
 # ONVIF Service
 if [ "$port_onvif" != "" ]; then
 	has_onvif=$(getServicePID onvif)
- 	if [ "$onvif_enabled" = "1" -a -f "$onvif_enabled" ]; then
+ 	if [ "$service_onvif_enabled" = "1" -a -f "$file_onvif_enabled" ]; then
 		if [ "$has_onvif" = "" ]; then
 			$sd_sbin/onvif.sh &
 		fi
@@ -372,7 +380,7 @@ fi
 # Mosquitto Service
 if [ "$port_mqtt" != "" ]; then
 	has_mqtt=$(getServicePID mqtt)
- 	if [ "$mqtt_enabled" = "1" -a -f "$mqtt_enabled" ]; then
+ 	if [ "$service_mqtt_enabled" = "1" -a -f "$file_mqtt_enabled" ]; then
 		if [ "$has_mqtt" = "" ]; then
 			$sd_sbin/mosquitto -c $sd_etc/mosquitto/mosquitto.conf -p $port_mqtt -d
 		fi

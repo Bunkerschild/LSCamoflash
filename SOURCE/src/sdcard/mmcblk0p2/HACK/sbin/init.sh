@@ -235,7 +235,7 @@ done
 
 # Create enabled files on tmp
 echo "Creating enabled files"
-for i in $ftp_enabled $http_enabled $telnet_enabled $cron_enabled $onvif_enabled $mqtt_enabled; do
+for i in $file_ftp_enabled $file_http_enabled $file_telnet_enabled $file_cron_enabled $file_onvif_enabled $file_mqtt_enabled; do
 	touch $i > /dev/null 2>&1
 done
 
@@ -339,8 +339,10 @@ if [ ! -e $sd_backup/filesystem.lst ]; then
 	$find / -type f -or -type l -or -type s > $sd_backup/filesystem.lst && echo "done" || echo "failed"
 fi
 for i in 1 2 3 4 5 6 7; do
-	echo -n "Creating backup image of mtdblock$i..."
-	$dd if=/dev/mtdblock$i of=$sd_backup/mtdblock$i.img bs=1 >/dev/null 2>&1 && echo "done" || echo "failed"
+	if [ ! -e $sd_backup/mtdblock$i.img ]; then
+		echo -n "Creating backup image of mtdblock$i..."
+		$dd if=/dev/mtdblock$i of=$sd_backup/mtdblock$i.img bs=1 >/dev/null 2>&1 && echo "done" || echo "failed"
+	fi
 done
 
 # Check, whether anyka_ipc exists
