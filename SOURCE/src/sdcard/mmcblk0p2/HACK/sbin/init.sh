@@ -302,11 +302,11 @@ if [ -f "$sd_overlay/fs.img" ]; then
 	done
 	for i in `$sd_mnt/real/bin/busybox --install 2>&1 | $cut -d : -f2 | $sed -e 's/\/usr//g'`; do 
 		$ln -sf $sd_mnt/real/bin/busybox $sd_mnt/$i 
+		$ln -sf $sd_mnt/real/bin/busybox $sd_mnt/override/$i 
 	done
-	rm -f $sd_mnt/override/sbin/ifconfig >/dev/null 2>&1
-	rm -f $sd_mnt/override/sbin/udhcpc >/dev/null 2>&1
 	for i in `$busybox --install 2>&1 | $cut -d : -f2`; do 
 		$ln -sf $busybox $sd_mnt/$i 
+		$ln -sf $busybox $sd_mnt/override/$i 
 	done
 	$find $sys_bin -maxdepth 1 -type l -exec $ln -sf $sd_mnt/real/bin/busybox $sd_mnt/.{} \;
 	$find $sys_sbin -maxdepth 1 -type l -exec $ln -sf $sd_mnt/real/bin/busybox $sd_mnt/.{} \;
@@ -318,6 +318,7 @@ if [ -f "$sd_overlay/fs.img" ]; then
 	$find $sd_lib -maxdepth 1 -type l -exec $ln -sf {} $sd_mnt/lib \;
 	$find $sd_lib/pkgconfig -maxdepth 1 -type f -exec $ln -sf {} $sd_mnt/lib/pkgconfig \;
  	$ln -sf $sd_mnt/real/bin/busybox $sd_mnt/override/bin/busybox
+ 	$ln -sf $sd_mnt/real/bin/busybox $sd_mnt/override/sbin/busybox
  	$ln -sf $sd_mnt/real/bin/mtd_debug $sd_mnt/override/bin/mtd_debug
  	$ln -sf $sd_mnt/real/bin/mtd_debug $sd_mnt/bin/mtd_debug
  	$rm -f $sd_mnt/override/sbin/ifconfig
