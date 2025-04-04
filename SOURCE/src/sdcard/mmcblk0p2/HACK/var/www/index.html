@@ -47,6 +47,7 @@
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item active"><a class="nav-link" href="#cam">Cam</a></li>
+                    <li id="recordingMenuEntry" class="nav-item d-none"><a class="nav-link" href="#recording">Recording</a></li>
                     <li id="settingsMenuEntry" class="nav-item d-none"><a class="nav-link" href="#settings">Settings</a></li>
                     <li class="nav-item"><a class="nav-link" href="#password">Password</a></li>
                     <li class="nav-item"><a class="nav-link" href="#logout">Logout</a></li>
@@ -94,6 +95,53 @@
         </div>
     </div>
         
+    <!-- Camera Recording -->
+    <div class="container-box d-none" id="containerRecording">
+        <h2 class="text-center">Camera Recording</h2>
+        <div id="cameraRecordingAcc">
+                <h3>Recordings</h3>
+                <div>
+                        <video id="recordingVideo" controls></video>
+                        <div class="mb-3 text-center">
+                                <label for="recordingDate" class="form-label">Date of recording</label>
+                                <select id="recordingDate" class="recordingSelect"></select>
+                                <label for="recordingFile" class="form-label">Time</label>
+                                <select id="recordingFile" class="recordingSelect"></select>
+                        </div>
+                        <div class="mb-3 text-center">
+                                <button type="button" id="updateRecordingList" class="mp4-btn btn btn-secondary w-33">&#8635; Update</button>
+                                <button type="button" id="playRecording" class="mp4-btn btn btn-success w-33">&#9658; Play</button>
+                                <button type="button" id="downloadRecording" class="mp4-btn btn btn-primary w-33">&#10515; Download</button>
+                        </div>
+                        <div class="mb-3 text-center">
+                                <button type="button" id="deleteRecording" class="mp4-btn btn btn-warning w-33">&#10007; Delete recording</button>
+                                <button type="button" id="deleteDaysRecordings" class="mp4-btn btn btn-warning w-33">&#10008; Delete hole day</button>
+                                <button type="button" id="deleteAllRecordings" class="mp4-btn btn btn-danger w-33">&#9760; Delete anything</button>
+                        </div>
+                </div>
+                <h3>Snapshots</h3>
+                <div>
+                        <img title="Snapshot" alt="Snapshot" id="snapshotImage" border="1"/>
+                        <div class="mb-3 text-center">
+                                <label for="snapshotDate" class="form-label">Date of snapshot</label>
+                                <select id="snapshotDate" class="snapshotSelect"></select>
+                                <label for="snapshotFile" class="form-label">Time</label>
+                                <select id="snapshotFile" class="snapshotSelect"></select>
+                        </div>
+                        <div class="mb-3 text-center">
+                                <button type="button" id="updateSnapshotList" class="jpg-btn btn btn-secondary w-33">&#8635; Update</button>
+                                <button type="button" id="openSnapshot" class="jpg-btn btn btn-success w-33">&#9658; Open</button>
+                                <button type="button" id="downloadSnapshot" class="jpg-btn btn btn-primary w-33">&#10515; Download</button>
+                        </div>
+                        <div class="mb-3 text-center">
+                                <button type="button" id="deleteSnapshot" class="jpg-btn btn btn-warning w-33">&#10007; Delete snapshot</button>
+                                <button type="button" id="deleteDaysSnapshots" class="jpg-btn btn btn-warning w-33">&#10008; Delete hole day</button>
+                                <button type="button" id="deleteAllSnapshots" class="jpg-btn btn btn-danger w-33">&#9760; Delete anything</button>
+                        </div>
+                </div>
+        </div>
+    </div>
+
     <!-- Camera Settings -->
     <div class="container-box d-none" id="containerSettings">
         <h2 class="text-center">Camera Settings</h2>
@@ -420,8 +468,10 @@
                     <div class="card-body">
                         <h5 class="card-title">Device-Control</h5>
                         <p class="card-text">Reboot device or restart IPC.</p>
-                        <button class="btn btn-danger" id="btn-reboot-now">Reboot Cam</button>
-                        <button class="btn btn-warning" id="btn-restart-ipc">Restart IPC</button>
+                        <div class="text-center">
+                                <button class="btn btn-danger" id="btn-reboot-now">Reboot Cam</button>
+                                <button class="btn btn-warning" id="btn-restart-ipc">Restart IPC</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -430,8 +480,10 @@
                     <div class="card-body">
                         <h5 class="card-title">Local streams</h5>
                         <p class="card-text">Get a local stream address.</p>
-                        <button class="btn btn-success" id="btn-rtsp-local">Local RTSP</button>
-                        <button class="btn btn-primary" id="btn-onvif-local">Local ONVIF</button>
+                        <div class="text-center">
+                                <button class="btn btn-success" id="btn-rtsp-local">Local RTSP</button>
+                                <button class="btn btn-primary" id="btn-onvif-local">ONVIF</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -440,9 +492,11 @@
                     <div class="card-body">
                         <h5 class="card-title">Cloud streams</h5>
                         <p class="card-text">Get a cloud stream address.</p>
-                        <button class="btn btn-secondary" id="btn-rtsp-cloud">RTSP</button>
-                        <button class="btn btn-secondary" id="btn-hls-cloud">HLS</button>
-                        <button class="btn btn-secondary" id="btn-flv-cloud">FLV</button>
+                        <div class="text-center">
+                                <button class="btn btn-secondary" id="btn-rtsp-cloud">RTSP</button>
+                                <button class="btn btn-secondary" id="btn-hls-cloud">HLS</button>
+                                <button class="btn btn-secondary" id="btn-flv-cloud">FLV</button>
+                        </div>
                     </div>
                 </div>
             </div>

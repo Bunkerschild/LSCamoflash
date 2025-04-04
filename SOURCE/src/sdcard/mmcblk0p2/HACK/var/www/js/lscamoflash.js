@@ -14,6 +14,9 @@ var dist = 15;
 var settingsRead = false;
 var settingsJSON = null;
 
+var recordingRead = false;
+var recordingJSON = null;
+
 function initHlsPlayer() {
     if (Hls.isSupported()) {
         const hls = new Hls();
@@ -371,13 +374,248 @@ function getSettings() {
 
             $("#cameraSettingsAcc").accordion({ heightStyle: "content" });
             $("input:checkbox").checkboxradio();
-            $("select").selectmenu();
+            $(".form-select").selectmenu();
             
             settingsRead = true;
             
             bsShow($("#settingsMenuEntry"));
         }
     });
+}
+
+function execDeleteRecording(optDelete, optType) {
+    $(".mp4-btn").attr("disabled","disabled");
+    $(".jpg-btn").attr("disabled","disabled");
+    
+    var day = $("#recordingDate").val();
+    var file = $("#recordingFile").val();
+    
+    if (optType == "jpg") {
+        day = $("#snapshotDate").val();
+        file = $("#snapshotFile").val();
+    }
+
+    $.ajax({
+        url: "/cgi-bin/recording.cgi?day=" + day + "&file=" + file + "&delete=" + optDelete + "&type=" + optType,
+        type: "GET", 
+        dataType: "json",
+        success: function(s) {
+            getRecordings();
+        },
+        error: function(a,b,c) {
+            $(".mp4-btn").removeAttr("disabled");
+            $(".jpg-btn").removeAttr("disabled");
+            alert("Unable to delete. Try again later.");
+        }
+    });
+}
+
+function getRecordings() {
+    $.ajax({
+        url: "/cgi-bin/recording.cgi",
+        type: "GET", 
+        dataType: "json",
+        success: function(s) {
+            if ((s.available != "true") || (s.days < 1))
+            {
+                bsHide($("#recordingMenuEntry"));
+                showCam();
+                return false; 
+            }
+                
+            recordingJSON = s;
+            
+            const $recordingDate = $("#recordingDate");
+            const $recordingFile = $("#recordingFile");
+            $recordingDate.find('option').remove().end();
+            $recordingFile.find('option').remove().end();
+
+            const $snapshotDate = $("#snapshotDate");
+            const $snapshotFile = $("#snapshotFile");
+            $snapshotDate.find('option').remove().end();
+            $snapshotFile.find('option').remove().end();
+
+            try {
+                $recordingDate.selectmenu('destroy').selectmenu({ style: 'dropdown' });
+            } catch(e) {
+                ;
+            }
+                     
+            Object.entries(s.data).forEach(([key, obj]) => {
+                var dateY = obj.datestamp.substring(0,4);
+                var dateM = obj.datestamp.substring(4,6);
+                var dateD = obj.datestamp.substring(6,8);
+                
+                if (obj.mp4Count > 0) {
+                    $recordingDate.append($("<option>", {
+                        value: obj.datestamp,
+                        text: dateY + "-" + dateM + "-" + dateD
+                    }));
+                }
+                
+                if (obj.jpgCount > 0) {
+                    $snapshotDate.append($("<option>", {
+                        value: obj.datestamp,
+                        text: dateY + "-" + dateM + "-" + dateD
+                    }));
+                }
+            });
+                
+            $("#cameraRecordingAcc").accordion({ heightStyle: "content" });
+
+            $recordingFile.selectmenu();
+            $snapshotFile.selectmenu();
+
+            $recordingDate.selectmenu({
+                change: function(event, ui) {
+                    setRecordingFiles();
+                }
+            });
+            
+            $snapshotDate.selectmenu({
+                change: function(event, ui) {
+                    setSnapshotFiles();
+                }
+            });
+            
+            $recordingDate.selectmenu("refresh");
+            $snapshotDate.selectmenu("refresh");
+            $recordingFile.selectmenu("refresh");
+            $snapshotFile.selectmenu("refresh");
+            
+            recordingRead = true;
+            
+            $(".mp4-btn").removeAttr("disabled");
+            $(".jpg-btn").removeAttr("disabled");
+
+            setRecordingFiles();
+            setSnapshotFiles();
+            
+            bsShow($("#recordingMenuEntry"));
+        }
+    });
+}
+
+function setRecordingFiles() {
+    if (recordingRead == false)
+        return false;
+                
+    const $recordingFile = $("#recordingFile");
+    const $recordingDate = $("#recordingDate");
+    
+    var selectedDay = "day" + $recordingDate.val();
+    var data = recordingJSON.data[selectedDay];
+    
+    if (!data)
+        return false;
+    
+    $recordingFile.find('option').remove().end();
+    
+    try {
+        $recordingFile.selectmenu('destroy').selectmenu({ style: 'dropdown' });
+    } catch(e) {
+        ;
+    }
+    
+    $.each(data.mp4Files, function(id, filename) {
+        var filetext = filename.substring(9,11) + ":" + filename.substring(11,13) + ":" + filename.substring(13,15) + " (" + parseInt(filename.substring(20,24)) + " secs.)";
+        $recordingFile.append($('<option>', {
+            value: filename,
+            text: filetext
+        }));        
+    });
+    
+    $recordingFile.selectmenu();
+    $recordingFile.selectmenu("refresh");
+}
+
+function setSnapshotFiles() {
+    if (recordingRead == false)
+        return false;
+                
+    const $snapshotFile = $("#snapshotFile");
+    const $snapshotDate = $("#snapshotDate");
+    
+    var selectedDay = "day" + $snapshotDate.val();
+    var data = recordingJSON.data[selectedDay];
+    
+    if (!data)
+        return false;
+    
+    $snapshotFile.find('option').remove().end();
+    
+    try {
+        $snapshotFile.selectmenu('destroy').selectmenu({ style: 'dropdown' });
+    } catch(e) {
+        ;
+    }
+    
+    $.each(data.jpgFiles, function(id, filename) {
+        var filetext = filename.substring(9,11) + ":" + filename.substring(11,13) + ":" + filename.substring(13,15);
+        $snapshotFile.append($('<option>', {
+            value: filename,
+            text: filetext
+        }));        
+    });
+    
+    $snapshotFile.selectmenu();
+    $snapshotFile.selectmenu("refresh");
+}
+
+function playRecordingFile() {
+    if (($("#recordingFile").val() == "") || ($("#recordingDate").val() == "")) {
+        alert("Please select recording date and time, first.");
+        return false;
+    }
+    
+    const video = $("#recordingVideo");
+    
+    var url = "/cgi-bin/recording.cgi?day=" + $("#recordingDate").val() + "&file=" + $("#recordingFile").val();
+    
+    video.attr("type", "video/mp4");
+    video.attr("src", url);
+    video.attr("autoplay", true);
+}
+
+function openSnapshotFile() {
+    if (($("#snapshotFile").val() == "") || ($("#snapshotDate").val() == "")) {
+        alert("Please select snapshot date and time, first.");
+        return false;
+    }
+    
+    const image = $("#snapshotImage");
+    
+    var url = "/cgi-bin/recording.cgi?day=" + $("#snapshotDate").val() + "&file=" + $("#snapshotFile").val();
+    
+    image.attr("type", "image/jpeg");
+    image.attr("src", url);
+    image.show();
+}
+
+function downloadRecordingFile() {
+    if (($("#recordingFile").val() == "") || ($("#recordingDate").val() == "")) {
+        alert("Please select recording date and time, first.");
+        return false;
+    }
+    
+    const video = $("#recordingVideo");
+    
+    var url = "/cgi-bin/recording.cgi?day=" + $("#recordingDate").val() + "&file=" + $("#recordingFile").val();
+
+    window.open(url);    
+}
+
+function downloadSnapshotFile() {
+    if (($("#snapshotFile").val() == "") || ($("#snapshotDate").val() == "")) {
+        alert("Please select snapshot date and time, first.");
+        return false;
+    }
+    
+    const video = $("#snapshotVideo");
+    
+    var url = "/cgi-bin/recording.cgi?day=" + $("#snapshotDate").val() + "&file=" + $("#snapshotFile").val();
+
+    window.open(url);    
 }
 
 function checkMotor() {
@@ -463,6 +701,7 @@ function sessionCallback(error, sessionId) {
         getSysinfo();
         getHostname();
         getSettings();
+        getRecordings();
         checkMotor();
         fetchStreamURL();
     }
@@ -476,6 +715,7 @@ function hideAll() {
     bsHide($("#containerCam"));
     bsHide($("#containerPassword"));
     bsHide($("#containerSettings"));
+    bsHide($("#containerRecording"));
 }
 
 function showLogin() {
@@ -508,6 +748,15 @@ function showSettings() {
         hideAll();
         bsShow($("#navbarLogout"));
         bsShow($("#containerSettings"));
+    }
+}
+
+function showRecording() {
+    if (recordingRead)
+    {
+        hideAll();
+        bsShow($("#navbarLogout"));
+        bsShow($("#containerRecording"));
     }
 }
 
@@ -586,6 +835,10 @@ function navLinkClick(link) {
             if (loggedin)
                 showSettings();
             break;
+        case "recording":
+            if (loggedin)
+                showRecording();
+            break;
         case "password":
             if (loggedin)
                 showPassword();
@@ -620,6 +873,136 @@ $(document).ready(function() {
             return false;
             
         return updatePassword($("#password1").val(), $("#password2").val());
+    });
+        
+    $("#playRecording").click(function() {
+        playRecordingFile();
+    });
+    
+    $("#openSnapshot").click(function() {
+        openSnapshotFile();
+    });
+    
+    $("#updateRecordingList,#updateSnapshotList").click(function() {
+        $(".mp4-btn").attr("disabled", "disabled");
+        $(".jpg-btn").attr("disabled", "disabled");
+        getRecordings();
+    });
+    
+    $("#downloadRecording").click(function() {
+        downloadRecordingFile();
+    });
+    
+    $("#downloadSnapshot").click(function() {
+        downloadSnapshotFile();
+    });
+    
+    $("#deleteRecording").click(function() {
+        $("#confirmDialog").dialog({
+            autoOpen: false,
+            modal: true,
+            title: "Delete recording from " + $("#recordingDate option:selected").text() + " " + $("#recordingFile option:selected").text(),
+            buttons: {
+                "Yes, delete this file": function() {
+                    $(this).dialog("close");
+                    execDeleteRecording("file", "mp4");
+                },
+                "No": function() {
+                    $(this).dialog("close");
+                }
+            }
+        }).html("Are you sure you want to delete the recording from " + $("#recordingDate option:selected").text() + " " + $("#recordingFile option:selected").text() + "? This cannot be undone!");
+        $("#confirmDialog").dialog("open");    
+    });
+    
+    $("#deleteDaysRecordings").click(function() {
+        $("#confirmDialog").dialog({
+            autoOpen: false,
+            modal: true,
+            title: "Delete recordings of " + $("#recordingDate option:selected").text(),
+            buttons: {
+                "Yes, delete this day": function() {
+                    $(this).dialog("close");
+                    execDeleteRecording("day", "mp4");
+                },
+                "No": function() {
+                    $(this).dialog("close");
+                }
+            }
+        }).html("Are you sure you want to delete the recordings of " + $("#recordingDate option:selected").text() + " from the sd card? This cannot be undone!");
+        $("#confirmDialog").dialog("open");        
+    });
+    
+    $("#deleteAllRecordings").click(function() {
+        $("#confirmDialog").dialog({
+            autoOpen: false,
+            modal: true,
+            title: "Delete all recordings",
+            buttons: {
+                "Yes, delete all": function() {
+                    $(this).dialog("close");
+                    execDeleteRecording("all", "mp4");
+                },
+                "No": function() {
+                    $(this).dialog("close");
+                }
+            }
+        }).html("Are you sure you want to delete ALL RECORDINGS from the sd card? This will also remove all snapshots and cannot be undone!");
+        $("#confirmDialog").dialog("open");    
+    });
+    
+    $("#deleteSnapshot").click(function() {
+        $("#confirmDialog").dialog({
+            autoOpen: false,
+            modal: true,
+            title: "Delete snapshot from " + $("#snapshotDate option:selected").text() + " " + $("#snapshotFile option:selected").text(),
+            buttons: {
+                "Yes, delete this file": function() {
+                    $(this).dialog("close");
+                    execDeleteRecording("file", "jpg");
+                },
+                "No": function() {
+                    $(this).dialog("close");
+                }
+            }
+        }).html("Are you sure you want to delete the snapshot from " + $("#snapshotDate option:selected").text() + " " + $("#snapshotFile option:selected").text() + "? This cannot be undone!");
+        $("#confirmDialog").dialog("open");    
+    });
+    
+    $("#deleteDaysSnapshots").click(function() {
+        $("#confirmDialog").dialog({
+            autoOpen: false,
+            modal: true,
+            title: "Delete snapshots of " + $("#snapshotDate option:selected").text(),
+            buttons: {
+                "Yes, delete this day": function() {
+                    $(this).dialog("close");
+                    execDeleteRecording("day", "jpg");
+                },
+                "No": function() {
+                    $(this).dialog("close");
+                }
+            }
+        }).html("Are you sure you want to delete the snapshots of " + $("#snapshotDate option:selected").text() + " from the sd card? This cannot be undone!");
+        $("#confirmDialog").dialog("open");        
+    });
+    
+    $("#deleteAllSnapshots").click(function() {
+        $("#confirmDialog").dialog({
+            autoOpen: false,
+            modal: true,
+            title: "Delete all snapshots",
+            buttons: {
+                "Yes, delete all": function() {
+                    $(this).dialog("close");
+                    execDeleteRecording("all", "jpg");
+                },
+                "No": function() {
+                    $(this).dialog("close");
+                }
+            }
+        }).html("Are you sure you want to delete ALL SNAPSHOTS from the sd card? This will also remove all recordings and cannot be undone!");
+        $("#confirmDialog").dialog("open");    
     });
     
     $(".nav-link").click(function() {

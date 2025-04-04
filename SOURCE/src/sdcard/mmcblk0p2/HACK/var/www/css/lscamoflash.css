@@ -45,6 +45,19 @@ body {
     max-width: 940px;
     margin-top: 180px;
 }
+#containerRecording {
+    max-width: 940px;
+    margin-top: 180px;
+}
+#recordingVideo {
+    width: 100%;
+    border-radius: 10px;
+}
+#snapshotImage {
+    width: 100%;
+    border-radius: 10px;
+    display: none;
+}
 #hls-player {
     width: 100%;
     border-radius: 10px;
