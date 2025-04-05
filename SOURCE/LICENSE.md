@@ -192,6 +192,10 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
+## Images / Backgrounds
+- **Background-Image WebUI**
+  Photo by Niklas Jeromin 
+  Source: [https://www.pexels.com/photo/black-and-white-photo-of-mountains-in-the-snow-19394170/](https://www.pexels.com/photo/black-and-white-photo-of-mountains-in-the-snow-19394170/)
 
 ## Notes
 - Each software package retains its original license, and you are responsible for ensuring compliance when redistributing or modifying this software.
