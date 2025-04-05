@@ -194,7 +194,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## Images / Backgrounds
 - **Background-Image WebUI**
-  Photo by Niklas Jeromin 
+  Photo by Niklas Jeromin
   Source: [https://www.pexels.com/photo/black-and-white-photo-of-mountains-in-the-snow-19394170/](https://www.pexels.com/photo/black-and-white-photo-of-mountains-in-the-snow-19394170/)
 
 ## Notes
