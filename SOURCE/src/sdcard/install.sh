@@ -19,20 +19,42 @@ if [ ! -b "/dev/$disk" ]; then
 fi
 
 # Sicherheitspruefung: Ist es ein Wechselmedium?
-if ! lsblk -d -o NAME,ROTA | grep -q "$disk 0"; then
+if ! lsblk -d -o NAME,ROTA | grep "^$disk" | awk '{print $2}' | grep "0"; then
     echo "Fehler: Der gewaehlte Datentraeger ist KEIN Wechselmedium! Abbruch."
     exit 1
 fi
 
+# SD Groesse
+sdsize=`fdisk -l /dev/mmcblk0 | grep "^Disk" | grep bytes | awk '{print $5}'`
+sdsect=`fdisk -l /dev/mmcblk0 | grep "^Disk" | grep bytes | awk '{print $7}'`
+p2size=$((1024 * 1024 * 1024))
+p1size=$(($sdsize - $p2size))
+p1sect=`awk "BEGIN {print ($sdsect / $sdsize * $p1size)}"`
+
 # Partitionen loeschen
 echo "Loesche vorhandene Partitionen auf /dev/$disk ..."
 wipefs --all --force /dev/$disk
-parted -s /dev/$disk mklabel msdos
 
 # Partitionierung durchfuehren
 echo "Erstelle neue Partitionen..."
-parted -s /dev/$disk mkpart primary fat32 1MiB -1GiB
-parted -s /dev/$disk mkpart primary fat32 -1GiB 100%
+echo "o
+n
+p
+1
+
+$p1sect
+n
+p
+2
+
+
+t
+1
+0c
+t
+2
+0c
+w" | fdisk /dev/$disk >/dev/null 2>&1
 
 # Warten, bis das System die Partitionen erkennt
 sleep 2
@@ -67,6 +89,9 @@ echo "Kopiere Konfigurationsdateien, sofern vorhanden..."
 [ -f "./httpd.conf" ] && cp -f ./httpd.conf "$mount2/HACK/etc"
 [ -f "./crontab" ] && cp -f ./crontab "$mount2/HACK/var/spool/cron/crontabs/root"
 
+echo "Synchronisiere Dateisysteme..."
+sync
+echo "Dateisysteme unmounten..."
 # Unmounten
 umount "$mount1"
 umount "$mount2"
