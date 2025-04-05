@@ -24,13 +24,17 @@ function initHlsPlayer() {
         hls.loadSource(streamurl);
         hls.attachMedia(video);
         hls.on(Hls.Events.MANIFEST_PARSED, function() {
-            $("#connecting").fadeOut();
-            $("#video-container").removeClass("d-none");
-            $("#info-container").removeClass("d-none");
-            $("#ptz-container").removeClass("d-none");
+            prepCamPlayer();
             $("#hls-player").show();
-        });
+        }); 
     }
+}
+
+function prepCamPlayer() {
+    $("#connecting").fadeOut();
+    $("#video-container").removeClass("d-none");
+    $("#info-container").removeClass("d-none");
+    $("#ptz-container").removeClass("d-none");
 }
 
 function setCookie(name, value, days) {
@@ -153,6 +157,7 @@ function getHostname() {
             $("#hostname").html(hostname);
             $("#camera-name").text(manufacturer + " " + model);
             $("#camera-fqdn").text(fqdn);
+            prepCamPlayer();
         }
     });
 }

@@ -10,7 +10,7 @@ FORCE_PRIVATE_IP="1"
 [ -f "$sd_etc/onvif.token" ] || send_error 404 "Not found" "Missing onvif token file"
 onvif_token=`cat $sd_etc/onvif.token 2>/dev/null`
 TOKEN=`parse_keyval '&' "$QUERY_STRING" token`
-[ "$TOKEN" = "$onvif_token" ] || send_error 401 "Unauthorized" "Invalid onvif token"
+[ "$TOKEN" = "$onvif_token" -o "$AUTHORIZED" = "1" ] || send_error 401 "Unauthorized" "Invalid onvif token"
 
 SNAPSHOT=`parse_keyval '&' "$QUERY_STRING" snapshot`
 if [ "$SNAPSHOT" = "update" ]; then
@@ -28,7 +28,11 @@ SNAPSHOT_SD="$sd_www/images/snapshot_sd.jpg"
 SNAPSHOT_FILE="$sd_www/images/snapshot.jpg"
 DISP_FILENAME="snapshot_$(date +%s).jpg"
 
-[ -f "$SNAP_HUMAP_TMP" ] && find "$SNAP_HUMAN_TMP" -newer "$SNAP_HUMAN_SD" >/dev/null 2>&1 && cp -f "$SNAP_HUMAN_TMP" "$SNAP_HUMAN_SD" >/dev/null 2>&1
+if [ -f "$SNAP_HUMAN_TMP" ]; then
+	[ -f "$SNAP_HUMAN_SD" ] && ( find "$SNAP_HUMAN_TMP" -newer "$SNAP_HUMAN_SD" >/dev/null 2>&1 && cp -f "$SNAP_HUMAN_TMP" "$SNAP_HUMAN_SD" >/dev/null 2>&1 ) || cp -f "$SNAP_HUMAN_TMP" "$SNAP_HUMAN_SD" >/dev/null 2>&1
+	[ -f "$SNAPSHOT_SD" ] || cp -f "$SNAP_HUMAN_TMP" "$SNAPSHOT_SD" >/dev/null 2>&1
+	[ -f "$SNAPSHOT_FILE" ] || cp -f "$SNAP_HUMAN_TMP" "$SNAPSHOT_FILE" >/dev/null 2>&1
+fi
 
 if [ -f "$SNAPSHOT_SD" ]; then
 	SNAPSRC=""

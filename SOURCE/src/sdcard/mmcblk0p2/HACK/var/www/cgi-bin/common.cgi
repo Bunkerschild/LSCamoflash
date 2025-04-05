@@ -82,9 +82,19 @@ send_json() {
 SESSIONID=`parse_keyval '; ' "$HTTP_COOKIE" sessionid`
 $DB_SCRIPT -o cleanup-sessions >/dev/null 2>&1
 
-if [ "$NO_SESSION_REQUIRED" != "1" ]; then
-	sessionData=`$DB_SCRIPT -o get-session -s $SESSIONID 2>/dev/null`
+sessionData=`$DB_SCRIPT -o get-session -s $SESSIONID 2>/dev/null`
+AUTHORIZED=0
 
+if [ "$NO_SESSION_REQUIRED" = "1" ]; then
+	sessionUID=`echo "$sessionData" | cut -d "|" -f1`
+	sessionIP=`echo "$sessionData" | cut -d "|" -f5`
+
+	if [ "$sessionIP" != "$IPADDRESS" ]; then
+		$DB_SCRIPT -o logout -s $SESSIONID >/dev/null 2>&1
+	else
+		AUTHORIZED=1
+	fi
+else
 	[ "$sessionData" = "" ] && send_error 401 Unauthorized "Missing session"
 
 	sessionUID=`echo "$sessionData" | cut -d "|" -f1`
@@ -93,6 +103,8 @@ if [ "$NO_SESSION_REQUIRED" != "1" ]; then
 	if [ "$sessionIP" != "$IPADDRESS" ]; then
 		$DB_SCRIPT -o logout -s $SESSIONID >/dev/null 2>&1
 		send_error 403 Forbidden "IP address change detected"
+	else
+		AUTHORIZED=1
 	fi
 fi
 
