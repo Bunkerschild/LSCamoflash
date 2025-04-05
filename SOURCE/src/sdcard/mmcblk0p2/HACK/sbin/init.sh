@@ -67,7 +67,7 @@ if [ "$wifi_config_override" = "1" ]; then
 
 	# Disable wifi and networking tools
 	echo -n "Disabling wifi and networking tools..."
-	for i in $sys_sbin/udhcpc $sys_sbin/ifconfig $sys_usr_bin/wpa_supplicant $sys_usr_bin/wpa_cli; do 
+	for i in $sys_usr_bin/wpa_supplicant $sys_usr_bin/wpa_cli; do 
 		mount --bind $sd_sbin/exit.sh $i
 	done
 	echo "done"
