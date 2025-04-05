@@ -1,6 +1,13 @@
 #!/bin/bash
 
+use_sd_config=0
+
+if [ "$1" = "-u" -o "$1" = "--use-sd-config" ]; then
+	use_sd_config=1
+fi
+
 echo "LSCamoflash SD-Karten Partitionierungsskript"
+[ "$use_sd_config" = "1" ] && echo "Konfigurationsdateien werden von der SD uebernommen, sofern vorhanden."
 echo "ACHTUNG: NUR WECHSELMEDIEN WERDEN ANGEZEIGT! ALLE DATEN AUF DEM GEWAEHLTEN DATENTRAEGER WERDEN GELOESCHT!"
 echo "ABBRUCH MIT CTRL+C"
 sleep 5
@@ -22,6 +29,28 @@ fi
 if ! lsblk -d -o NAME,ROTA | grep "^$disk" | awk '{print $2}' | grep "0"; then
     echo "Fehler: Der gewaehlte Datentraeger ist KEIN Wechselmedium! Abbruch."
     exit 1
+fi
+
+# Mount-Punkte erstellen
+mount1=$(mktemp -d)
+mount2=$(mktemp -d)
+
+if [ "$use_sd_config" = "1" ]; then
+	mount /dev/${disk}p1 $mount1 >/dev/null 2>&1
+	mount /dev/${disk}p2 $mount2 >/dev/null 2>&1
+	
+	for m in $mount1 $mount2; do
+		if [ -f "$m/HACK/etc/hack_custom.conf" ]; then
+			echo "Kopiere Konfiguration von SD Karte..."
+			cp -f $m/HACK/etc/hack_custom.conf hack_custom.conf >/dev/null 2>&1
+			cp -f $m/HACK/etc/config/passwd passwd >/dev/null 2>&1
+			cp -f $m/HACK/etc/config/shadow shadow >/dev/null 2>&1
+			cp -f $m/HACK/var/spool/cron/crontabs/root crontab >/dev/null 2>&1
+		fi
+	done
+	
+	umount $mount2 >/dev/null 2>&1
+	umount $mount1 >/dev/null 2>&1
 fi
 
 # SD Groesse
@@ -65,10 +94,6 @@ echo "Formatiere Partitionen als FAT32..."
 mkfs.vfat -F32 /dev/${disk}p1
 mkfs.vfat -F32 /dev/${disk}p2
 
-# Mount-Punkte erstellen
-mount1=$(mktemp -d)
-mount2=$(mktemp -d)
-
 # Partitionen mounten
 mount /dev/${disk}p1 "$mount1"
 mount /dev/${disk}p2 "$mount2"
@@ -86,7 +111,6 @@ echo "Kopiere Konfigurationsdateien, sofern vorhanden..."
 [ -f "./mmcblk0p2/HACK/etc/shadow" ] && cp -f ./mmcblk0p2/HACK/etc/shadow "$mount1/"
 [ -f "./passwd" ] && cp -f ./passwd "$mount1/" && cp -f ./passwd "$mount2/HACK/etc/config"
 [ -f "./shadow" ] && cp -f ./shadow "$mount1/" && cp -f ./shadow "$mount2/HACK/etc/config"
-[ -f "./httpd.conf" ] && cp -f ./httpd.conf "$mount2/HACK/etc"
 [ -f "./crontab" ] && cp -f ./crontab "$mount2/HACK/var/spool/cron/crontabs/root"
 
 echo "Synchronisiere Dateisysteme..."
