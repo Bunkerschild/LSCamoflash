@@ -66,7 +66,7 @@ getServicePID() {
 			has_pid=`pgrep -f "busybox httpd"`
 			;;
 		cron)
-			has_pid=`pgrep -f "crond"`
+			has_pid=`pgrep -f "busybox crond"`
 			;;
 		onvif)
 			has_pid=`pgrep -f "onvif_srvd"`
@@ -297,7 +297,9 @@ if [ "$port_ftp" != "" ]; then
 	has_ftp=$(getServicePID ftp)
  	if [ "$service_ftp_enabled" = "1" -a -f "$file_ftp_enabled" ]; then
 		if [ "$has_ftp" = "" ]; then
-			$sys_bin/tcpsvd 0 $port_ftp ftpd -w $sd_path -t 1800 &
+			ftp_path="$sd_path"
+			[ "$dcim_ftp_only" = "1" ] && ftp_path="$sd_dcim"
+			$sys_bin/tcpsvd 0 $port_ftp ftpd -w $ftp_path -t 1800 &
 		fi
 	else
  		if [ "$has_ftp" != "" ]; then
@@ -428,7 +430,7 @@ fi
 if [ ! -e /tmp/cleanup`date +%Y%m%d` ]; then
  rm -rf /tmp/cleanup*
  touch /tmp/cleanup`date +%Y%m%d`
- /tmp/sd/cgi-bin/cleanup.cgi > $cleanup_log
+ [ "$dcim_cleanup_days" = 0 ] || find $sd_dcim/ -type d -mtime +$dcim_cleanup_days -exec rm -rf {} \;
 fi
 
 # Custom scripts run after services
