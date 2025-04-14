@@ -341,6 +341,15 @@ for i in shadow passwd; do
 	$cp $sd_config/$i $sys_config/$i
 done
 
+# Create certificates, if not exists
+if [ ! -e $sd_etc/mosquitto/certs/ca.crt ]; then
+	echo "Generating mosquitto ca and certificate"
+	mkdir -p $sd_etc/mosquitto/certs
+	TARGET="$sd_etc/mosquitto/certs" \
+	HOSTLIST="m2.tuyaeu.com mq.gw.tuyaeu.com m2-weaz.tuyaeu.com m2.tuyacn.com mq.gw.tuyacn.com m2-ceaz.tuyacn.com m2.tuyaus.com mq.gw.tuyaus.com m2-ueaz.tuyaus.com" \
+	$sd_sbin/generate-ca.sh
+fi
+
 # Copy crontabs
 echo -n "Copying crontabs from $sd_crontabs to $sys_crontabs..."
 $mkdir -p $sys_crontabs >/dev/null 2>&1
