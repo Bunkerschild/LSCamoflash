@@ -82,7 +82,7 @@ After installation, the following tools are available:
 - `curl`: Data transfer tool
 - `joe` (incl. `jmacs`, `jpico`, `jstar`, `rjoe`): Text editor
 - `mosquitto` (incl. `mosquitto_pub`, `mosquitto_sub`, `mosquitto_passwd`, `mosquitto_rr`): MQTT broker and clients
-- `motor`: Terminal-based file manager
+- `motor`: CLI PTZ-Controller
 - `msmtp` and `msmtpd`: SMTP client and server
 - `openssl`: SSL/TLS toolkit
 - `pcap-config`: Tool for querying libpcap configuration details
@@ -129,4 +129,5 @@ The SD card is partitioned so that formatting via the TUYA app does not remove t
 - **Implementation of checksums:** Future versions will use checksums for external downloads to ensure file integrity.
 - **Review of `strace-log-merge`:** This tool is currently only used for internal purposes and may be removed in later versions.
 - **Reducing monitoring intervals:** Currently, `services.sh` checks the state of the partitions every 30 seconds. Future versions aim to shorten this interval for faster recovery.
+
 
