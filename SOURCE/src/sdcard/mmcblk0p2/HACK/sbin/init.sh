@@ -16,7 +16,7 @@ export commands_conf="$hack/etc/commands.conf"
 export busybox_hack="$sd_bin/busybox"
 export busybox_firmware="$sys_bin/busybox"
 
-# Setup lock0
+# Setup lock
 export setup_lock_file="/tmp/setup.lock"
 
 # Load commands variables
@@ -39,64 +39,10 @@ if [ -n "$system_hostname" ]; then
         $hostname $(echo $system_hostname | $cut -d . -f1)
 fi
 
-# Wifi configuration
-if [ "$wifi_config_override" = "1" ]; then
-	echo "Wifi configuration override requested"
-	echo "ctrl_interface=/var/run/wpa_supplicant" > /tmp/wpa_custom.conf
-	echo "network={" >> /tmp/wpa_custom.conf
-	echo "    ssid=\"$wifi_ssid\"" >> /tmp/wpa_custom.conf
-	echo "    scan_ssid=$wifi_scan_ssid" >> /tmp/wpa_custom.conf
-	echo "    key_mgmt=$wifi_key_mgmt" >> /tmp/wpa_custom.conf
-	echo "    pairwise=$wifi_pairwise" >> /tmp/wpa_custom.conf
-	echo "    group=$wifi_group" >> /tmp/wpa_custom.conf
-	echo "    psk=\"$wifi_psk\"" >> /tmp/wpa_custom.conf
-	echo "}" >> /tmp/wpa_custom.conf
-	
-	# Disable wifi scripts
-	echo -n "Disabling wifi scripts..."
-	for i in `ls -1 $sys_usr_sbin/station_connect.sh $sys_usr_sbin/wifi_*`; do 
-		mount --bind $sd_sbin/exit.sh $i
-	done
-	echo "done"
-	
-	# Copy wpa_supplicant to a safe execution position
-	$cp -f $sys_usr_bin/wpa_supplicant $sd_bin/wifi_sup
-	$cp -f $sys_usr_bin/wpa_cli $sd_bin/wifi_cli
-	
-	wpa_supplicant="$sd_bin/wifi_sup"
-
-	# Disable wifi and networking tools
-	echo -n "Disabling wifi and networking tools..."
-	for i in $sys_usr_bin/wpa_supplicant $sys_usr_bin/wpa_cli; do 
-		mount --bind $sd_sbin/exit.sh $i
-	done
-	echo "done"
-	
-	# Stop eventually running wpa_supplicant and udhcpc
-	for i in wpa_supplicant udhcpc; do
-		proc=$(pgrep -f "$i" || true)
-		[ "$proc" != "" ] && $kill -KILL $proc 
-	done
-	
-	# Setup network
-	$wpa_supplicant -iwlan0 -D$wifi_driver -c /tmp/wpa_custom.conf > $sd_log/wpa_supplicant.log 2>&1 & $sleep 5
-	if [ "$wifi_use_dhcp" = "1" -o "$wifi_ip_address" = "" ]; then
-		$ifconfig lo up
-		$ifconfig wlan0 0.0.0.0 up
-		$udhcpc -x hostname:$(echo $system_hostname | $cut -d . -f1) \
-		--interface=wlan0 --now --pidfile=/var/run/udhcpc-wlan0.pid \
-		--script=$sd_sbin/udhcpc-hook.sh > $sd_log/udhcpc.log 2>&1 &
-	else
-		[ -n "$wifi_ip_address" -a -n "$wifi_netmask" -a -n "$wifi_broadcast" ] && $ifconfig wlan0 $wifi_ip_address netmask $wifi_netmask broadcast $wifi_broadcast
-		[ -n "$wifi_ip_address" -a -n "$wifi_netmask" ] && $ifconfig wlan0 $wifi_ip_address netmask $wifi_netmask
-		[ -n "$wifi_ip_address" -a -n "$wifi_broadcast" ] && $ifconfig wlan0 $wifi_ip_address broadcast $wifi_broadcast
-		[ -n "$wifi_ip_address" ] && $ifconfig wlan0 $wifi_ip_address netmask $wifi_netmask broadcast $wifi_broadcast
-		[ -n "$wifi_gateway" ] && $route add default gw $wifi_gateway
-		echo -n "" > $sys_config/resolv.conf
-		[ -n "$wifi_domainname" ] && echo "domainname $wifi_domainname" >> $sys_config/resolv.conf
-		[ -n "$wifi_nameserver" ] && echo "nameserver $wifi_nameserver" >> $sys_config/resolv.conf
-	fi
-fi
+# Initialize network
+$sd_sbin/network.sh & while [ ! -f $network_file ]; do
+	$sleep 1
+done
 
 # Breakout file
 breakout_file="$sys_temp/hostapd.break"
@@ -321,8 +267,8 @@ if [ -f "$sd_overlay/fs.img" ]; then
  	$ln -sf $sd_mnt/real/bin/busybox $sd_mnt/override/sbin/busybox
  	$ln -sf $sd_mnt/real/bin/mtd_debug $sd_mnt/override/bin/mtd_debug
  	$ln -sf $sd_mnt/real/bin/mtd_debug $sd_mnt/bin/mtd_debug
- 	$rm -f $sd_mnt/override/sbin/ifconfig
- 	$rm -f $sd_mnt/override/sbin/udhcpc
+	$rm -f $sd_mnt/override/sbin/ifconfig
+	$rm -f $sd_mnt/override/sbin/udhcpc
  	for i in jmacs jpico jstar rjoe; do
 		$ln -sf $sd_bin/joe $sd_mnt/bin/$i
 	done
