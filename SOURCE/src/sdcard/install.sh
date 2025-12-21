@@ -88,6 +88,7 @@ w" | fdisk /dev/$disk >/dev/null 2>&1
 # Warten, bis das System die Partitionen erkennt
 sleep 2
 partprobe /dev/$disk
+sleep 10
 
 # Partitionen formatieren
 echo "Formatiere Partitionen als FAT32..."
