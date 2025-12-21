@@ -82,7 +82,7 @@ Nach der Installation stehen folgende Tools zur Verfügung:
 - `curl`: Datenübertragungswerkzeug
 - `joe` (inkl. `jmacs`, `jpico`, `jstar`, `rjoe`): Texteditor
 - `mosquitto` (inkl. `mosquitto_pub`, `mosquitto_sub`, `mosquitto_passwd`, `mosquitto_rr`): MQTT-Broker und -Clients
-- `motor`: Terminal-basierter Dateimanager
+- `motor`: CLI PTZ Steuerung
 - `msmtp` und `msmtpd`: SMTP-Client und -Server
 - `openssl`: Toolkit für SSL/TLS
 - `pcap-config`: Werkzeug zur Abfrage von libpcap-Konfigurationsdetails
