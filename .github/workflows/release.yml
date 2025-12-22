@@ -14,20 +14,26 @@ jobs:
       - name: Install required build tools
         run: sudo apt update && sudo apt install -y build-essential flex bison gsoap binutils make automake autoconf autoconf-archive
 
-      - name: Version aus Datei lesen
-        id: version
-        run: echo "VERSION=$(cat SOURCE/version.txt)" >> $GITHUB_OUTPUT
-
       - name: Build release
+        shell: bash
         run: |
+          set -euo pipefail
           cd SOURCE
           make mrproper-full download
           make all-and-optionals
           make release
           make update
           mkdir -p ../release
-          cp LSCamoflash-*-uclibc.tar.gz ../release/
-          cp update-*-uclibc.tgz ../release/
+          cp -v LSCamoflash-*-uclibc.tar.gz ../release/
+          cp -v update-*-uclibc.tgz ../release/
+
+      - name: Version nach Build/Update lesen (sanitize)
+        id: version
+        shell: bash
+        run: |
+          ver="$(cat SOURCE/version.txt | tr -d '\r\n' | sed 's/^v//')"
+          echo "VERSION=$ver" >> "$GITHUB_OUTPUT"
+          echo "Version: $ver"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
