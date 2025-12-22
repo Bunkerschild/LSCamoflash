@@ -23,6 +23,13 @@ if [ "$REQUEST_METHOD" = "POST" -a -n "$CONTENT_LENGTH" ]; then
 
 	touch $lockfile >/dev/null 2>&1
 	read -r -n "$CONTENT_LENGTH" POST_DATA
+	# Optional debug: drop a file /tmp/settings_debug to enable logging of POST data and temp files
+	if [ -f /tmp/settings_debug ]; then
+		echo "POST_DATA:" > /tmp/settings_debug.post
+		echo "$POST_DATA" >> /tmp/settings_debug.post
+		# hex-dump for non-printables
+		printf "%s" "$POST_DATA" | od -An -t x1 > /tmp/settings_debug.post.hex 2>/dev/null || true
+	fi
 	echo "[config]" > $settings_tmp
 fi
 
@@ -78,15 +85,24 @@ if [ "$REQUEST_METHOD" = "POST" -a -n "$POST_DATA" ]; then
 	fixed_length=30
 	{
 	  echo -e "\n[config]"
-	  sed '/^\[/d' "$settings_tmp" | while IFS='=' read -r key value; do
+		  # dump intermediate tmp if debugging
+		  if [ -f /tmp/settings_debug ]; then cp -f "$settings_tmp" /tmp/settings_debug.tmp 2>/dev/null || true; fi
+		  sed '/^\[/d' "$settings_tmp" | while IFS='=' read -r key value; do
 	    key_trimmed=$(echo "$key" | sed 's/[[:space:]]*$//')
 	    val_trimmed=$(echo "$value" | sed 's/^[[:space:]]*//')
 	    printf "%-${fixed_length}s = %s\n" "$key_trimmed" "$val_trimmed"
 	  done
 	  echo ""
 	} > "$settings_prep"
-	mv -f $settings_prep $settings_persist >/dev/null 2>&1
-	cp -f $settings_persist $settings_live >/dev/null 2>&1
+		# optionally save copies for debugging
+		if [ -f /tmp/settings_debug ]; then
+			cp -f "$settings_prep" /tmp/settings_debug.prep 2>/dev/null || true
+		fi
+		mv -f $settings_prep $settings_persist >/dev/null 2>&1
+		cp -f $settings_persist $settings_live >/dev/null 2>&1
+		if [ -f /tmp/settings_debug ]; then
+			cp -f "$settings_persist" /tmp/settings_debug.persist 2>/dev/null || true
+		fi
 	rm -f $settings_tmp >/dev/null 2>&1
 	rm -f $lockfile >/dev/null 2>&1
 	send_json status=saved

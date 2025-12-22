@@ -384,6 +384,10 @@ fi
 if [ ! -e $sd_config/_ht_sw_settings.ini ]; then
 	echo -n "Creating _ht_sw_settings.ini file..."
 	$cp $sys_config/_ht_sw_settings.ini $sd_config && echo "done" || echo "failed" 
+	# Sanitize any malformed lines (remove leading ':' characters and optional "config:" prefix)
+	if [ -f "$sd_config/_ht_sw_settings.ini" ]; then
+		$sed -i -e 's/^:*config://' -e 's/^:*//' "$sd_config/_ht_sw_settings.ini" >/dev/null 2>&1 || true
+	fi
 	if [ -f "$sd_config/_ht_sw_config.tmpl" ]; then
   	  while IFS= read -r line; do
             case "$line" in
@@ -400,6 +404,19 @@ if [ ! -e $sd_config/_ht_sw_settings.ini ]; then
 	fi
 fi
 if [ -e $sd_config/_ht_sw_settings.ini ]; then
+	# Sanitize persisted settings file in SD overlay as well
+	if [ -f "$sd_config/_ht_sw_settings.ini" ]; then
+		$sed -i -e 's/^:*config://' -e 's/^:*//' "$sd_config/_ht_sw_settings.ini" >/dev/null 2>&1 || true
+	fi
+	# Also sanitize and deduplicate the system config to avoid duplicated options
+	if [ -f "$sys_config/_ht_sw_settings.ini" ]; then
+		# remove leading ':' characters and optional 'config:' prefix
+		$sed -e 's/^:*config://' -e 's/^:*//' "$sys_config/_ht_sw_settings.ini" > "$sys_temp/_ht_sw_settings.ini.sanitize" 2>/dev/null || true
+		# ensure a [config] header exists
+		$grep -q '^\[config\]' "$sys_temp/_ht_sw_settings.ini.sanitize" || (echo '[config]' | cat - "$sys_temp/_ht_sw_settings.ini.sanitize" > "$sys_temp/_ht_sw_settings.ini.sanitize.1" && $mv "$sys_temp/_ht_sw_settings.ini.sanitize.1" "$sys_temp/_ht_sw_settings.ini.sanitize")
+		# deduplicate keys, keep the last occurrence of each key
+		$awk 'FNR==NR{ if($0 ~ /=/){ split($0,a,"="); k=a[1]; gsub(/^[ \t]+|[ \t]+$/,"",k); cnt[k]++ } next }{ if($0 ~ /=/){ split($0,a,"="); k=a[1]; gsub(/^[ \t]+|[ \t]+$/,"",k); cnt[k]--; if(cnt[k]==0) print $0 } else print $0 }' "$sys_temp/_ht_sw_settings.ini.sanitize" "$sys_temp/_ht_sw_settings.ini.sanitize" > "$sys_temp/_ht_sw_settings.ini.clean" && $mv "$sys_temp/_ht_sw_settings.ini.clean" "$sys_config/_ht_sw_settings.ini"
+	fi
 	compare $sys_config/_ht_sw_settings.ini $sd_config/_ht_sw_settings.ini || $cp $sys_config/_ht_sw_settings.ini $sd_config 
 fi
 
