@@ -73,7 +73,7 @@ if [ "$wifi_config_override" = "1" ]; then
 	done
 	
 	# Setup network
-	$wpa_supplicant -iwlan0 -D$wifi_driver -c /tmp/wpa_custom.conf > $sd_log/wpa_supplicant.log 2>&1 & $sleep 5
+	LD_LIBRARY_PATH="/lib:/usr/lib" $wpa_supplicant -iwlan0 -D$wifi_driver -c /tmp/wpa_custom.conf > $sd_log/wpa_supplicant.log 2>&1 & $sleep 5
 	if [ "$wifi_use_dhcp" = "1" -o "$wifi_ip_address" = "" ]; then
         network_mode="dhcp"
 		$ifconfig lo up
@@ -99,15 +99,15 @@ echo "$network_mode" > $network_file
 if [ "$network_mode" != "tuya" ]; then
     while true; do
         $sleep 60
-        $wpa_cli -p /var/run/wpa_supplicant -i wlan0 ping 2>/dev/null | $grep "PONG" >/dev/null 2>&1 || {
+        LD_LIBRARY_PATH="/lib:/usr/lib" $wpa_cli -p /var/run/wpa_supplicant -i wlan0 ping 2>/dev/null | $grep "PONG" >/dev/null 2>&1 || {
             echo "wpa_supplicant not responding, restarting network..."
-            $sd_sbin/network.sh
+            $sd_sbin/network.sh &
             exit 0
         }
         if [ "$network_mode" = "dhcp" ]; then
-            $pidof udhcpc >/dev/null 2>&1 || {
+			$ps w | $grep udhcpc | $grep -v grep | $awk '{print $1}' || {
                 echo "udhcpc not running, restarting network..."
-                $sd_sbin/network.sh
+                $sd_sbin/network.sh &
                 exit 0
             }
         fi
