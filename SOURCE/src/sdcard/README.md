@@ -14,6 +14,49 @@ The `SDCARD` folder in this repository contains:
 - `mmcblk0p1/` - Contents for the first partition.
 - `mmcblk0p2/` - Contents for the second partition.
 
+## SD Card Preparation (available only for Linux)
+Before installing LSCamoflash, it is recommended to prepare the SD card using the `disk_prepare.sh` script. This utility:
+
+- **Erases all data** on the SD card irreversibly
+- **Performs read/write tests** to detect card damage and measure performance
+- **Rates the card's suitability** for use with the cameras based on capacity and read/write speeds (using school grades)
+- **Performs secure clearing** using `blkdiscard` and FAT32 formatting to remove any residual data that could slow down read/write access
+- **Helps restore** partially damaged cards to a working state
+
+### Capacity Requirements
+- **Recommended**: At least **32 GB** SD card
+- **Maximum**: **128 GB** SD card
+
+⚠️ **Warning**: Running this script will **permanently delete all data** on the selected SD card. Ensure you have selected the correct device.
+
+### Basic Usage
+To run the script on Linux:
+```bash
+chmod +x ./disk_prepare.sh
+sudo ./disk_prepare.sh
+```
+
+### Advanced Command-Line Options (For Experts)
+The script supports the following CLI switches:
+
+```bash
+Usage:
+  disk_prepare.sh                        # interactive disk selection + confirmation
+  disk_prepare.sh -D /dev/mmcblk0        # non-interactive with confirmation
+  disk_prepare.sh -D /dev/mmcblk0 -F     # skip confirmation prompt
+  disk_prepare.sh -D /dev/mmcblk0 -f     # faster test (count=128)
+  disk_prepare.sh -D /dev/mmcblk0 -u     # ultra-fast test (count=64)
+```
+
+**Options:**
+- `-D, --disk <device>`: Select disk non-interactively (e.g., `/dev/mmcblk0`, `/dev/sdb`)
+- `-F, --force`: Skip the destructive confirmation prompt (use with caution)
+- `-f, --fast`: Faster test with reduced write operations. Only applicable for SD cards >= 8 GiB. Trades thoroughness for speed.
+- `-u, --ultra`: Ultra-fast test with minimal write operations. Only applicable for SD cards >= 8 GiB. Provides the quickest result but least precise speed measurement.
+- `-h, --help`: Display the help message
+
+**Speed vs. Accuracy**: The `--fast` and `--ultra` options are only recommended when you need results quickly. The standard mode (default) provides the most accurate performance measurement. Faster modes reduce the amount of data written to the card and therefore provide less precise speed measurements.
+
 ## Automatic Installation (Recommended)
 To simplify partitioning and file copying, installation scripts are provided for Windows and Linux:
 
@@ -25,6 +68,7 @@ To simplify partitioning and file copying, installation scripts are provided for
   ```
 - **Linux**: Run `install.sh` with root privileges:
   ```bash
+  chmod +x ./install.sh
   sudo ./install.sh
   ```
 

@@ -14,6 +14,49 @@ Im `SDCARD`-Ordner dieses Repos befinden sich:
 - `mmcblk0p1/` - Inhalte für die erste Partition.
 - `mmcblk0p2/` - Inhalte für die zweite Partition.
 
+## SD-Karten-Vorbereitung (verfügbar nur für Linux)
+Vor der Installation von LSCamoflash wird empfohlen, die SD-Karte mit dem Skript `disk_prepare.sh` vorzubereiten. Dieses Tool:
+
+- **Löscht alle Daten** auf der SD-Karte unwiderruflich
+- **Führt Lese- und Schreibtests** durch, um Kartenschäden zu erkennen und die Leistung zu messen
+- **Bewertet die Eignung der Karte** für die Kameras anhand der Kapazität und der Lese-/Schreibgeschwindigkeit (mit Schulnoten)
+- **Führt sichere Löschung** mit `blkdiscard` und FAT32-Formatierung durch, um sicherzustellen, dass keine Restdaten vorhanden sind, die den Schreib- und Lesezugriff verlangsamen
+- **Hilft, teilweise beschädigte Karten** in einen funktionierenden Zustand zurückzuversetzen
+
+### Kapazitätsanforderungen
+- **Empfohlen**: Mindestens **32 GB** SD-Karte
+- **Maximum**: **128 GB** SD-Karte
+
+⚠️ **Warnung**: Das Ausführen dieses Skripts löscht **alle Daten** auf der ausgewählten SD-Karte dauerhaft. Stellen Sie sicher, dass Sie das richtige Gerät ausgewählt haben.
+
+### Grundlegende Verwendung
+Um das Skript unter Linux auszuführen:
+```bash
+chmod +x ./disk_prepare.sh
+sudo ./disk_prepare.sh
+```
+
+### Erweiterte Kommandozeilen-Optionen (Für Experten)
+Das Skript unterstützt die folgenden CLI-Schalter:
+
+```bash
+Verwendung:
+  disk_prepare.sh                        # interaktive Datenträgerwahl + Bestätigung
+  disk_prepare.sh -D /dev/mmcblk0        # nicht-interaktiv mit Bestätigung
+  disk_prepare.sh -D /dev/mmcblk0 -F     # Bestätigungsaufforderung überspringen
+  disk_prepare.sh -D /dev/mmcblk0 -f     # schnellerer Test (count=128)
+  disk_prepare.sh -D /dev/mmcblk0 -u     # ultra-schneller Test (count=64)
+```
+
+**Optionen:**
+- `-D, --disk <device>`: Datenträger nicht-interaktiv auswählen (z. B. `/dev/mmcblk0`, `/dev/sdb`)
+- `-F, --force`: Bestätigungsaufforderung für destruktive Operationen überspringen (mit Vorsicht verwenden)
+- `-f, --fast`: Schnellerer Test mit reduzierten Schreibvorgängen. Nur anwendbar für SD-Karten >= 8 GiB. Tauscht Gründlichkeit gegen Geschwindigkeit.
+- `-u, --ultra`: Ultra-schneller Test mit minimalen Schreibvorgängen. Nur anwendbar für SD-Karten >= 8 GiB. Bietet das schnellste Ergebnis, aber die am wenigsten präzise Geschwindigkeitsmessung.
+- `-h, --help`: Hilfemeldung anzeigen
+
+**Geschwindigkeit vs. Genauigkeit**: Die Optionen `--fast` und `--ultra` werden nur empfohlen, wenn Sie schnell Ergebnisse benötigen. Der Standardmodus (Standard) liefert die genaueste Leistungsmessung. Schnellere Modi reduzieren die Menge der auf die Karte geschriebenen Daten und liefern daher weniger präzise Geschwindigkeitsmessungen.
+
 ## Automatische Installation (Empfohlen)
 Um die Partitionierung und das Kopieren der Dateien zu vereinfachen, gibt es für Windows und Linux jeweils ein Installationsskript:
 
@@ -25,6 +68,7 @@ Um die Partitionierung und das Kopieren der Dateien zu vereinfachen, gibt es fü
   ```
 - **Linux**: Führe `install.sh` mit Root-Rechten aus:
   ```bash
+  chmod +x ./install.sh
   sudo ./install.sh
   ```
 
