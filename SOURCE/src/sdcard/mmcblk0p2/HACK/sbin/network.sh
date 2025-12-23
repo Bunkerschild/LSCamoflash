@@ -97,19 +97,40 @@ fi
 echo "$network_mode" > $network_file
 
 if [ "$network_mode" != "tuya" ]; then
-    while true; do
-        $sleep 60
-        LD_LIBRARY_PATH="/lib:/usr/lib" $wpa_cli -p /var/run/wpa_supplicant -i wlan0 ping 2>/dev/null | $grep "PONG" >/dev/null 2>&1 || {
-            echo "wpa_supplicant not responding, restarting network..."
-            $sd_sbin/network.sh &
-            exit 0
-        }
-        if [ "$network_mode" = "dhcp" ]; then
-			$ps w | $grep udhcpc | $grep -v grep | $awk '{print $1}' || {
-                echo "udhcpc not running, restarting network..."
-                $sd_sbin/network.sh &
-                exit 0
-            }
-        fi
-    done
+	while true; do
+		$sleep 60
+
+		# Check whether wpa_supplicant reports a completed connection.
+		LD_LIBRARY_PATH="/lib:/usr/lib" $wpa_cli -p /var/run/wpa_supplicant -i wlan0 status 2>/dev/null | $grep "wpa_state=COMPLETED" >/dev/null 2>&1
+		if [ $? -ne 0 ]; then
+			echo "wpa_supplicant not connected; trying reassociate..."
+			LD_LIBRARY_PATH="/lib:/usr/lib" $wpa_cli -p /var/run/wpa_supplicant -i wlan0 reassociate >/dev/null 2>&1 || true
+			$sleep 5
+			LD_LIBRARY_PATH="/lib:/usr/lib" $wpa_cli -p /var/run/wpa_supplicant -i wlan0 status 2>/dev/null | $grep "wpa_state=COMPLETED" >/dev/null 2>&1
+			if [ $? -ne 0 ]; then
+				echo "wpa_supplicant not responding or failed to connect, restarting network..."
+				$sd_sbin/network.sh &
+				exit 0
+			fi
+		fi
+
+		if [ "$network_mode" = "dhcp" ]; then
+			# Prefer checking udhcpc pidfile (we start udhcpc with --pidfile)
+			if [ -f /var/run/udhcpc-wlan0.pid ]; then
+				udhcpc_pid=`$cat /var/run/udhcpc-wlan0.pid 2>/dev/null || echo ""`
+				if [ -z "$udhcpc_pid" ] || ! $kill -0 "$udhcpc_pid" 2>/dev/null; then
+					echo "udhcpc not running (pidfile stale), restarting network..."
+					$sd_sbin/network.sh &
+					exit 0
+				fi
+			else
+				# fallback to previous ps-based check
+				$ps w | $grep udhcpc | $grep -v grep | $awk '{print $1}' >/dev/null 2>&1 || {
+					echo "udhcpc not running, restarting network..."
+					$sd_sbin/network.sh &
+					exit 0
+				}
+			fi
+		fi
+	done
 fi
