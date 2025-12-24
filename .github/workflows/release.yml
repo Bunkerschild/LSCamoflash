@@ -3,6 +3,9 @@ name: Create Stable Release
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -10,6 +13,10 @@ jobs:
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install required build tools
         run: sudo apt update && sudo apt install -y build-essential flex bison gsoap binutils make automake autoconf autoconf-archive
@@ -26,6 +33,29 @@ jobs:
           mkdir -p ../release
           cp -v LSCamoflash-*-uclibc.tar.gz ../release/
           cp -v update-*-uclibc.tgz ../release/
+
+      # Note: `update-version.sh` is executed during `make release`.
+      # We only need to commit the resulting SOURCE/version.txt here.
+
+      - name: Commit and push updated SOURCE/version.txt
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          branch="${GITHUB_REF#refs/heads/}"
+          if [ -z "$branch" ]; then
+            branch="main"
+          fi
+          if git status --porcelain -- SOURCE/version.txt | grep . >/dev/null 2>&1; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add SOURCE/version.txt
+            git commit -m "ci(release): update SOURCE/version.txt to $(cat SOURCE/version.txt)"
+            git push origin "HEAD:${branch}"
+          else
+            echo "No changes to SOURCE/version.txt to commit"
+          fi
 
       - name: Version nach Build/Update lesen (sanitize)
         id: version
