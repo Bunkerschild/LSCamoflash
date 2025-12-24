@@ -30,14 +30,13 @@ export setup_lock_file="/tmp/setup.lock"
 [ -n "$anyka_checksums_conf" ] && . $anyka_checksums_conf && echo "Anyka checksums loaded from: $anyka_checksums_conf" || exit 1
 
 # Repair Mode: Check for /tmp/sd/INJECT directory with recovery archives
-inject_path="/tmp/sd/INJECT"
-if [ -d "$inject_path" ]; then
-	echo "Repair Mode: Found $inject_path directory"
+if [ -d "$sd_inject" ]; then
+	echo "Repair Mode: Found $sd_inject directory"
 	
 	# List of potential repair archives
 	for archive in bin etc lib sbin usr var; do
-		archive_file="$inject_path/$archive.tar"
-		log_file="$inject_path/$archive.log"
+		archive_file="$sd_inject/$archive.tar"
+		log_file="$sd_inject/$archive.log"
 		
 		if [ -f "$archive_file" ]; then
 			echo "Repair Mode: Processing $archive.tar..."
