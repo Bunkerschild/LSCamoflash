@@ -25,7 +25,7 @@ anyka_startlock="$sys_temp/_ak39_startlock.ini"
 
 # Define options for telnetd
 export telnetd_options="-p $port_telnet"
-[ "$FORCE_PASSWORDLESS_TELNETD" = "1" ] && telnetd_options="$telnetd_options -a"
+[ "$FORCE_PASSWORDLESS_TELNETD" = "1" ] && telnetd_options="$telnetd_options -l /bin/sh"
 
 # Compare function
 compare() {
@@ -42,6 +42,82 @@ compare() {
         fi
 
         return 1
+}
+
+# Issue #2 mitigation: Recovery function for critical /etc/config files
+recover_config_file() {
+	local filename="$1"
+	local config_log="$sd_var/log/config-critical.log"
+	
+	# Ensure log directory exists
+	$mkdir -p "$($dirname $config_log)" >/dev/null 2>&1
+	
+	# Check if file exists in /etc/config
+	if [ -f "/etc/config/$filename" ]; then
+		return 0
+	fi
+	
+	# Step 1: Try to recover from /tmp/sd/HACK/etc/config
+	if [ -f "$sd_config/$filename" ]; then
+		echo "Recovering $filename from SD overlay config..."
+		$cp "$sd_config/$filename" "/etc/config/$filename" 2>/dev/null
+		if compare "/etc/config/$filename" "$sd_config/$filename"; then
+			return 0
+		else
+			echo "$(date '+%Y-%m-%d %H:%M:%S') - $filename: copy from \$sd_config failed or checksum mismatch" >> "$config_log"
+		fi
+	fi
+	
+	# Step 2: Try to recover from /tmp/sd/HACK/backup/config directory
+	if [ -f "$sd_backup/config/$filename" ]; then
+		echo "Recovering $filename from backup config directory..."
+		$cp "$sd_backup/config/$filename" "/etc/config/$filename" 2>/dev/null
+		$cp "$sd_backup/config/$filename" "$sd_config/$filename" 2>/dev/null
+		if compare "/etc/config/$filename" "$sd_backup/config/$filename"; then
+			return 0
+		else
+			echo "$(date '+%Y-%m-%d %H:%M:%S') - $filename: copy from backup/config failed or checksum mismatch" >> "$config_log"
+		fi
+	fi
+	
+	# Step 3: Try to recover from /tmp/sd/HACK/backup/config.tar
+	if [ -f "$sd_backup/config.tar" ]; then
+		echo "Recovering $filename from config.tar..."
+		$tar -xpf "$sd_backup/config.tar" -C "$sd_backup/" "etc/config/$filename" 2>/dev/null
+		if [ -f "$sd_backup/etc/config/$filename" ]; then
+			$cp "$sd_backup/etc/config/$filename" "$sd_backup/config/$filename" 2>/dev/null
+			$cp "$sd_backup/etc/config/$filename" "/etc/config/$filename" 2>/dev/null
+			$cp "$sd_backup/etc/config/$filename" "$sd_config/$filename" 2>/dev/null
+			if compare "/etc/config/$filename" "$sd_backup/etc/config/$filename"; then
+				return 0
+			else
+				echo "$(date '+%Y-%m-%d %H:%M:%S') - $filename: copy from config.tar failed or checksum mismatch" >> "$config_log"
+			fi
+		else
+			echo "$(date '+%Y-%m-%d %H:%M:%S') - $filename: not found in config.tar" >> "$config_log"
+		fi
+	fi
+	
+	# Step 4: Try to recover from /tmp/sd/HACK/etc.tar
+	if [ -f "$sd_backup/etc.tar" ]; then
+		echo "Recovering $filename from etc.tar..."
+		$tar -xpf "$sd_backup/etc.tar" -C "$sd_backup/" "etc/config/$filename" 2>/dev/null
+		if [ -f "$sd_backup/etc/config/$filename" ]; then
+			$cp "$sd_backup/etc/config/$filename" "/etc/config/$filename" 2>/dev/null
+			$cp "$sd_backup/etc/config/$filename" "$sd_config/$filename" 2>/dev/null
+			if compare "/etc/config/$filename" "$sd_backup/etc/config/$filename"; then
+				return 0
+			else
+				echo "$(date '+%Y-%m-%d %H:%M:%S') - $filename: copy from etc.tar failed or checksum mismatch" >> "$config_log"
+			fi
+		else
+			echo "$(date '+%Y-%m-%d %H:%M:%S') - $filename: not found in etc.tar" >> "$config_log"
+		fi
+	fi
+	
+	# All recovery attempts failed
+	echo "$(date '+%Y-%m-%d %H:%M:%S') - $filename: recovery failed, file not found in any backup" >> "$config_log"
+	return 1
 }
 
 # Get PID of service
@@ -283,6 +359,20 @@ fi
 # Custom scripts run before services
 [ -n "$custom_pre_services_async" -a -x "$custom_pre_services_async" ] && $custom_pre_services_async &
 [ -n "$custom_pre_services" -a -x "$custom_pre_services" ] && $custom_pre_services
+
+# Issue #2 mitigation: Recover critical /etc/config files if missing
+if [ -f "$sd_backup/config.md5" ]; then
+	while IFS= read -r line; do
+		# Extract filename from checksum line (format: "hash  ./filename")
+		filename=$(echo "$line" | $awk '{print $NF}' | $sed 's/^\.\///')
+		if [ -n "$filename" ] && [ "$filename" != "logseq*" ] && [ "$filename" != "log_seq_stat" ]; then
+			recover_config_file "$filename"
+		fi
+	done < "$sd_backup/config.md5"
+fi
+
+# Issue #2 mitigation: Clean logseq* and log_seq_stat files that anyka_ipc creates on crashes
+$rm -f /etc/config/logseq* /etc/config/log_seq_stat >/dev/null 2>&1 || true
 
 # Check, whether _ht_sw_settings.ini exists
 if [ ! -e $sd_config/_ht_sw_settings.ini ]; then

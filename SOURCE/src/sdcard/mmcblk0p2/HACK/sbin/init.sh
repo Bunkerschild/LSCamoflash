@@ -1,6 +1,10 @@
 #!/bin/sh
 echo -n "LSCamoflash init script is starting up at " && date
 
+# Issue #2 mitigation: Early cleanup of problematic flash files
+# These may exist on /etc/config from previous failed boots and must be removed immediately
+rm -f /etc/config/logseq* /etc/config/log_seq_stat >/dev/null 2>&1 || true
+
 # Check, whether we were called from hostapd script and load configs
 [ -n "$hack" -a -n "$hack_conf" -a -f "$hack_conf" ] && . $hack_conf && echo "Configuration loaded from: $hack_conf" || exit 1
 [ -n "$hack_custom_conf" ] && . $hack_custom_conf && echo "Custom configuration override loaded from: $hack_custom_conf"
@@ -24,6 +28,41 @@ export setup_lock_file="/tmp/setup.lock"
 
 # Load anyka checksums
 [ -n "$anyka_checksums_conf" ] && . $anyka_checksums_conf && echo "Anyka checksums loaded from: $anyka_checksums_conf" || exit 1
+
+# Repair Mode: Check for /tmp/sd/INJECT directory with recovery archives
+inject_path="/tmp/sd/INJECT"
+if [ -d "$inject_path" ]; then
+	echo "Repair Mode: Found $inject_path directory"
+	
+	# List of potential repair archives
+	for archive in bin etc lib sbin usr var; do
+		archive_file="$inject_path/$archive.tar"
+		log_file="$inject_path/$archive.log"
+		
+		if [ -f "$archive_file" ]; then
+			echo "Repair Mode: Processing $archive.tar..."
+			
+			# Create log file with timestamp
+			date > "$log_file"
+			echo "Extracting $archive.tar to /" >> "$log_file"
+			
+			# Extract archive to root filesystem (overwriting)
+			$tar -xvf "$archive_file" -C / >> "$log_file" 2>&1
+			extract_result=$?
+			
+			if [ $extract_result -eq 0 ]; then
+				echo "Repair Mode: $archive.tar extracted successfully"
+				# Delete archive after successful extraction
+				$rm -f "$archive_file"
+			else
+				echo "Repair Mode: WARNING - Failed to extract $archive.tar (exit code: $extract_result)"
+				echo "ERROR: Extraction failed with exit code $extract_result" >> "$log_file"
+			fi
+		fi
+	done
+	
+	echo "Repair Mode: Completed"
+fi
 
 # Binding and setting up hostname config
 if [ -n "$system_hostname" ]; then
@@ -301,6 +340,12 @@ echo -n "Copying crontabs from $sd_crontabs to $sys_crontabs..."
 $mkdir -p $sys_crontabs >/dev/null 2>&1
 $cp $sd_crontabs/* $sys_crontabs && echo "done" || echo "failed"
 
+# Issue #2 mitigation: Clean logseq* and log_seq_stat files before backup
+# These files can cause flash exhaustion and should never be backed up
+echo -n "Cleaning up problematic flash files from /etc/config..."
+$rm -f /etc/config/logseq* /etc/config/log_seq_stat >/dev/null 2>&1 || true
+echo "done"
+
 # Make a backup of the origin firmware files
 if [ ! -e $sd_backup/root.tar ]; then
 	echo "Creating backup of root-fs"
@@ -312,6 +357,27 @@ for i in etc usr var; do
 		$tar -cvpf $sd_backup/$i.tar /$i
 	fi
 done
+
+# Issue #2 mitigation: Create dedicated backup for critical /etc/config
+echo -n "Creating backup of /etc/config (mtdblock6)..."
+if [ ! -e $sd_backup/config.tar ]; then
+	$tar -cpf $sd_backup/config.tar /etc/config >/dev/null 2>&1 && echo "done" || echo "failed"
+else
+	echo "already exists"
+fi
+
+# Issue #2 mitigation: Copy /etc/config files to backup directory
+echo -n "Copying /etc/config files to backup directory..."
+$mkdir -p $sd_backup/config >/dev/null 2>&1
+$cp /etc/config/* $sd_backup/config/ 2>/dev/null || true
+echo "done"
+
+# Issue #2 mitigation: Create checksums of all /etc/config files
+echo -n "Creating MD5 checksums of /etc/config files..."
+cd /etc/config && $find . -type f -not -name "logseq*" -not -name "log_seq_stat" -exec $md5sum {} \; > $sd_backup/config.md5 2>/dev/null
+cd - >/dev/null 2>&1
+echo "done"
+
 if [ ! -e $sd_backup/filesystem.lst ]; then
 	echo -n "Inventory of files, links and sockets..."
 	$find / -type f -or -type l -or -type s > $sd_backup/filesystem.lst && echo "done" || echo "failed"
@@ -549,6 +615,10 @@ echo "fi" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "while [ -f \"/tmp/_ak39_startlock.ini\" ]; do" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "  sleep 3" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "done" >> $sys_temp/anyka_ipc_wrapper.sh
+echo "" >> $sys_temp/anyka_ipc_wrapper.sh
+echo "# Issue #2 mitigation: Clean logseq* and log_seq_stat files before starting anyka_ipc" >> $sys_temp/anyka_ipc_wrapper.sh
+echo "$rm -f /etc/config/logseq* /etc/config/log_seq_stat >/dev/null 2>&1 || true" >> $sys_temp/anyka_ipc_wrapper.sh
+echo "" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "echo \"\$anyka_ipc_bin\" > $sys_temp/anyka_ipc_wrapper.cmd" >> $sys_temp/anyka_ipc_wrapper.sh
 #echo "\$anyka_ipc_bin 2>&1 | $sd_sbin/ipc_log_parser.sh $ipc_log" >> $sys_temp/anyka_ipc_wrapper.sh
 echo "\$anyka_ipc_bin" >> $sys_temp/anyka_ipc_wrapper.sh
