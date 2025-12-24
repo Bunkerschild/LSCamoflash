@@ -22,6 +22,22 @@ LSCamoflash ist ein modifiziertes Firmware-Paket für bestimmte IP-Kameras, das 
 - [Update-Mechanismus](#update-mechanismus)
 - [SD-Karten-Partitionierung](#sd-karten-partitionierung)
 - [Geplante Verbesserungen](#geplante-verbesserungen)
+- [Haftungsausschluss](#haftungsausschluss)
+
+## Haftungsausschluss
+
+**WARNUNG:** Dieses Projekt modifiziert die Firmware und kann die Gerätegarantie ungültig machen. Nutzung auf eigene Gefahr.
+
+- **Keine Haftung:** Die Autoren übernehmen keine Verantwortung für Schäden, Datenverlust, beschädigte Hardware oder andere Schäden, die sich aus der Verwendung dieser Software ergeben.
+- **Bereitstellung im "Ist-Zustand":** Diese Software wird "wie vorhanden" ohne jegliche Gewährleistungen oder Garantien bereitgestellt.
+- **Nutzung auf eigene Gefahr:** Durch die Verwendung von LSCamoflash bestätigen Sie, dass Sie die damit verbundenen Risiken verstehen und die volle Verantwortung für alle Folgen übernehmen.
+- **Hardware-Risiko:** Das Flashen von Firmware kann Ihr Gerät dauerhaft beschädigen, wenn etwas schiefgeht. Stellen Sie sicher, dass Sie ein Backup haben und den Prozess verstehen, bevor Sie fortfahren.
+- **Datenverlust:** Sichern Sie immer wichtige Daten, bevor Sie diese Firmware verwenden. Wir sind nicht für Datenverlust verantwortlich.
+- **Nur autorisierte Nutzung:** Diese Software darf nur auf Geräten verwendet werden, die Sie besitzen oder für deren Modifizierung Sie ausdrückliche Genehmigung haben. Unbefugter Zugriff auf Computersysteme ist illegal. Der Versuch, diese Firmware für unbefugten Zugriff auf oder Kontrolle über Geräte zu nutzen, auf die Sie kein Eigentumsrecht haben oder für die Sie keine Genehmigung haben, ist ausdrücklich untersagt und kann gegen geltende Gesetze verstoßen, einschließlich des Strafgesetzbuches (StGB) § 202a (Ausspähen von Daten), § 263a (Betrug) und ähnlicher Regelungen in Ihrer Jurisdiktion.
+- **Kein böswilliger Einsatz:** Dieses Projekt darf nicht zur Erstellung von Malware, Spyware oder anderer bösartiger Software verwendet werden, die darauf abzielt, die Gerätesicherheit zu gefährden, Kommunikation abzufangen oder andere zu schädigen.
+- **Rechtliche Verantwortung des Nutzers:** Nutzer sind allein dafür verantwortlich, sicherzustellen, dass ihre Nutzung von LSCamoflash mit allen geltenden Gesetzen und Vorschriften ihrer Jurisdiktion konform ist. Die Autoren lehnen jegliche Haftung für illegale Nutzung oder deren Folgen ab.
+
+Bitte lesen Sie die [LICENSE-Dateien](LICENSE.md) für vollständige rechtliche Details.
 
 ## Installation
 
