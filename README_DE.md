@@ -25,6 +25,7 @@ Sicherheitsprobleme sollten verantwortungsvoll gemeldet werden. Siehe SECURITY.m
 
 ## Inhaltsverzeichnis
 
+- [Haftungsausschluss](#haftungsausschluss)
 - [Installation](#installation)
 - [Build-Umgebung einrichten](#build-umgebung-einrichten)
 - [Verfügbare Tools](#verfügbare-tools)
@@ -33,7 +34,7 @@ Sicherheitsprobleme sollten verantwortungsvoll gemeldet werden. Siehe SECURITY.m
 - [Update-Mechanismus](#update-mechanismus)
 - [SD-Karten-Partitionierung](#sd-karten-partitionierung)
 - [Geplante Verbesserungen](#geplante-verbesserungen)
-- [Haftungsausschluss](#haftungsausschluss)
+- [Support](#support)
 
 ## Haftungsausschluss
 
@@ -156,3 +157,7 @@ Die SD-Karte ist so partitioniert, dass eine Formatierung über die TUYA-App den
 - **Implementierung von Checksummen:** In zukünftigen Versionen werden für externe Downloads Checksummen verwendet, um die Integrität der Dateien sicherzustellen.
 - **Überarbeitung von `strace-log-merge`:** Dieses Tool wird aktuell nur für interne Zwecke genutzt und könnte in späteren Versionen entfernt werden.
 - **Verkürzung des Überwachungsintervalls:** Derzeit überprüft `services.sh` alle 30 Sekunden den Zustand der Partitionen. Es ist geplant, dieses Intervall in zukünftigen Versionen zu verkürzen, um eine schnellere Wiederherstellung zu ermöglichen.
+
+## Support
+
+Weitere Informationen finden Sie in der Datei SUPPORT.md.
