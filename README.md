@@ -48,7 +48,7 @@ Security issues should be reported responsibly. See SECURITY.md.
 - **No Malicious Use:** This project shall not be used for creating malware, spyware, or any other malicious software intended to compromise device security, intercept communications, or harm others.
 - **Legal Responsibility:** Users are solely responsible for ensuring their use of LSCamoflash complies with all applicable laws and regulations in their jurisdiction. The authors disclaim all liability for any illegal use or consequences thereof.
 
-Please refer to the [LICENSE files](SOURCE/3RD_PARTY_LICENSES.md) for full legal details.
+Please refer to the [Usage Policy](SOURCE/USAGE_POLICY.md) for full legal details.
 
 ## Installation
 
@@ -156,6 +156,7 @@ The SD card is partitioned so that formatting via the TUYA app does not remove t
 - **Implementation of checksums:** Future versions will use checksums for external downloads to ensure file integrity.
 - **Review of `strace-log-merge`:** This tool is currently only used for internal purposes and may be removed in later versions.
 - **Reducing monitoring intervals:** Currently, `services.sh` checks the state of the partitions every 30 seconds. Future versions aim to shorten this interval for faster recovery.
+
 
 
 
