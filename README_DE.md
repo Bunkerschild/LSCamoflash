@@ -48,7 +48,7 @@ Sicherheitsprobleme sollten verantwortungsvoll gemeldet werden. Siehe SECURITY.m
 - **Kein böswilliger Einsatz:** Dieses Projekt darf nicht zur Erstellung von Malware, Spyware oder anderer bösartiger Software verwendet werden, die darauf abzielt, die Gerätesicherheit zu gefährden, Kommunikation abzufangen oder andere zu schädigen.
 - **Rechtliche Verantwortung des Nutzers:** Nutzer sind allein dafür verantwortlich, sicherzustellen, dass ihre Nutzung von LSCamoflash mit allen geltenden Gesetzen und Vorschriften ihrer Jurisdiktion konform ist. Die Autoren lehnen jegliche Haftung für illegale Nutzung oder deren Folgen ab.
 
-Bitte lesen Sie die [LICENSE-Dateien](SOURCE/3RD_PARTY_LICENSE.md) für vollständige rechtliche Details.
+Bitte lesen Sie die [Verwendungsrichtlinie](SOURCE/USAGE_POLICY.md) für vollständige rechtliche Details.
 
 ## Installation
 
