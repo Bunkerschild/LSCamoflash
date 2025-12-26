@@ -25,6 +25,7 @@ Security issues should be reported responsibly. See SECURITY.md.
 
 ## Table of Contents
 
+- [Disclaimer](#disclaimer)
 - [Installation](#installation)
 - [Setting up the Build Environment](#setting-up-the-build-environment)
 - [Available Tools](#available-tools)
@@ -33,7 +34,7 @@ Security issues should be reported responsibly. See SECURITY.md.
 - [Update Mechanism](#update-mechanism)
 - [SD Card Partitioning](#sd-card-partitioning)
 - [Planned Improvements](#planned-improvements)
-- [Disclaimer](#disclaimer)
+- [Support](#support)
 
 ## Disclaimer
 
@@ -156,6 +157,10 @@ The SD card is partitioned so that formatting via the TUYA app does not remove t
 - **Implementation of checksums:** Future versions will use checksums for external downloads to ensure file integrity.
 - **Review of `strace-log-merge`:** This tool is currently only used for internal purposes and may be removed in later versions.
 - **Reducing monitoring intervals:** Currently, `services.sh` checks the state of the partitions every 30 seconds. Future versions aim to shorten this interval for faster recovery.
+
+## Support
+
+For support information, see SUPPORT.md.
 
 
 
