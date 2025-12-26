@@ -7,6 +7,13 @@ LSCamoflash ist ein modifiziertes Firmware-Paket für bestimmte IP-Kameras, das 
 - [Download aktuelles Autobuild Update-Paket](https://bunkerschild.github.io/LSCamoflash/autobuild/update-autobuild.tgz)
 - [Download aktuelles Release](https://github.com/Bunkerschild/LSCamoflash/releases/latest)
 
+
+[![GitHub release](https://img.shields.io/github/v/release/Bunkerschild/LSCamoflash.svg)](https://github.com/Bunkerschild/LSCamoflash/releases)
+[![GitHub downloads](https://img.shields.io/github/downloads/Bunkerschild/LSCamoflash/total.svg)](https://github.com/Bunkerschild/LSCamoflash/releases)
+[![GitHub stars](https://img.shields.io/github/stars/Bunkerschild/LSCamoflash.svg)](https://github.com/Bunkerschild/LSCamoflash/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/Bunkerschild/LSCamoflash.svg)](https://github.com/Bunkerschild/LSCamoflash/network)
+[![Last commit](https://img.shields.io/github/last-commit/Bunkerschild/LSCamoflash.svg)](https://github.com/Bunkerschild/LSCamoflash/commits/main)
+
 [![Build-Test](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/makefile.yml/badge.svg)](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/makefile.yml)
 [![Create Stable Release](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/release.yml/badge.svg)](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/release.yml)
 [![CodeQL Advanced](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/codeql.yml/badge.svg)](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/codeql.yml)
