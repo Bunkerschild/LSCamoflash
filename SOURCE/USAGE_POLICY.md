@@ -1,3 +1,5 @@
+# Usage Policy
+
 ## Acceptable Use Policy
 
 **Despite the permissive nature of the MIT License, the following uses of LSCamoflash are explicitly prohibited:**
