@@ -7,17 +7,21 @@ LSCamoflash ist ein modifiziertes Firmware-Paket für bestimmte IP-Kameras, das 
 - [Download aktuelles Autobuild Update-Paket](https://bunkerschild.github.io/LSCamoflash/autobuild/update-autobuild.tgz)
 - [Download aktuelles Release](https://github.com/Bunkerschild/LSCamoflash/releases/latest)
 
+[![GitHub stars](https://img.shields.io/github/stars/Bunkerschild/LSCamoflash.svg)](https://github.com/Bunkerschild/LSCamoflash/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/Bunkerschild/LSCamoflash.svg)](https://github.com/Bunkerschild/LSCamoflash/network)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![GitHub release](https://img.shields.io/github/v/release/Bunkerschild/LSCamoflash.svg)](https://github.com/Bunkerschild/LSCamoflash/releases)
 [![GitHub downloads](https://img.shields.io/github/downloads/Bunkerschild/LSCamoflash/total.svg)](https://github.com/Bunkerschild/LSCamoflash/releases)
-[![GitHub stars](https://img.shields.io/github/stars/Bunkerschild/LSCamoflash.svg)](https://github.com/Bunkerschild/LSCamoflash/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/Bunkerschild/LSCamoflash.svg)](https://github.com/Bunkerschild/LSCamoflash/network)
 [![Last commit](https://img.shields.io/github/last-commit/Bunkerschild/LSCamoflash.svg)](https://github.com/Bunkerschild/LSCamoflash/commits/main)
+[![Security Policy](https://img.shields.io/badge/security-policy-blue.svg)](SECURITY.md)
 
 [![Build-Test](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/makefile.yml/badge.svg)](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/makefile.yml)
 [![Create Stable Release](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/release.yml/badge.svg)](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/release.yml)
 [![CodeQL Advanced](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/codeql.yml/badge.svg)](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/codeql.yml)
 [![Deploy GitHub Pages](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/jekyll-gh-pages.yml/badge.svg)](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/jekyll-gh-pages.yml)
+
+Sicherheitsprobleme sollten verantwortungsvoll gemeldet werden. Siehe SECURITY.md.
 
 ## Inhaltsverzeichnis
 
