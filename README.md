@@ -7,6 +7,12 @@ LSCamoflash is a modified firmware package for specific IP cameras that provides
 - [Download Latest Autobuild Update Package](https://bunkerschild.github.io/LSCamoflash/autobuild/update-autobuild.tgz)
 - [Download Latest Release](https://github.com/Bunkerschild/LSCamoflash/releases/latest)
 
+[![GitHub release](https://img.shields.io/github/v/release/Bunkerschild/LSCamoflash.svg)](https://github.com/Bunkerschild/LSCamoflash/releases)
+[![GitHub downloads](https://img.shields.io/github/downloads/Bunkerschild/LSCamoflash/total.svg)](https://github.com/Bunkerschild/LSCamoflash/releases)
+[![GitHub stars](https://img.shields.io/github/stars/Bunkerschild/LSCamoflash.svg)](https://github.com/Bunkerschild/LSCamoflash/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/Bunkerschild/LSCamoflash.svg)](https://github.com/Bunkerschild/LSCamoflash/network)
+[![Last commit](https://img.shields.io/github/last-commit/Bunkerschild/LSCamoflash.svg)](https://github.com/Bunkerschild/LSCamoflash/commits/main)
+
 [![Build-Test](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/makefile.yml/badge.svg)](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/makefile.yml)
 [![Create Stable Release](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/release.yml/badge.svg)](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/release.yml)
 [![CodeQL Advanced](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/codeql.yml/badge.svg)](https://github.com/Bunkerschild/LSCamoflash/actions/workflows/codeql.yml)
@@ -145,5 +151,6 @@ The SD card is partitioned so that formatting via the TUYA app does not remove t
 - **Implementation of checksums:** Future versions will use checksums for external downloads to ensure file integrity.
 - **Review of `strace-log-merge`:** This tool is currently only used for internal purposes and may be removed in later versions.
 - **Reducing monitoring intervals:** Currently, `services.sh` checks the state of the partitions every 30 seconds. Future versions aim to shorten this interval for faster recovery.
+
 
 
