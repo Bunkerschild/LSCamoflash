@@ -495,7 +495,7 @@ if [ -e $sd_lib/libavssdkbeta.so ]; then
 fi
 
 # Prepare and mount factory_cfg.ini
-if [ -e $sd_config/anyka_cgi.ini ]; then
+if [ -e $sd_config/anyka_cfg.ini ]; then
 	echo -n "Updating anyka_cfg.ini file..."
 	$sed -i -e 's/rtsp\ =\ 0/rtsp\ =\ 1/g' $sd_config/anyka_cfg.ini && \
 	$sed -i -e 's/onvif\ =\ 0/onvif\ =\ 1/g' $sd_config/anyka_cfg.ini && \
