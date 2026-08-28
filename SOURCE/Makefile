@@ -1256,7 +1256,7 @@ $(BUILD_HACK)/etc/version.txt:
 	
 $(BUILD_DIR)/LICENSE.md:
 	@cp $(ROOT_DIR)/LICENSE.MIT $(BUILD_DIR)/LICENSE.MIT
-	@cp $(ROOT_DIR)/LICENSE.md $@
+	@cp $(ROOT_DIR)/LICENSE.md $@ 2>/dev/null || cp $(ROOT_DIR)/LICENSE.MIT $@
 	@touch $@
 
 build: $(BUILD_DIR)/install.ps1 $(BUILD_HACK)/bin/radare2 $(BUILD_HACK)/bin/r2agent $(BUILD_HACK)/bin/r2r $(BUILD_HACK)/bin/rasign2 $(BUILD_HACK)/bin/rax2 $(BUILD_HACK)/bin/ragg2 $(BUILD_HACK)/bin/rarun2 $(BUILD_HACK)/bin/rabin2 \
