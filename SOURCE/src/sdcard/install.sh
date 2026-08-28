@@ -31,13 +31,20 @@ if ! lsblk -d -o NAME,ROTA | grep "^$disk" | awk '{print $2}' | grep "0"; then
     exit 1
 fi
 
+# Partitions-Namensschema bestimmen: mmcblk0/nvme (endet auf Ziffer) -> "p"-Trenner,
+# sd*/hd*/vd* -> kein Trenner (z.B. sdb -> sdb1, mmcblk0 -> mmcblk0p1)
+case "$disk" in
+	*[0-9]) part="${disk}p" ;;
+	*)      part="${disk}" ;;
+esac
+
 # Mount-Punkte erstellen
 mount1=$(mktemp -d)
 mount2=$(mktemp -d)
 
 if [ "$use_sd_config" = "1" ]; then
-	mount /dev/${disk}p1 $mount1 >/dev/null 2>&1
-	mount /dev/${disk}p2 $mount2 >/dev/null 2>&1
+	mount /dev/${part}1 $mount1 >/dev/null 2>&1
+	mount /dev/${part}2 $mount2 >/dev/null 2>&1
 	
 	for m in $mount1 $mount2; do
 		if [ -f "$m/HACK/etc/hack_custom.conf" ]; then
@@ -92,12 +99,12 @@ sleep 10
 
 # Partitionen formatieren
 echo "Formatiere Partitionen als FAT32..."
-mkfs.vfat -F32 /dev/${disk}p1
-mkfs.vfat -F32 /dev/${disk}p2
+mkfs.vfat -F32 /dev/${part}1
+mkfs.vfat -F32 /dev/${part}2
 
 # Partitionen mounten
-mount /dev/${disk}p1 "$mount1"
-mount /dev/${disk}p2 "$mount2"
+mount /dev/${part}1 "$mount1"
+mount /dev/${part}2 "$mount2"
 
 # Dateien kopieren
 echo "Kopiere Dateien auf die erste Partition..."
