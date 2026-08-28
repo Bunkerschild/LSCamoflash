@@ -25,8 +25,9 @@ if [ ! -b "/dev/$disk" ]; then
     exit 1
 fi
 
-# Sicherheitspruefung: Ist es ein Wechselmedium?
-if ! lsblk -d -o NAME,ROTA | grep "^$disk" | awk '{print $2}' | grep "0"; then
+# Sicherheitspruefung: Ist es ein Wechselmedium? (RM=1, nicht ROTA:
+# moderne interne SSDs sind ROTA=0 und wuerden die alte Pruefung faelschlich bestehen)
+if [ "$(lsblk -dno RM /dev/$disk 2>/dev/null)" != "1" ]; then
     echo "Fehler: Der gewaehlte Datentraeger ist KEIN Wechselmedium! Abbruch."
     exit 1
 fi
