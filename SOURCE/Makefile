@@ -1139,8 +1139,9 @@ $(BUILD_HACK)/bin/pydoc:
 	@cp $(STAGE_HACK)/bin/pydoc3.13 $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/pip:
+	@mkdir -p $(STAGING_DIR)/$(SDROOT)/lib/python3.13/site-packages $(BUILD_HACK)/lib/python3.13/site-packages >/dev/null 2>&1 || true
 	@for m in $(SRC_DIR)/modules/python/*; do \
-		cp -r $$m $(STAGING_DIR)/$(SDROOT)/lib/python3.13/site-packages/; \
+		cp -r $$m $(STAGING_DIR)/$(SDROOT)/lib/python3.13/site-packages/ >/dev/null 2>&1 || true; \
 	done
 	@cp -aL $(STAGING_DIR)/$(HOST_DIR)/lib/python3.13/site-packages/* $(BUILD_HACK)/lib/python3.13/site-packages/ >/dev/null 2>&1 || true
 	@cp $(STAGING_DIR)/$(HOST_DIR)/bin/pip3.13 $@ >/dev/null 2>&1 || true
