@@ -861,7 +861,7 @@ libilbc-clean:
 
 $(PACKAGES_DIR)/$(OPENJPEG)/build/Makefile:
 	@mkdir -p $(PACKAGES_DIR)/$(OPENJPEG)/build
-	@cd $(PACKAGES_DIR)/$(OPENJPEG)/build; cmake .. -DCMAKE_INSTALL_PREFIX=$(STAGING_DIR)/$(SDROOT)
+	@cd $(PACKAGES_DIR)/$(OPENJPEG)/build; cmake .. -DCMAKE_INSTALL_PREFIX=$(STAGING_DIR)/$(SDROOT) -DBUILD_CODEC=OFF
 	
 $(PACKAGES_DIR)/$(OPENJPEG)/libopenjp2.so: $(PACKAGES_DIR)/$(OPENJPEG)/build/Makefile
 	@make -C $(PACKAGES_DIR)/$(OPENJPEG)/build -j$(nproc)
