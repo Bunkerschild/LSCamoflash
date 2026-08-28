@@ -25,19 +25,27 @@ if [ ! -b "/dev/$disk" ]; then
     exit 1
 fi
 
-# Sicherheitspruefung: Ist es ein Wechselmedium?
-if ! lsblk -d -o NAME,ROTA | grep "^$disk" | awk '{print $2}' | grep "0"; then
+# Sicherheitspruefung: Ist es ein Wechselmedium? (RM=1, nicht ROTA:
+# moderne interne SSDs sind ROTA=0 und wuerden die alte Pruefung faelschlich bestehen)
+if [ "$(lsblk -dno RM /dev/$disk 2>/dev/null)" != "1" ]; then
     echo "Fehler: Der gewaehlte Datentraeger ist KEIN Wechselmedium! Abbruch."
     exit 1
 fi
+
+# Partitions-Namensschema bestimmen: mmcblk0/nvme (endet auf Ziffer) -> "p"-Trenner,
+# sd*/hd*/vd* -> kein Trenner (z.B. sdb -> sdb1, mmcblk0 -> mmcblk0p1)
+case "$disk" in
+	*[0-9]) part="${disk}p" ;;
+	*)      part="${disk}" ;;
+esac
 
 # Mount-Punkte erstellen
 mount1=$(mktemp -d)
 mount2=$(mktemp -d)
 
 if [ "$use_sd_config" = "1" ]; then
-	mount /dev/${disk}p1 $mount1 >/dev/null 2>&1
-	mount /dev/${disk}p2 $mount2 >/dev/null 2>&1
+	mount /dev/${part}1 $mount1 >/dev/null 2>&1
+	mount /dev/${part}2 $mount2 >/dev/null 2>&1
 	
 	for m in $mount1 $mount2; do
 		if [ -f "$m/HACK/etc/hack_custom.conf" ]; then
@@ -53,51 +61,52 @@ if [ "$use_sd_config" = "1" ]; then
 	umount $mount1 >/dev/null 2>&1
 fi
 
-# SD Groesse
-sdsize=`fdisk -l /dev/mmcblk0 | grep "^Disk" | grep bytes | awk '{print $5}'`
-sdsect=`fdisk -l /dev/mmcblk0 | grep "^Disk" | grep bytes | awk '{print $7}'`
-p2size=$((1024 * 1024 * 1024))
-p1size=$(($sdsize - $p2size))
-p1sect=`awk "BEGIN {print ($sdsect / $sdsize * $p1size)}"`
+# SD Groesse (blockdev statt fdisk-Ausgabe zu parsen)
+sdsize=$(blockdev --getsize64 /dev/$disk)
+p2size=$((1024 * 1024 * 1024))                 # Partition 2 = 1 GiB
+# Partition 1 in ganzen MiB; wird als "+<MiB>M" an fdisk uebergeben. Vermeidet die
+# Fliesskomma-/Wissenschaftsnotation (z.B. 6.04e+07) die fdisk nicht als Sektor parsen kann.
+p1mib=$(( (sdsize - p2size) / 1024 / 1024 ))
+
+# Vorhandene (evtl. automatisch gemountete) Partitionen aushaengen
+umount /dev/${disk}?* 2>/dev/null
 
 # Partitionen loeschen
 echo "Loesche vorhandene Partitionen auf /dev/$disk ..."
 wipefs --all --force /dev/$disk
 
-# Partitionierung durchfuehren
+# Partitionierung mit sfdisk (skriptfaehig statt fragiler fdisk-Tastendruck-Sequenz):
+#   Partition 1 = p1mib MiB, Partition 2 = Rest, beide Typ 0x0c (W95 FAT32 LBA)
 echo "Erstelle neue Partitionen..."
-echo "o
-n
-p
-1
+sfdisk --wipe always --wipe-partitions always /dev/$disk <<EOF
+label: dos
+size=${p1mib}MiB, type=0c
+type=0c
+EOF
 
-$p1sect
-n
-p
-2
-
-
-t
-1
-0c
-t
-2
-0c
-w" | fdisk /dev/$disk >/dev/null 2>&1
-
-# Warten, bis das System die Partitionen erkennt
+# Kernel die neue Partitionstabelle einlesen lassen und pruefen, dass beide da sind
+sync
+partprobe /dev/$disk 2>/dev/null
+udevadm settle 2>/dev/null
 sleep 2
-partprobe /dev/$disk
-sleep 10
+if [ ! -b /dev/${part}1 ] || [ ! -b /dev/${part}2 ]; then
+	echo "Fehler: /dev/${part}1 bzw. /dev/${part}2 wurde nicht angelegt (Partitionstabelle nicht neu eingelesen). Abbruch." >&2
+	exit 1
+fi
+
+# Vor dem Formatieren aushaengen (falls der Desktop automatisch gemountet hat)
+udevadm settle 2>/dev/null
+umount /dev/${part}1 2>/dev/null
+umount /dev/${part}2 2>/dev/null
 
 # Partitionen formatieren
 echo "Formatiere Partitionen als FAT32..."
-mkfs.vfat -F32 /dev/${disk}p1
-mkfs.vfat -F32 /dev/${disk}p2
+mkfs.vfat -F32 /dev/${part}1
+mkfs.vfat -F32 /dev/${part}2
 
 # Partitionen mounten
-mount /dev/${disk}p1 "$mount1"
-mount /dev/${disk}p2 "$mount2"
+mount /dev/${part}1 "$mount1"
+mount /dev/${part}2 "$mount2"
 
 # Dateien kopieren
 echo "Kopiere Dateien auf die erste Partition..."

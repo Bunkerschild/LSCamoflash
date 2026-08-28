@@ -603,7 +603,7 @@ sqlite3-clean:
 	@make -C $(PACKAGES_DIR)/$(SQLITE3) clean distclean
 
 $(PACKAGES_DIR)/$(SQLCIPHER)/config.status:
-	@cd $(PACKAGES_DIR)/$(SQLCIPHER); ./configure --host=$(HOST) --prefix=$(SDROOT) --sysconfdir=$(SDROOT)/etc/config --datarootdir=$(SDROOT)/usr/share --with-sysroot=$(STAGING_DIR)/$(SDROOT) CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL" LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -lssl -lcrypto"
+	@cd $(PACKAGES_DIR)/$(SQLCIPHER); ./configure --host=$(HOST) --prefix=$(SDROOT) --sysconfdir=$(SDROOT)/etc/config --datarootdir=$(SDROOT)/usr/share --with-sysroot=$(STAGING_DIR)/$(SDROOT) --disable-tcl CFLAGS="-I$(STAGING_DIR)/$(SDROOT)/include -DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL" LDFLAGS="-L$(STAGING_DIR)/$(SDROOT)/lib -lssl -lcrypto"
 
 $(PACKAGES_DIR)/$(SQLCIPHER)/sqlcipher: $(PACKAGES_DIR)/$(SQLCIPHER)/config.status
 	@make -C $(PACKAGES_DIR)/$(SQLCIPHER) -j$(nproc)
@@ -861,7 +861,7 @@ libilbc-clean:
 
 $(PACKAGES_DIR)/$(OPENJPEG)/build/Makefile:
 	@mkdir -p $(PACKAGES_DIR)/$(OPENJPEG)/build
-	@cd $(PACKAGES_DIR)/$(OPENJPEG)/build; cmake .. -DCMAKE_INSTALL_PREFIX=$(STAGING_DIR)/$(SDROOT)
+	@cd $(PACKAGES_DIR)/$(OPENJPEG)/build; cmake .. -DCMAKE_INSTALL_PREFIX=$(STAGING_DIR)/$(SDROOT) -DBUILD_CODEC=OFF
 	
 $(PACKAGES_DIR)/$(OPENJPEG)/libopenjp2.so: $(PACKAGES_DIR)/$(OPENJPEG)/build/Makefile
 	@make -C $(PACKAGES_DIR)/$(OPENJPEG)/build -j$(nproc)
@@ -1139,8 +1139,9 @@ $(BUILD_HACK)/bin/pydoc:
 	@cp $(STAGE_HACK)/bin/pydoc3.13 $@ >/dev/null 2>&1 || true
 
 $(BUILD_HACK)/bin/pip:
+	@mkdir -p $(STAGING_DIR)/$(SDROOT)/lib/python3.13/site-packages $(BUILD_HACK)/lib/python3.13/site-packages >/dev/null 2>&1 || true
 	@for m in $(SRC_DIR)/modules/python/*; do \
-		cp -r $$m $(STAGING_DIR)/$(SDROOT)/lib/python3.13/site-packages/; \
+		cp -r $$m $(STAGING_DIR)/$(SDROOT)/lib/python3.13/site-packages/ >/dev/null 2>&1 || true; \
 	done
 	@cp -aL $(STAGING_DIR)/$(HOST_DIR)/lib/python3.13/site-packages/* $(BUILD_HACK)/lib/python3.13/site-packages/ >/dev/null 2>&1 || true
 	@cp $(STAGING_DIR)/$(HOST_DIR)/bin/pip3.13 $@ >/dev/null 2>&1 || true
@@ -1255,7 +1256,7 @@ $(BUILD_HACK)/etc/version.txt:
 	
 $(BUILD_DIR)/LICENSE.md:
 	@cp $(ROOT_DIR)/LICENSE.MIT $(BUILD_DIR)/LICENSE.MIT
-	@cp $(ROOT_DIR)/LICENSE.md $@
+	@cp $(ROOT_DIR)/LICENSE.md $@ 2>/dev/null || cp $(ROOT_DIR)/LICENSE.MIT $@
 	@touch $@
 
 build: $(BUILD_DIR)/install.ps1 $(BUILD_HACK)/bin/radare2 $(BUILD_HACK)/bin/r2agent $(BUILD_HACK)/bin/r2r $(BUILD_HACK)/bin/rasign2 $(BUILD_HACK)/bin/rax2 $(BUILD_HACK)/bin/ragg2 $(BUILD_HACK)/bin/rarun2 $(BUILD_HACK)/bin/rabin2 \
