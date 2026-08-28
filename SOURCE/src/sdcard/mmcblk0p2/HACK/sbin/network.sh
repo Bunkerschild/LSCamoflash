@@ -73,7 +73,18 @@ if [ "$wifi_config_override" = "1" ]; then
 	done
 	
 	# Setup network
-	LD_LIBRARY_PATH="/lib:/usr/lib" $wpa_supplicant -iwlan0 -D$wifi_driver -c /tmp/wpa_custom.conf > $sd_log/wpa_supplicant.log 2>&1 & $sleep 5
+	LD_LIBRARY_PATH="/lib:/usr/lib" $wpa_supplicant -iwlan0 -D$wifi_driver -c /tmp/wpa_custom.conf > $sd_log/wpa_supplicant.log 2>&1 &
+
+	# Wait for the wifi link to associate before configuring the network. A fixed
+	# sleep is not enough: the first association can time out and only succeed on a
+	# retry a few seconds later. Starting udhcpc before the link is up makes it send
+	# its discovers into a dead link and give up with no lease.
+	wpa_wait=0
+	while [ $wpa_wait -lt 30 ]; do
+		LD_LIBRARY_PATH="/lib:/usr/lib" $wpa_cli -p /var/run/wpa_supplicant -i wlan0 status 2>/dev/null | $grep "wpa_state=COMPLETED" >/dev/null 2>&1 && break
+		$sleep 1
+		wpa_wait=$((wpa_wait + 1))
+	done
 	if [ "$wifi_use_dhcp" = "1" -o "$wifi_ip_address" = "" ]; then
         network_mode="dhcp"
 		$ifconfig lo up
