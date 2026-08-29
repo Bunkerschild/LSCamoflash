@@ -15,5 +15,5 @@ if [ "$DIST" = "" -a "$DIR" = "" ]; then
 fi
 
 did_ptz=0
-$sd_sbin/ptz.sh $DIR $DIST 2>/dev/null && did_ptz=1
+$sd_sbin/ptz.sh $DIR $DIST >/dev/null 2>&1 && did_ptz=1
 send_json has_ptz=$device_has_ptz did_ptz=$did_ptz dir=$DIR dist=$DIST 
