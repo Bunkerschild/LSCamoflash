@@ -160,6 +160,17 @@ if [ -f "$sys_usr_bin/anyka_ipc" ]; then
         		export device_outdoor_use=1
         		export device_supported=1
 	        ;;
+	        $ipc_xc_c323_originl)
+        		export device_var="ipc_xc_c323"
+        		export device_manufacturer="LSC"
+        		export device_model="Indoor PTZ Camera 1080p"
+        		export device_deprecated=0
+        		export device_has_ptz=1
+        		export device_height=1080
+        		export device_width=1920
+        		export device_outdoor_use=0
+        		export device_supported=1
+	        ;;
 	        *)
 	        	echo "WARNING: Unsupported device"
         		export device_var=""
