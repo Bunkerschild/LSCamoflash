@@ -41,6 +41,17 @@ outdoor_ptz_1296p_calibrate=""
 outdoor_ptz_1296p_checksum="339313038233b6f7645197ff93dd0d88"
 outdoor_ptr_1296p_force_inverted="1"
 
+# IPC-XC-C323 shares the indoor_ptz_1080p memory layout (verified: motor fds
+# at 0x51c334/0x51c3a4 hold /dev/motor0//dev/motor1)
+ipc_xc_c323_seek="51c1d8"
+ipc_xc_c323_up_down="51c3a4"
+ipc_xc_c323_left_right="51c334"
+ipc_xc_c323_preset_goto=""
+ipc_xc_c323_preset_set=""
+ipc_xc_c323_calibrate=""
+ipc_xc_c323_checksum="fd726ad2e0b6b5c2f1a1c41d350a5d0a"
+ipc_xc_c323_force_inverted="0"
+
 set_seek=""
 set_up_down=""
 set_left_right=""
@@ -110,6 +121,15 @@ case $anyka_chk in
 		set_preset_set="$outdoor_ptz_1296p_preset_set"
 		set_calibrate="$outdoor_ptz_1296p_calibrate"
 		force_inverted="$outdoor_ptr_1296p_force_inverted"
+	;;
+	$ipc_xc_c323_originl)
+		set_seek="$ipc_xc_c323_seek"
+		set_up_down="$ipc_xc_c323_up_down"
+		set_left_right="$ipc_xc_c323_left_right"
+		set_preset_goto="$ipc_xc_c323_preset_goto"
+		set_preset_set="$ipc_xc_c323_preset_set"
+		set_calibrate="$ipc_xc_c323_calibrate"
+		force_inverted="$ipc_xc_c323_force_inverted"
 	;;
 	*)
 		echo "Not a supported ptz camera"
